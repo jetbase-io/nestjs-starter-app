@@ -9,7 +9,7 @@ import { Seeder } from './seeder';
  * @module
  */
 @Module({
-    imports: [DbModule, UsersModule],
-    providers: [Seeder]
+  imports: [DbModule, UsersModule],
+  providers: [Seeder],
 })
 export class SeederModule {}

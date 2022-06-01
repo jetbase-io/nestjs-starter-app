@@ -1,7 +1,6 @@
-import { IsNotEmpty, MinLength } from "class-validator";
+import { IsNotEmpty, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
-  
   @IsNotEmpty()
   @MinLength(6)
   username: string;
@@ -9,5 +8,4 @@ export class UpdateUserDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
-
 }
