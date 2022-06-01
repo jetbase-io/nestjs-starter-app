@@ -1,18 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import {UsernameUnique} from "../users/validator/user-unique.validator";
+import {entities} from "./db.provider";
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: +process.env.DATABASE_PORT,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_DATABASE,
-      entities: [],
-      synchronize: true,
-    }),
+    TypeOrmModule.forRoot(),
+    TypeOrmModule.forFeature(entities)
   ],
+  providers: [UsernameUnique]
 })
 export class DbModule {}
