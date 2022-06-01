@@ -1,7 +1,5 @@
 const migrationDir = process.env.DEV_SEED === 'true' ? 'seeds' : 'migrations';
 
-console.log("+++ logs: ", process.env.DATABASE_DATABASE)
-console.log("+++ migrationDIR: " , migrationDir)
 const database = {
     development: process.env.DATABASE_DATABASE || 'mvpngn_development',
     test: process.env.DATABASE_DATABASE_TEST || 'mvpngn_test',
