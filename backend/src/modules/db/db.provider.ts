@@ -1,3 +1,3 @@
-import { UsersEntity } from '../users/models/users.entity';
+import { UserEntity } from '../users/models/users.entity';
 
-export const entities = [UsersEntity];
+export const entities = [UserEntity];
