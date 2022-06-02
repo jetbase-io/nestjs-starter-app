@@ -6,10 +6,10 @@ import { DbModule } from './modules/db/db.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: '.env',
-    }),
     DbModule,
+    ConfigModule.forRoot({
+      envFilePath: `.${process.env.NODE_ENV}.env`,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
