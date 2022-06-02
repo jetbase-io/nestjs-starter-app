@@ -5,12 +5,12 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { UsernameUnique } from '../validator/user-unique.validator';
-import { UsersEntity } from '../models/users.entity';
+import { UserEntity } from '../models/users.entity';
 
 export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(6)
-  @Validate(UsernameUnique, [UsersEntity, ['username']], {
+  @Validate(UsernameUnique, [UserEntity, ['username']], {
     message: ({ targetName, constraints, property }: ValidationArguments) =>
       `${targetName} with the same pair of ${property} already exist`,
   })

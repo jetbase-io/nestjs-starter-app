@@ -7,9 +7,9 @@ import {
 } from 'typeorm';
 
 @Entity('users')
-export class UsersEntity {
+export class UserEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column({ unique: true })
   username: string;
