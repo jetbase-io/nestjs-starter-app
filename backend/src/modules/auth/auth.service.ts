@@ -23,10 +23,8 @@ export class AuthService {
 
   async signUp(createUserDto: CreateUserDto) {
     await this.validateUsername(createUserDto.username);
-    const hashPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = await this.usersService.create({
       ...createUserDto,
-      password: hashPassword,
     });
     return this.generateToken(user);
   }

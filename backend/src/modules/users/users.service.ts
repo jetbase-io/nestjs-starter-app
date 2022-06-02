@@ -23,16 +23,7 @@ export class UsersService {
   }
 
   async findByUsername(username: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({ username });
-    return user;
-  }
-
-  async passwordValid(password: string, user: UserEntity): Promise<boolean> {
-    if (user && user.password) {
-      const result = await bcrypt.compare(password, user.password);
-      return result;
-    }
-    return false;
+    return await this.userRepository.findOne({ username });
   }
 
   async generateHashPassword(password: string): Promise<string> {
