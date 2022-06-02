@@ -1,13 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserEntity } from '../users/models/users.entity';
-import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +17,7 @@ export class AuthService {
   }
 
   async signUp(createUserDto: CreateUserDto) {
-    await this.validateUsername(createUserDto.username);
+    await this.usersService.validateUsername(createUserDto.username);
     const user = await this.usersService.create({
       ...createUserDto,
     });
@@ -31,9 +26,9 @@ export class AuthService {
 
   private async validateUser(userDto: CreateUserDto) {
     const user = await this.usersService.findByUsername(userDto.username);
-    const isPasswordsEqual = await bcrypt.compare(
+    const isPasswordsEqual = await this.usersService.isPasswordValid(
       userDto.password,
-      user.password,
+      user,
     );
     if (user && isPasswordsEqual) {
       return user;
@@ -41,14 +36,6 @@ export class AuthService {
     throw new UnauthorizedException({
       message: 'Incorrect password or username',
     });
-  }
-
-  private async validateUsername(username: string) {
-    const user = await this.usersService.findByUsername(username);
-    if (user) {
-      throw new BadRequestException({ message: 'User already exist' });
-    }
-    return user;
   }
 
   private async generateToken(user: UserEntity) {
