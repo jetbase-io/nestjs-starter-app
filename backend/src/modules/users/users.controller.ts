@@ -1,10 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { DeleteResult, UpdateResult } from 'typeorm';
 import { UserEntity } from './models/users.entity';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
-@Controller('api/users')
+@Controller('api/users/')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
@@ -24,5 +32,13 @@ export class UsersController {
   @Delete(':id')
   deleteOne(@Param('id') id: number): Promise<{ message: string }> {
     return this.userService.deleteOne(id);
+  }
+
+  @Post('resetPassword/:id')
+  resetPassword(
+    @Param('id') id: number,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    return this.userService.resetPassword(id, resetPasswordDto);
   }
 }

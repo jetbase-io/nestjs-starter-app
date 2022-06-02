@@ -5,6 +5,7 @@ import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 // This should be a real class/interface representing a user entity
 export type User = any;
@@ -42,6 +43,35 @@ export class UsersService {
     await this.userRepository.delete(id);
     return {
       message: 'User deleted successfully!',
+    };
+  }
+
+  async resetPassword(
+    userId: number,
+    resetPassword: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne(userId);
+    const isMatch = await this.isPasswordValid(resetPassword.oldPassword, user);
+
+    if (!isMatch) {
+      throw new BadRequestException({
+        message: 'Old password does not match!',
+      });
+    }
+
+    if (resetPassword.newPassword !== resetPassword.confirmPassword) {
+      throw new BadRequestException({
+        message: 'Old and Confirm do not match!',
+      });
+    }
+
+    const hashedNewPassword = await this.generateHashPassword(
+      resetPassword.newPassword,
+    );
+    await this.userRepository.update(userId, { password: hashedNewPassword });
+
+    return {
+      message: 'Password updated successfully!',
     };
   }
 
