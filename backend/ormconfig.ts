@@ -31,4 +31,4 @@ module.exports = {
       : false,
 };
 
-// for running seed change entities: to 'src/**/*.entity.ts'
+// for running seed change entities: ['src/**/*.entity.ts']
