@@ -9,9 +9,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RolesService } from '../roles/roles.service';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
 
-// This should be a real class/interface representing a user entity
-export type User = any;
-
 @Injectable()
 export class UsersService {
   constructor(
