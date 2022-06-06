@@ -10,7 +10,12 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ApiExcludeEndpoint, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -18,14 +23,14 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiOperation({ summary: 'Sign Up' })
-  @ApiResponse({ status: 200, type: Promise<{ token: string }>})
+  @ApiResponse({ status: 200, description: 'Returns token' })
   @Post('/signUp')
   signUp(@Body() userDto: CreateUserDto) {
     return this.authService.signUp(userDto);
   }
 
   @ApiOperation({ summary: 'Sign In' })
-  @ApiResponse({ status: 200, type: Promise<{ token: string }>})
+  @ApiResponse({ status: 200, description: 'Returns token' })
   @Post('/signIn')
   signIn(@Body() userDto: CreateUserDto) {
     return this.authService.signIn(userDto);

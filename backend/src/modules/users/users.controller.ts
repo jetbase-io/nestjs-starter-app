@@ -15,7 +15,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Users')
 @Controller('api/users/')
@@ -32,7 +32,7 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Update user' })
-  @ApiResponse({ status: 200, type: UpdateUserDto})
+  @ApiResponse({ status: 200, type: UpdateUserDto })
   @Put(':id')
   updateOne(
     @Param('id') id: number,
@@ -42,7 +42,7 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Delete user' })
-  @ApiResponse({ status: 200, type: Promise<{ message: string }> })
+  @ApiResponse({ status: 200, description: 'Returns success message' })
   @Roles('ADMIN')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
@@ -51,7 +51,7 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Reset password' })
-  @ApiResponse({ status: 200, type: Promise<{ message: string }>})
+  @ApiResponse({ status: 200, description: 'Returns success message' })
   @UseGuards(JwtAuthGuard)
   @Post('resetPassword/:id')
   resetPassword(
