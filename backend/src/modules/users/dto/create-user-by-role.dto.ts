@@ -1,5 +1,6 @@
 import {
   IsNotEmpty,
+  IsString,
   MinLength,
   Validate,
   ValidationArguments,
@@ -10,6 +11,7 @@ import { UserEntity } from '../models/users.entity';
 export class CreateUserByRoleDto {
   @IsNotEmpty()
   @MinLength(6)
+  @IsString()
   @Validate(UsernameUnique, [UserEntity, ['username']], {
     message: ({ targetName, constraints, property }: ValidationArguments) =>
       `${targetName} with the same pair of ${property} already exist`,

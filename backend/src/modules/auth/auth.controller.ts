@@ -1,21 +1,13 @@
-import {
-  Body,
-  Request,
-  Controller,
-  Post,
-  Get,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LocalAuthGuard } from './local-auth.guard';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import {
-  ApiExcludeEndpoint,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Tokens } from './types/tokens.type';
+import { SignInUserDto } from '../users/dto/login-user.dto';
+import { RefreshTokenAuthGuard } from './guards/refresh-token-auth.guard';
+import { GetCurrentUserId } from './decorators/get-current-user-id.decorator';
+import { GetCurrentUser } from './decorators/get-current-user.decorator';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -23,30 +15,34 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiOperation({ summary: 'Sign Up' })
-  @ApiResponse({ status: 200, description: 'Returns token' })
+  @ApiResponse({ status: 200, description: 'Returns tokens' })
+  @Public()
   @Post('/signUp')
-  signUp(@Body() userDto: CreateUserDto) {
+  signUp(@Body() userDto: CreateUserDto): Promise<Tokens> {
     return this.authService.signUp(userDto);
   }
 
   @ApiOperation({ summary: 'Sign In' })
-  @ApiResponse({ status: 200, description: 'Returns token' })
+  @ApiResponse({ status: 200, description: 'Returns tokens' })
+  @Public()
   @Post('/signIn')
-  signIn(@Body() userDto: CreateUserDto) {
+  signIn(@Body() userDto: SignInUserDto): Promise<Tokens> {
     return this.authService.signIn(userDto);
   }
 
-  @ApiExcludeEndpoint()
-  @UseGuards(JwtAuthGuard)
-  @Get('/profile')
-  getProfile(@Request() req) {
-    return req.user;
+  @Post('/signOut')
+  signOut(@GetCurrentUserId() userId: number) {
+    return this.authService.signOut(userId);
   }
 
-  @ApiExcludeEndpoint()
-  @UseGuards(LocalAuthGuard)
-  @Post('/login')
-  async login(@Request() req) {
-    return req.user;
+  @Public()
+  @UseGuards(RefreshTokenAuthGuard)
+  @Post('/refresh')
+  refreshAccessToken(
+    @GetCurrentUserId() userId: number,
+    @GetCurrentUser('refreshToken') refreshToken: string,
+  ) {
+    console.log('REFRESH CONTROLLER: ', userId);
+    return this.authService.refreshAccessToken(userId, refreshToken);
   }
 }
