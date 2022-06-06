@@ -12,7 +12,7 @@ export class AuthService {
   ) {}
 
   async signIn(userDto: CreateUserDto) {
-    const user = await this.validateUser(userDto);
+    const user = await this.validateUser(userDto.username, userDto.password);
     return this.generateToken(user);
   }
 
@@ -24,10 +24,10 @@ export class AuthService {
     return this.generateToken(user);
   }
 
-  private async validateUser(userDto: CreateUserDto) {
-    const user = await this.usersService.findByUsername(userDto.username);
+  async validateUser(username: string, password: string) {
+    const user = await this.usersService.findByUsername(username);
     const isPasswordsEqual = await this.usersService.isPasswordValid(
-      userDto.password,
+      password,
       user,
     );
     if (user && isPasswordsEqual) {
@@ -39,7 +39,12 @@ export class AuthService {
   }
 
   private async generateToken(user: UserEntity) {
-    const payload = { id: user.id, username: user.username };
+    const payload = {
+      id: user.id,
+      username: user.username,
+      password: user.password,
+      roles: user.roles,
+    };
     return {
       token: this.jwtService.sign(payload),
     };
