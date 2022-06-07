@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DbModule } from './modules/db/db.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenAuthGuard } from './modules/auth/guards/access-token-auth.guard';
 
 @Module({
   imports: [
@@ -14,6 +16,9 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: AccessTokenAuthGuard },
+  ],
 })
 export class AppModule {}

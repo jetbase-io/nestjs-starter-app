@@ -12,10 +12,10 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './models/users.entity';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from '../auth/roles.decorator';
-import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
 
 @ApiTags('Users')
 @Controller('api/users/')
@@ -25,15 +25,15 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user' })
   @ApiResponse({ status: 200, type: UserEntity })
   @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Get(':id')
+  @UseGuards(RolesGuard)
+  @Get('/:id')
   getOne(@Param('id') id: number): Promise<UserEntity> {
     return this.userService.getOne(id);
   }
 
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({ status: 200, type: UpdateUserDto })
-  @Put(':id')
+  @Put('/:id')
   updateOne(
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -44,7 +44,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete user' })
   @ApiResponse({ status: 200, description: 'Returns success message' })
   @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   deleteOne(@Param('id') id: number): Promise<{ message: string }> {
     return this.userService.deleteOne(id);
@@ -52,12 +52,11 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({ status: 200, description: 'Returns success message' })
-  @UseGuards(JwtAuthGuard)
-  @Post('resetPassword/:id')
+  @Post('/resetPassword')
   resetPassword(
-    @Param('id') id: number,
+    @GetCurrentUserId() userId: number,
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
-    return this.userService.resetPassword(id, resetPasswordDto);
+    return this.userService.resetPassword(userId, resetPasswordDto);
   }
 }

@@ -1,5 +1,6 @@
 import {
   IsNotEmpty,
+  IsString,
   MinLength,
   Validate,
   ValidationArguments,
@@ -11,6 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateUserDto {
   @ApiProperty({ example: 'username', description: 'Unique username' })
   @IsNotEmpty()
+  @IsString()
   @MinLength(6)
   @Validate(UsernameUnique, [UserEntity, ['username']], {
     message: ({ targetName, constraints, property }: ValidationArguments) =>

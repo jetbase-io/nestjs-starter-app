@@ -4,23 +4,24 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './local.strategy';
-import { JwtStrategy } from './jwt.strategy';
-import { ConfigService } from '../config/config.service';
-
-const configService = new ConfigService();
+import { AccessTokenStrategy } from './strategies/access-token.strategy';
+import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshTokenEntity } from './models/refreshTokens.entity';
+import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
+import {Repository} from "typeorm";
 
 @Module({
   imports: [
-    PassportModule,
     UsersModule,
-    JwtModule.register({
-      secret: configService.config.JWT_SECRET,
-      signOptions: { expiresIn: '24h' },
+    TypeOrmModule.forFeature([RefreshTokenEntity, ExpiredAccessTokenEntity]),
+    PassportModule.register({
+      session: true,
     }),
+    JwtModule.register({}),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

@@ -23,6 +23,18 @@ export class initSchema1654057726725 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "users_roles_roles" ADD CONSTRAINT "FK_b2f0366aa9349789527e0c36d97" FOREIGN KEY ("rolesId") REFERENCES "roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
+    await queryRunner.query(
+      `CREATE TABLE "expired_access_tokens" ("id" SERIAL NOT NULL, "token" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" integer, CONSTRAINT "UQ_04259d7ed505a721a81f74a07ab" UNIQUE ("token"), CONSTRAINT "PK_10798a01b70c12c8fada80fe3fd" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "refresh_tokens" ("id" SERIAL NOT NULL, "token" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" integer, CONSTRAINT "UQ_4542dd2f38a61354a040ba9fd57" UNIQUE ("token"), CONSTRAINT "PK_7d8bee0204106019488c4c50ffa" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "expired_access_tokens" ADD CONSTRAINT "FK_dd214c76e3544048c4dd4f29ca4" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_610102b60fea1455310ccd299de" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -41,5 +53,13 @@ export class initSchema1654057726725 implements MigrationInterface {
     );
     await queryRunner.query(`DROP TABLE "users_roles_roles"`);
     await queryRunner.query(`DROP TABLE "roles"`);
+    await queryRunner.query(
+      `ALTER TABLE "refresh_tokens" DROP CONSTRAINT "FK_610102b60fea1455310ccd299de"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "expired_access_tokens" DROP CONSTRAINT "FK_dd214c76e3544048c4dd4f29ca4"`,
+    );
+    await queryRunner.query(`DROP TABLE "refresh_tokens"`);
+    await queryRunner.query(`DROP TABLE "expired_access_tokens"`);
   }
 }
