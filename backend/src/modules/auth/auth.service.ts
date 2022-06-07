@@ -1,13 +1,25 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserEntity } from '../users/models/users.entity';
 import { JwtService } from '@nestjs/jwt';
 import { Tokens } from './types/tokens.type';
+import { RefreshTokenEntity } from './models/refreshTokens.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(RefreshTokenEntity)
+    private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    @InjectRepository(ExpiredAccessTokenEntity)
+    private readonly expiredAccessTokenRepository: Repository<ExpiredAccessTokenEntity>,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
@@ -15,7 +27,7 @@ export class AuthService {
   async signIn(userDto: CreateUserDto): Promise<Tokens> {
     const user = await this.validateUser(userDto.username, userDto.password);
     const tokens = await this.generateTokens(user);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    await this.updateRefreshToken(user, tokens.refreshToken);
     return tokens;
   }
 
@@ -25,22 +37,33 @@ export class AuthService {
       ...createUserDto,
     });
     const tokens = await this.generateTokens(user);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    await this.updateRefreshToken(user, tokens.refreshToken);
     return tokens;
   }
 
-  async signOut(userId: number) {
-    console.log('Sign Out User with id: ', userId);
-    console.log('Must delete refresh token from db');
-    return null;
+  async signOut(userId: number, accessToken: string) {
+    const user = await this.usersService.getOne(userId);
+    const createdExpiredToken = new ExpiredAccessTokenEntity();
+    createdExpiredToken.user = user;
+    createdExpiredToken.token = accessToken;
+    await this.expiredAccessTokenRepository.save(createdExpiredToken);
+    return { message: 'Successfully logged out!' };
   }
 
   async refreshAccessToken(userId: number, refreshToken: string) {
-    console.log('REFRESH SERVICE: ', refreshToken);
+    const foundToken = await this.refreshTokenRepository.findOne({
+      where: { user: { id: userId }, token: refreshToken },
+    });
+    // delete old refresh token
+    if (foundToken) {
+      await this.refreshTokenRepository.remove(foundToken);
+    } else {
+      throw new ForbiddenException('Access denied!');
+    }
     const user = await this.usersService.getOne(userId);
     const tokens = await this.generateTokens(user);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
-    return null;
+    await this.updateRefreshToken(user, tokens.refreshToken);
+    return tokens;
   }
 
   async validateUser(username: string, password: string) {
@@ -57,10 +80,19 @@ export class AuthService {
     });
   }
 
-  async updateRefreshToken(userId: number, refreshToken: string) {
-    console.log('updateRefreshToken: ');
-    console.log('userId: ', userId);
-    console.log('refreshToken: ', refreshToken);
+  async updateRefreshToken(user: UserEntity, refreshToken: string) {
+    // create new refresh token
+    const refreshTokenDb = new RefreshTokenEntity();
+    refreshTokenDb.token = refreshToken;
+    refreshTokenDb.user = user;
+    await this.refreshTokenRepository.save(refreshTokenDb);
+  }
+
+  async isAccessTokenExpired(userId: number, token: string): Promise<boolean> {
+    const foundToken = await this.expiredAccessTokenRepository.findOne({
+      where: { user: { id: userId }, token: token },
+    });
+    return foundToken !== undefined;
   }
 
   private async generateTokens(user: UserEntity): Promise<Tokens> {
@@ -74,11 +106,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: `.${process.env.NODE_ENV}.env.ACCESS_TOKEN_JWT_SECRET`,
-        expiresIn: 60 * 15,
+        expiresIn: '10m',
       }),
       this.jwtService.signAsync(payload, {
         secret: `.${process.env.NODE_ENV}.env.REFRESH_TOKEN_JWT_SECRET`,
-        expiresIn: 60 * 15,
+        expiresIn: '30d',
       }),
     ]);
 

@@ -31,8 +31,11 @@ export class AuthController {
   }
 
   @Post('/signOut')
-  signOut(@GetCurrentUserId() userId: number) {
-    return this.authService.signOut(userId);
+  signOut(
+    @GetCurrentUserId() userId: number,
+    @GetCurrentUser('accessToken') accessToken: string,
+  ) {
+    return this.authService.signOut(userId, accessToken);
   }
 
   @Public()

@@ -6,9 +6,13 @@ import {
   UpdateDateColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { RoleEntity } from '../../roles/models/role.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { RefreshTokenEntity } from '../../auth/models/refreshTokens.entity';
+import { Exclude } from 'class-transformer';
+import { ExpiredAccessTokenEntity } from '../../auth/models/expiredAccessTokens.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -33,4 +37,15 @@ export class UserEntity {
   @ManyToMany(() => RoleEntity, (role) => role.users)
   @JoinTable()
   roles: RoleEntity[];
+
+  @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user)
+  @Exclude()
+  refreshTokens: RefreshTokenEntity[];
+
+  @OneToMany(
+    () => ExpiredAccessTokenEntity,
+    (expiredAccessToken) => expiredAccessToken.user,
+  )
+  @Exclude()
+  expiredAccessTokens: ExpiredAccessTokenEntity[];
 }
