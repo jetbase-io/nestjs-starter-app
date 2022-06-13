@@ -1,8 +1,15 @@
-import React, {FC, useState} from 'react';
+import React, { FC, useState } from 'react';
 import classNames from "classnames";
+import { RootState } from "../../store/store";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
-const Header: FC = () => {
+type HomePageProps = ReturnType<typeof mapState>;
+
+const Header: FC<HomePageProps> = (props) => {
   const [openBurger, setOpenBurger] = useState(false);
+
+  const isAuthenticated = props.isAuthenticated;
 
   const toggle = () => {
     setOpenBurger(openBurger => !openBurger);
@@ -27,22 +34,36 @@ const Header: FC = () => {
           </button>
         </div>
         <div className={burgerClass + " lg:flex flex-grow items-center"} id="example-navbar-warning">
-          <ul className="flex flex-col lg:flex-row list-none ml-auto">
-            <li className="nav-item">
-              <a className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" href="#pablo">
-                Sign In
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" href="#pablo">
-                Sign Up
-              </a>
-            </li>
-          </ul>
+          { isAuthenticated ? (
+            <ul className="flex flex-col lg:flex-row list-none ml-auto">
+              <li className="nav-item">
+                <a className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" href="#pablo">
+                  Sign Out
+                </a>
+              </li>
+            </ul>
+            ) : (
+            <ul className="flex flex-col lg:flex-row list-none ml-auto">
+              <li className="nav-item">
+                <Link to='/signIn' className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75">
+                  Sign In
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link to='/signUp' className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75">
+                  Sign Up
+                </Link>
+              </li>
+            </ul>
+            )}
         </div>
       </div>
     </nav>
   )
 }
 
-export default Header;
+const mapState = (state: RootState) => ({
+  isAuthenticated: state.user?.isAuthenticated,
+})
+
+export default connect(mapState) (Header);
