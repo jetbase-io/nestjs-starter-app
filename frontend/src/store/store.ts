@@ -3,6 +3,11 @@ import { models, RootModel } from './models'
 
 export const store = init({
   models,
+  redux: {
+    devtoolOptions: {
+      actionSanitizer: (action) => action,
+    }
+  }
 })
 
 export type Store = typeof store

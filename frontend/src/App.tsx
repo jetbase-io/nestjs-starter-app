@@ -1,9 +1,7 @@
 import React from 'react';
 import {Routes, Route} from "react-router-dom";
-import { HomePage } from './pages/index';
+import { HomePage, NotFoundPage, SignUpPage } from './pages/index';
 import './App.css';
-import SignUpPage from "./pages/SignUpPage";
-import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
