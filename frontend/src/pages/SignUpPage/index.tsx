@@ -1,6 +1,9 @@
-import React, { FC, useState } from "react";
+import classNames from "classnames";
+import { useFormik } from "formik";
+import React, { FC } from "react";
 import { connect } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
+import * as Yup from "yup";
 
 import { Dispatch, RootState } from "../../store/store";
 
@@ -9,25 +12,28 @@ type SignUpProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
 const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
   const navigate = useNavigate();
 
-  const [enteredUsername, setEnteredUsername] = useState("");
-  const [enteredPassword, setEnteredPassword] = useState("");
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      username: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
+      password: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
+    }),
+    onSubmit: (values) => {
+      signUp({
+        username: values.username,
+        password: values.password,
+      });
+      navigate("/signIn");
+    },
+  });
 
-  const usernameChangeHandler = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setEnteredUsername(event.target.value);
-  };
-
-  const passwordChangeHandler = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setEnteredPassword(event.target.value);
-  };
-
-  const handleSubmit = (event: { preventDefault: () => void }) => {
-    event.preventDefault();
-    signUp({
-      username: enteredUsername,
-      password: enteredPassword,
-    });
-    navigate("/signIn");
-  };
+  const buttonClass = classNames({
+    "bg-blue-600 hover:bg-blue-600": formik.isValid,
+    "bg-gray-400": !formik.isValid,
+  });
 
   if (isAuthenticated) {
     return <Navigate to="/" />;
@@ -39,31 +45,41 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
         <div className="text-center font-medium text-xl">Sign Up Page</div>
       </div>
       <div className="max-w-md w-full mx-auto mt-4 bg-white p-8 border border-gray-300">
-        <form onSubmit={handleSubmit} action="" className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="" className="text-sm font-bold text-gray-600 block">
               Username
             </label>
             <input
-              value={enteredUsername}
-              onChange={usernameChangeHandler}
+              name="username"
+              value={formik.values.username}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               type="text"
               className="w-full p-2 border border-gray-300 rounded mt-1"
             />
+            {formik.touched.username && formik.errors.username ? (
+              <p className="text-red-500">{formik.errors.username}</p>
+            ) : null}
           </div>
           <div>
             <label htmlFor="" className="text-sm font-bold text-gray-600 block">
               Password
             </label>
             <input
-              value={enteredPassword}
-              onChange={passwordChangeHandler}
+              name="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               type="password"
               className="w-full p-2 border border-gray-300 rounded mt-1"
             />
+            {formik.touched.password && formik.errors.password ? (
+              <p className="text-red-500">{formik.errors.password}</p>
+            ) : null}
           </div>
           <div>
-            <button className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm">
+            <button type="submit" className={`${buttonClass} w-full py-2 px-4 rounded-md text-white text-sm`}>
               Register
             </button>
           </div>
