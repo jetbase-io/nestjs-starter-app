@@ -1,5 +1,5 @@
 import HomePage from "./HomePage";
-import SignUpPage from "./SignUpPage";
 import NotFoundPage from "./NotFoundPage";
+import SignUpPage from "./SignUpPage";
 
-export { HomePage, SignUpPage, NotFoundPage };
+export { HomePage, NotFoundPage, SignUpPage };

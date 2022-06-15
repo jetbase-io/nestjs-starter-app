@@ -1,51 +1,46 @@
-import { createModel } from '@rematch/core'
-import type { RootModel } from './index'
-import http from '../http/http-common';
+import { createModel } from "@rematch/core";
+
+import { SIGN_UP_URL } from "../constants/api-contstants";
+import http from "../http/http-common";
+import type { RootModel } from "./index";
 
 type UserState = {
-  isAuthenticated: boolean,
-  accessToken: '',
-  refreshToken: '',
-}
+  isAuthenticated: boolean;
+  accessToken: "";
+  refreshToken: "";
+};
 
 export const user = createModel<RootModel>()({
   state: {
     isAuthenticated: false,
   } as UserState,
   reducers: {
-    setIsAuthenticated(state, payload) {
+    setIsAuthenticated(state, { isAuthenticated }) {
       return {
         ...state,
-        isAuthenticated: payload
-      } as UserState
+        isAuthenticated,
+      } as UserState;
     },
 
-    setTokens(state, payload) {
+    setTokens(state, { accessToken, refreshToken }) {
       return {
         ...state,
-        accessToken: payload.accessToken,
-        refreshToken: payload.refreshToken
-      }
-    }
+        accessToken,
+        refreshToken,
+      };
+    },
   },
   effects: (dispatch) => ({
-    async signUp({username, password}) {
+    async signUp({ username, password }) {
       try {
-        let response = await http.post('auth/signUp', {
-          username: username,
-          password: password
+        await http.post(SIGN_UP_URL, {
+          username,
+          password,
         });
-        dispatch.user.setIsAuthenticated(true);
-        dispatch.user.setTokens({
-          accessToken: response.data.accessToken,
-          refreshToken: response.data.refreshToken
-        })
-        localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
-
       } catch (err) {
-        dispatch.user.setIsAuthenticated(false);
+        // need to add toaster
+        console.log(err);
       }
     },
   }),
-})
+});
