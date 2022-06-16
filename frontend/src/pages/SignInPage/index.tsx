@@ -7,28 +7,26 @@ import * as Yup from "yup";
 
 import { Dispatch, RootState } from "../../store/store";
 
-type SignUpProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
+type SignInProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
 
-const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
+const SignInPage: FC<SignInProps> = ({ isAuthenticated, signIn }) => {
   const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
       username: "",
       password: "",
-      confirmPassword: "",
     },
     validationSchema: Yup.object({
       username: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
       password: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
-      confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords must match"),
     }),
     onSubmit: (values) => {
-      signUp({
+      signIn({
         username: values.username,
         password: values.password,
       });
-      navigate("/signIn");
+      navigate("/");
     },
   });
 
@@ -44,12 +42,12 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center">
       <div className="max-w-md w-full mx-auto">
-        <div className="text-center font-medium text-xl">Sign Up Page</div>
+        <div className="text-center font-medium text-xl">Sign In Page</div>
       </div>
       <div className="max-w-md w-full mx-auto mt-4 bg-white p-8 border border-gray-300">
         <form onSubmit={formik.handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="text-sm font-bold text-gray-600 block">
+            <label htmlFor="" className="text-sm font-bold text-gray-600 block">
               Username
             </label>
             <input
@@ -65,7 +63,7 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
             ) : null}
           </div>
           <div>
-            <label htmlFor="password" className="text-sm font-bold text-gray-600 block">
+            <label htmlFor="" className="text-sm font-bold text-gray-600 block">
               Password
             </label>
             <input
@@ -81,24 +79,8 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
             ) : null}
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="text-sm font-bold text-gray-600 block">
-              Confirm Password
-            </label>
-            <input
-              name="confirmPassword"
-              value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              type="password"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-            />
-            {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
-              <p className="text-red-500">{formik.errors.confirmPassword}</p>
-            ) : null}
-          </div>
-          <div>
             <button type="submit" className={`${buttonClass} w-full py-2 px-4 rounded-md text-white text-sm`}>
-              Sign Up
+              Sign In
             </button>
           </div>
         </form>
@@ -112,7 +94,7 @@ const mapState = (state: RootState) => ({
 });
 
 const mapDispatch = (dispatch: Dispatch) => ({
-  signUp: dispatch.user.signUp,
+  signIn: dispatch.user.signIn,
 });
 
-export default connect(mapState, mapDispatch)(SignUpPage);
+export default connect(mapState, mapDispatch)(SignInPage);

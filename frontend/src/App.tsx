@@ -1,20 +1,34 @@
 import "./App.css";
 
-import React from "react";
+import React, { FC, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 
-import { HomePage, NotFoundPage, SignUpPage } from "./pages/index";
+import { getAccessToken } from "./helpers/user";
+import { HomePage, NotFoundPage } from "./pages/index";
+import routes from "./routes";
+import { Dispatch } from "./store/store";
 
-function App() {
+const App: FC = () => {
+  const dispatch = useDispatch<Dispatch>();
+
+  useEffect(() => {
+    if (getAccessToken()) {
+      dispatch.user.checkUserAuthentication();
+    }
+  }, []);
+
   return (
     <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/signUp" element={<SignUpPage />} />
+        {routes.map((route) => (
+          <Route path={route.path} element={route.element} key={route.id} />
+        ))}
         <Route path={"/*"} element={<NotFoundPage />} />
       </Routes>
     </div>
   );
-}
+};
 
 export default App;
