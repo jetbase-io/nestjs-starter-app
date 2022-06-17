@@ -3,9 +3,10 @@ import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
-import { BrowserRouter } from "react-router-dom";
+import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
 
 import App from "./App";
+import history from "./helpers/history";
 import reportWebVitals from "./reportWebVitals";
 import { store } from "./store/store";
 
@@ -13,11 +14,11 @@ const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HistoryRouter history={history}>
       <Provider store={store}>
         <App />
       </Provider>
-    </BrowserRouter>
+    </HistoryRouter>
   </React.StrictMode>
 );
 

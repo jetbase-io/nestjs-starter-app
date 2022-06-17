@@ -14,7 +14,7 @@ const Header: FC<HeaderPageProps> = ({ isAuthenticated, signOut }) => {
   };
 
   const LINKS = [
-    { id: 1, text: "Sign Out", to: "/", isVisible: isAuthenticated, onClick: handleSignOutClick },
+    { id: 1, text: "Sign Out", to: "/signIn", isVisible: isAuthenticated, onClick: handleSignOutClick },
     { id: 2, text: "Sign In", to: "/signIn", isVisible: !isAuthenticated },
     { id: 3, text: "Sign Up", to: "/signUp", isVisible: !isAuthenticated },
   ];

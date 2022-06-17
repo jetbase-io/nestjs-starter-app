@@ -1,40 +1,57 @@
-import axios from "axios";
-import { createBrowserHistory } from "history";
+import axios, { AxiosRequestConfig } from "axios";
 
-import { getRefreshToken, setUserTokensToLocalStorage } from "../../helpers/user";
+import history from "../../helpers/history";
+import { getAccessToken, getRefreshToken, setUserTokensToLocalStorage } from "../../helpers/user";
 import { REFRESH_TOKEN_URL } from "../constants/api-contstants";
 
 const http = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
 
-let refresh = false;
+http.interceptors.request.use(
+  async (config: AxiosRequestConfig) => {
+    const accessToken = getAccessToken();
+    if (config.headers === undefined) {
+      config.headers = {};
+    }
+    if (accessToken) {
+      config.headers.Authorization = accessToken ? `Bearer ${accessToken}` : "";
+    }
+    return config;
+  },
+  (error) => error
+);
 
-const history = createBrowserHistory(window);
+let refresh = false;
 
 http.interceptors.response.use(
   (resp) => resp,
   async (error) => {
     if (error.response.status === 401 && !refresh) {
       refresh = true;
-      const response = await http.post(
-        REFRESH_TOKEN_URL,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${getRefreshToken()}`,
-          },
+      try {
+        const response = await axios.post(
+          process.env.REACT_APP_API_URL + REFRESH_TOKEN_URL,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${getRefreshToken()}`,
+            },
+          }
+        );
+        if (response.data) {
+          setUserTokensToLocalStorage(response.data.accessToken, response.data.refreshToken);
+        } else {
+          // refresh token expired
+          return history.push("/signIn");
         }
-      );
-      if (response.data) {
-        setUserTokensToLocalStorage(response.data.accessToken, response.data.refreshToken);
-      } else {
-        return history.push("/");
+        error.config.headers = {
+          Authorization: `Bearer ${response.data.accessToken}`,
+        };
+        return await http.request(error.config);
+      } catch (er) {
+        console.log(er);
       }
-      error.config.headers = {
-        Authorization: `Bearer ${response.data.accessToken}`,
-      };
-      return http.request(error.config);
     }
     refresh = false;
     return error;

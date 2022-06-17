@@ -7,7 +7,7 @@ import {
   getRefreshToken,
   setUserTokensToLocalStorage,
 } from "../../helpers/user";
-import { REFRESH_TOKEN_URL, SIGN_IN_URL, SIGN_OUT_URL, SIGN_UP_URL } from "../constants/api-contstants";
+import { SIGN_IN_URL, SIGN_OUT_URL, SIGN_UP_URL } from "../constants/api-contstants";
 import http from "../http/http-common";
 import type { RootModel } from "./index";
 
@@ -70,39 +70,10 @@ export const user = createModel<RootModel>()({
     },
 
     async signOut() {
-      const accessToken = getAccessToken();
-      await http.post(
-        SIGN_OUT_URL,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      dispatch.user.setIsAuthenticated({ isAuthenticated: false });
-      cleanUserTokensFromLocalStorage();
-    },
-
-    async checkUserAuthentication() {
       try {
-        const refreshToken = getRefreshToken();
-        const response = await http.post(
-          REFRESH_TOKEN_URL,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${refreshToken}`,
-            },
-          }
-        );
-
-        setUserTokensToLocalStorage(response.data.accessToken, response.data.refreshToken);
-
-        dispatch.user.setTokens({
-          accessToken: response.data.accessToken,
-          refreshToken: response.data.refreshToken,
-        });
+        await http.post(SIGN_OUT_URL);
+        dispatch.user.setIsAuthenticated({ isAuthenticated: false });
+        cleanUserTokensFromLocalStorage();
       } catch (error) {
         console.log(error);
       }
