@@ -71,7 +71,7 @@ export const user = createModel<RootModel>()({
 
     async signOut() {
       try {
-        await http.post(SIGN_OUT_URL);
+        await http.post(SIGN_OUT_URL, { refreshToken: getRefreshToken() });
         dispatch.user.setIsAuthenticated({ isAuthenticated: false });
         cleanUserTokensFromLocalStorage();
       } catch (error) {

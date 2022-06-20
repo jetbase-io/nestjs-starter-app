@@ -39,18 +39,15 @@ http.interceptors.response.use(
             },
           }
         );
-        if (response.data) {
-          setUserTokensToLocalStorage(response.data.accessToken, response.data.refreshToken);
-        } else {
-          // refresh token expired
-          return history.push("/signIn");
-        }
+        setUserTokensToLocalStorage(response.data.accessToken, response.data.refreshToken);
         error.config.headers = {
           Authorization: `Bearer ${response.data.accessToken}`,
         };
         return await http.request(error.config);
       } catch (er) {
         console.log(er);
+        // refresh token expired
+        return history.push("/signIn");
       }
     }
     refresh = false;
