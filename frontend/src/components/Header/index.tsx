@@ -3,18 +3,18 @@ import PropTypes from "prop-types";
 import React, { FC, useState } from "react";
 import { connect } from "react-redux";
 
-import { RootState } from "../../store/store";
+import { Dispatch, RootState } from "../../store/store";
 import HeaderLink from "../HeaderLink";
 
-const mapState = (state: RootState) => ({
-  isAuthenticated: state.user.isAuthenticated,
-});
+type HeaderPageProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
 
-type HeaderPageProps = ReturnType<typeof mapState>;
+const Header: FC<HeaderPageProps> = ({ isAuthenticated, signOut }) => {
+  const handleSignOutClick: React.MouseEventHandler<HTMLAnchorElement> = () => {
+    signOut();
+  };
 
-const Header: FC<HeaderPageProps> = ({ isAuthenticated }) => {
   const LINKS = [
-    { id: 1, text: "Sign Out", to: "/signOut", isVisible: isAuthenticated },
+    { id: 1, text: "Sign Out", to: "/signIn", isVisible: isAuthenticated, onClick: handleSignOutClick },
     { id: 2, text: "Sign In", to: "/signIn", isVisible: !isAuthenticated },
     { id: 3, text: "Sign Up", to: "/signUp", isVisible: !isAuthenticated },
   ];
@@ -52,7 +52,10 @@ const Header: FC<HeaderPageProps> = ({ isAuthenticated }) => {
         </div>
         <div className={`${burgerClass} lg:flex flex-grow items-center`} id="example-navbar-warning">
           <ul className="flex flex-col lg:flex-row list-none ml-auto">
-            {LINKS.map(({ id, text, to, isVisible }) => isVisible && <HeaderLink key={id} text={text} to={to} />)}
+            {LINKS.map(
+              ({ id, text, to, isVisible, onClick }) =>
+                isVisible && <HeaderLink key={id} text={text} to={to} onClick={onClick} />
+            )}
           </ul>
         </div>
       </div>
@@ -64,4 +67,12 @@ Header.propTypes = {
   isAuthenticated: PropTypes.bool.isRequired,
 };
 
-export default connect(mapState)(Header);
+const mapState = (state: RootState) => ({
+  isAuthenticated: state.user.isAuthenticated,
+});
+
+const mapDispatch = (dispatch: Dispatch) => ({
+  signOut: dispatch.user.signOut,
+});
+
+export default connect(mapState, mapDispatch)(Header);

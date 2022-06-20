@@ -34,8 +34,9 @@ export class AuthController {
   signOut(
     @GetCurrentUserId() userId: number,
     @GetCurrentUser('accessToken') accessToken: string,
+    @Body('refreshToken') refreshToken: string,
   ) {
-    return this.authService.signOut(userId, accessToken);
+    return this.authService.signOut(userId, accessToken, refreshToken);
   }
 
   @Public()

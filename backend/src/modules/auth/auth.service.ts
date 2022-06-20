@@ -41,7 +41,8 @@ export class AuthService {
     return tokens;
   }
 
-  async signOut(userId: number, accessToken: string) {
+  async signOut(userId: number, accessToken: string, refreshToken: string) {
+    await this.deleteRefreshToken(userId, refreshToken);
     const user = await this.usersService.getOne(userId);
     const createdExpiredToken = new ExpiredAccessTokenEntity();
     createdExpiredToken.user = user;
@@ -51,15 +52,7 @@ export class AuthService {
   }
 
   async refreshAccessToken(userId: number, refreshToken: string) {
-    const foundToken = await this.refreshTokenRepository.findOne({
-      where: { user: { id: userId }, token: refreshToken },
-    });
-    // delete old refresh token
-    if (foundToken) {
-      await this.refreshTokenRepository.remove(foundToken);
-    } else {
-      throw new ForbiddenException('Access denied!');
-    }
+    await this.deleteRefreshToken(userId, refreshToken);
     const user = await this.usersService.getOne(userId);
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
@@ -86,6 +79,18 @@ export class AuthService {
     refreshTokenDb.token = refreshToken;
     refreshTokenDb.user = user;
     await this.refreshTokenRepository.save(refreshTokenDb);
+  }
+
+  async deleteRefreshToken(userId: number, refreshToken: string) {
+    const foundToken = await this.refreshTokenRepository.findOne({
+      where: { user: { id: userId }, token: refreshToken },
+    });
+    // delete old refresh token
+    if (foundToken) {
+      await this.refreshTokenRepository.remove(foundToken);
+    } else {
+      throw new ForbiddenException('Access denied!');
+    }
   }
 
   async isAccessTokenExpired(userId: number, token: string): Promise<boolean> {
