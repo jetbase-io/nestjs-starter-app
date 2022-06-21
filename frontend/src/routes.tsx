@@ -1,6 +1,6 @@
 import React from "react";
 
-import { HomePage, SignInPage, SignUpPage } from "./pages";
+import { HomePage, ResetPasswordPage, SignInPage, SignUpPage } from "./pages";
 
 interface Page {
   id: number;
@@ -27,6 +27,12 @@ const routes: Page[] = [
     path: "/signIn",
     title: "SignInPage",
     element: <SignInPage />,
+  },
+  {
+    id: 4,
+    path: "/resetPassword",
+    title: "ResetPasswordPage",
+    element: <ResetPasswordPage />,
   },
 ];
 
