@@ -4,18 +4,15 @@ import {
   Delete,
   Get,
   Param,
-  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './models/users.entity';
-import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
 
 @ApiTags('Users')
 @Controller('api/users/')
@@ -48,15 +45,5 @@ export class UsersController {
   @Delete(':id')
   deleteOne(@Param('id') id: number): Promise<{ message: string }> {
     return this.userService.deleteOne(id);
-  }
-
-  @ApiOperation({ summary: 'Reset password' })
-  @ApiResponse({ status: 200, description: 'Returns success message' })
-  @Post('/resetPassword')
-  resetPassword(
-    @GetCurrentUserId() userId: number,
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ message: string }> {
-    return this.userService.resetPassword(userId, resetPasswordDto);
   }
 }

@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -12,6 +12,7 @@ import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
+import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,12 +44,42 @@ export class AuthService {
 
   async signOut(userId: number, accessToken: string, refreshToken: string) {
     await this.deleteRefreshToken(userId, refreshToken);
-    const user = await this.usersService.getOne(userId);
-    const createdExpiredToken = new ExpiredAccessTokenEntity();
-    createdExpiredToken.user = user;
-    createdExpiredToken.token = accessToken;
-    await this.expiredAccessTokenRepository.save(createdExpiredToken);
+    await this.saveExpiredAccessToken(userId, accessToken);
     return { message: 'Successfully logged out!' };
+  }
+
+  async resetPassword(
+    userId: number,
+    resetPassword: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.usersService.getOne(userId);
+    const isMatch = await this.usersService.isPasswordValid(
+      resetPassword.oldPassword,
+      user,
+    );
+
+    if (!isMatch) {
+      throw new BadRequestException({
+        message: 'Old password does not match!',
+      });
+    }
+
+    if (resetPassword.newPassword !== resetPassword.confirmPassword) {
+      throw new BadRequestException({
+        message: 'Old and Confirm do not match!',
+      });
+    }
+
+    await this.usersService.updatePassword(userId, resetPassword.newPassword);
+    await this.deleteAllRefreshTokens(userId);
+    return {
+      message: 'Password updated successfully!',
+    };
+  }
+
+  async fullSignOut(userId: number, accessToken: string) {
+    await this.deleteAllRefreshTokens(userId);
+    await this.saveExpiredAccessToken(userId, accessToken);
   }
 
   async refreshAccessToken(userId: number, refreshToken: string) {
@@ -68,7 +99,7 @@ export class AuthService {
     if (user && isPasswordsEqual) {
       return user;
     }
-    throw new UnauthorizedException({
+    throw new ForbiddenException({
       message: 'Incorrect password or username',
     });
   }
@@ -91,6 +122,21 @@ export class AuthService {
     } else {
       throw new ForbiddenException('Access denied!');
     }
+  }
+
+  async deleteAllRefreshTokens(userId: number) {
+    const foundTokens = await this.refreshTokenRepository.find({
+      where: { user: { id: userId } },
+    });
+    await this.refreshTokenRepository.remove(foundTokens);
+  }
+
+  async saveExpiredAccessToken(userId: number, accessToken: string) {
+    const user = await this.usersService.getOne(userId);
+    const createdExpiredToken = new ExpiredAccessTokenEntity();
+    createdExpiredToken.user = user;
+    createdExpiredToken.token = accessToken;
+    await this.expiredAccessTokenRepository.save(createdExpiredToken);
   }
 
   async isAccessTokenExpired(userId: number, token: string): Promise<boolean> {
