@@ -8,7 +8,13 @@ import {
   getRefreshToken,
   setUserTokensToLocalStorage,
 } from "../../helpers/user";
-import { RESET_PASSWORD_URL, SIGN_IN_URL, SIGN_OUT_URL, SIGN_UP_URL } from "../constants/api-contstants";
+import {
+  FULL_SIGN_OUT_URL,
+  RESET_PASSWORD_URL,
+  SIGN_IN_URL,
+  SIGN_OUT_URL,
+  SIGN_UP_URL,
+} from "../constants/api-contstants";
 import http from "../http/http-common";
 import type { RootModel } from "./index";
 
@@ -81,6 +87,17 @@ export const user = createModel<RootModel>()({
     async signOut() {
       try {
         const result = await http.post(SIGN_OUT_URL, { refreshToken: getRefreshToken() });
+        if (result.request.status === 201) {
+          this.logOutUser();
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async fullSignOut() {
+      try {
+        const result = await http.post(FULL_SIGN_OUT_URL);
         if (result.request.status === 201) {
           this.logOutUser();
         }
