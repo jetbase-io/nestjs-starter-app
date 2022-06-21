@@ -5,18 +5,23 @@ import { connect } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
+import { SIGN_IN_ROUTE } from "../../store/constants/route-constants";
 import { Dispatch, RootState } from "../../store/store";
+
+type IPasswordValues = Record<string, string>;
 
 type ResetPasswordProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
 const ResetPasswordPage: FC<ResetPasswordProps> = ({ isAuthenticated, resetPassword }) => {
   const navigate = useNavigate();
 
+  const passwordValues: IPasswordValues = {
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  };
+
   const formik = useFormik({
-    initialValues: {
-      oldPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    },
+    initialValues: passwordValues,
     validationSchema: Yup.object({
       oldPassword: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
       newPassword: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
@@ -28,7 +33,7 @@ const ResetPasswordPage: FC<ResetPasswordProps> = ({ isAuthenticated, resetPassw
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      navigate("/signIn");
+      navigate(SIGN_IN_ROUTE);
     },
   });
 
@@ -41,6 +46,12 @@ const ResetPasswordPage: FC<ResetPasswordProps> = ({ isAuthenticated, resetPassw
     return <Navigate to="/" />;
   }
 
+  const inputs = [
+    { id: 0, label: "Old Password", name: "oldPassword" },
+    { id: 1, label: "New Password", name: "newPassword" },
+    { id: 2, label: "Confirm Password", name: "confirmPassword" },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center">
       <div className="max-w-md w-full mx-auto">
@@ -48,54 +59,24 @@ const ResetPasswordPage: FC<ResetPasswordProps> = ({ isAuthenticated, resetPassw
       </div>
       <div className="max-w-md w-full mx-auto mt-4 bg-white p-8 border border-gray-300">
         <form onSubmit={formik.handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="username" className="text-sm font-bold text-gray-600 block">
-              Old Password
-            </label>
-            <input
-              name="oldPassword"
-              value={formik.values.oldPassword}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              type="password"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-            />
-            {formik.touched.oldPassword && formik.errors.oldPassword ? (
-              <p className="text-red-500">{formik.errors.oldPassword}</p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="password" className="text-sm font-bold text-gray-600 block">
-              New Password
-            </label>
-            <input
-              name="newPassword"
-              value={formik.values.newPassword}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              type="password"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-            />
-            {formik.touched.newPassword && formik.errors.newPassword ? (
-              <p className="text-red-500">{formik.errors.newPassword}</p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="confirmPassword" className="text-sm font-bold text-gray-600 block">
-              Confirm Password
-            </label>
-            <input
-              name="confirmPassword"
-              value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              type="password"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-            />
-            {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
-              <p className="text-red-500">{formik.errors.confirmPassword}</p>
-            ) : null}
-          </div>
+          {inputs.map((input) => (
+            <div key={input.id}>
+              <label htmlFor={input.name} className="text-sm font-bold text-gray-600 block">
+                {input.label}
+              </label>
+              <input
+                name={input.name}
+                value={formik.values[`${input.name}`]}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                type="password"
+                className="w-full p-2 border border-gray-300 rounded mt-1"
+              />
+              {formik.touched[`${input.name}`] && formik.errors[`${input.name}`] && (
+                <p className="text-red-500">{formik.errors[`${input.name}`]}</p>
+              )}
+            </div>
+          ))}
           <div>
             <button type="submit" className={`${buttonClass} w-full py-2 px-4 rounded-md text-white text-sm`}>
               Reset

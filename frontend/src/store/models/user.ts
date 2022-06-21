@@ -1,4 +1,5 @@
 import { createModel } from "@rematch/core";
+import { toast } from "react-toastify";
 
 import history from "../../helpers/history";
 import {
@@ -15,6 +16,7 @@ import {
   SIGN_OUT_URL,
   SIGN_UP_URL,
 } from "../constants/api-contstants";
+import { SIGN_IN_ROUTE } from "../constants/route-constants";
 import http from "../http/http-common";
 import type { RootModel } from "./index";
 
@@ -54,10 +56,9 @@ export const user = createModel<RootModel>()({
           password,
         });
         if (result.request.status === 201) {
-          history.push("/signIn");
+          history.push(SIGN_IN_ROUTE);
         }
       } catch (err) {
-        // need to add toaster
         console.log(err);
       }
     },
@@ -77,7 +78,7 @@ export const user = createModel<RootModel>()({
           setUserTokensToLocalStorage(result.data.accessToken, result.data.refreshToken);
         }
         if (result.request.status === 403) {
-          console.log("Incorrect credentials");
+          toast.error("Incorrect credentials");
         }
       } catch (error) {
         console.log(error);
@@ -117,7 +118,7 @@ export const user = createModel<RootModel>()({
           this.logOutUser();
         }
         if (result.request.status === 400) {
-          console.log("Password does not match");
+          toast.error("Password does not match");
         }
       } catch (err) {
         console.log(err);
@@ -127,7 +128,7 @@ export const user = createModel<RootModel>()({
     logOutUser() {
       dispatch.user.setIsAuthenticated({ isAuthenticated: false });
       cleanUserTokensFromLocalStorage();
-      history.push("/signIn");
+      history.push(SIGN_IN_ROUTE);
     },
   }),
 });

@@ -1,6 +1,7 @@
 import React from "react";
 
 import { HomePage, ResetPasswordPage, SignInPage, SignUpPage } from "./pages";
+import { RESET_PASSWORD_ROUTE, SIGN_IN_ROUTE, SIGN_UP_ROUTE } from "./store/constants/route-constants";
 
 interface Page {
   id: number;
@@ -18,19 +19,19 @@ const routes: Page[] = [
   },
   {
     id: 2,
-    path: "/signUp",
+    path: SIGN_UP_ROUTE,
     title: "SignUpPage",
     element: <SignUpPage />,
   },
   {
     id: 3,
-    path: "/signIn",
+    path: SIGN_IN_ROUTE,
     title: "SignInPage",
     element: <SignInPage />,
   },
   {
     id: 4,
-    path: "/resetPassword",
+    path: RESET_PASSWORD_ROUTE,
     title: "ResetPasswordPage",
     element: <ResetPasswordPage />,
   },
