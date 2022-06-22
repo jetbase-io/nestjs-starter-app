@@ -34,6 +34,10 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
+  async getUsers(): Promise<UserEntity[]> {
+    return await this.userRepository.find();
+  }
+
   async getOne(id: number): Promise<UserEntity> {
     return await this.userRepository.findOne({ id });
   }

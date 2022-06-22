@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Put,
   UseGuards,
@@ -18,6 +19,17 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 @Controller('api/users/')
 export class UsersController {
   constructor(private userService: UsersService) {}
+
+  @ApiOperation({ summary: 'Get users' })
+  @ApiResponse({ status: 200, type: UserEntity })
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @Header('Access-Control-Expose-Headers', 'Content-range')
+  @Header('Content-range', '0-5/10')
+  @Get('/')
+  getUsers(): Promise<UserEntity[]> {
+    return this.userService.getUsers();
+  }
 
   @ApiOperation({ summary: 'Get user' })
   @ApiResponse({ status: 200, type: UserEntity })
