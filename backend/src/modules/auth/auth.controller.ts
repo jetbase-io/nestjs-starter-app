@@ -8,6 +8,7 @@ import { RefreshTokenAuthGuard } from './guards/refresh-token-auth.guard';
 import { GetCurrentUserId } from './decorators/get-current-user-id.decorator';
 import { GetCurrentUser } from './decorators/get-current-user.decorator';
 import { Public } from './decorators/public.decorator';
+import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -37,6 +38,24 @@ export class AuthController {
     @Body('refreshToken') refreshToken: string,
   ) {
     return this.authService.signOut(userId, accessToken, refreshToken);
+  }
+
+  @Post('/fullSignOut')
+  fullSignOut(
+    @GetCurrentUserId() userId: number,
+    @GetCurrentUser('accessToken') accessToken: string,
+  ) {
+    return this.authService.fullSignOut(userId, accessToken);
+  }
+
+  @ApiOperation({ summary: 'Reset password' })
+  @ApiResponse({ status: 200, description: 'Returns success message' })
+  @Post('/resetPassword')
+  resetPassword(
+    @GetCurrentUserId() userId: number,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    return this.authService.resetPassword(userId, resetPasswordDto);
   }
 
   @Public()

@@ -3,6 +3,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import history from "../../helpers/history";
 import { getAccessToken, getRefreshToken, setUserTokensToLocalStorage } from "../../helpers/user";
 import { REFRESH_TOKEN_URL } from "../constants/api-contstants";
+import { SIGN_IN_ROUTE } from "../constants/route-constants";
 
 const http = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
@@ -47,7 +48,7 @@ http.interceptors.response.use(
       } catch (er) {
         console.log(er);
         // refresh token expired
-        return history.push("/signIn");
+        return history.push(SIGN_IN_ROUTE);
       }
     }
     refresh = false;

@@ -3,20 +3,27 @@ import PropTypes from "prop-types";
 import React, { FC, useState } from "react";
 import { connect } from "react-redux";
 
+import { RESET_PASSWORD_ROUTE, SIGN_IN_ROUTE, SIGN_UP_ROUTE } from "../../store/constants/route-constants";
 import { Dispatch, RootState } from "../../store/store";
 import HeaderLink from "../HeaderLink";
 
 type HeaderPageProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
 
-const Header: FC<HeaderPageProps> = ({ isAuthenticated, signOut }) => {
+const Header: FC<HeaderPageProps> = ({ isAuthenticated, signOut, fullSignOut }) => {
   const handleSignOutClick: React.MouseEventHandler<HTMLAnchorElement> = () => {
     signOut();
   };
 
+  const handleFullSignOutClick: React.MouseEventHandler<HTMLAnchorElement> = () => {
+    fullSignOut();
+  };
+
   const LINKS = [
-    { id: 1, text: "Sign Out", to: "/signIn", isVisible: isAuthenticated, onClick: handleSignOutClick },
-    { id: 2, text: "Sign In", to: "/signIn", isVisible: !isAuthenticated },
-    { id: 3, text: "Sign Up", to: "/signUp", isVisible: !isAuthenticated },
+    { id: 1, text: "Reset Password", to: RESET_PASSWORD_ROUTE, isVisible: isAuthenticated },
+    { id: 2, text: "Full Sign Out", to: SIGN_IN_ROUTE, isVisible: isAuthenticated, onClick: handleFullSignOutClick },
+    { id: 3, text: "Sign Out", to: SIGN_IN_ROUTE, isVisible: isAuthenticated, onClick: handleSignOutClick },
+    { id: 4, text: "Sign In", to: SIGN_IN_ROUTE, isVisible: !isAuthenticated },
+    { id: 5, text: "Sign Up", to: SIGN_UP_ROUTE, isVisible: !isAuthenticated },
   ];
 
   const [openBurger, setOpenBurger] = useState(false);
@@ -73,6 +80,7 @@ const mapState = (state: RootState) => ({
 
 const mapDispatch = (dispatch: Dispatch) => ({
   signOut: dispatch.user.signOut,
+  fullSignOut: dispatch.user.fullSignOut,
 });
 
 export default connect(mapState, mapDispatch)(Header);

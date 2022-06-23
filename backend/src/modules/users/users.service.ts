@@ -5,7 +5,6 @@ import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RolesService } from '../roles/roles.service';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
 
@@ -57,35 +56,6 @@ export class UsersService {
     };
   }
 
-  async resetPassword(
-    userId: number,
-    resetPassword: ResetPasswordDto,
-  ): Promise<{ message: string }> {
-    const user = await this.userRepository.findOne(userId);
-    const isMatch = await this.isPasswordValid(resetPassword.oldPassword, user);
-
-    if (!isMatch) {
-      throw new BadRequestException({
-        message: 'Old password does not match!',
-      });
-    }
-
-    if (resetPassword.newPassword !== resetPassword.confirmPassword) {
-      throw new BadRequestException({
-        message: 'Old and Confirm do not match!',
-      });
-    }
-
-    const hashedNewPassword = await this.generateHashPassword(
-      resetPassword.newPassword,
-    );
-    await this.userRepository.update(userId, { password: hashedNewPassword });
-
-    return {
-      message: 'Password updated successfully!',
-    };
-  }
-
   async validateUsername(username: string): Promise<UserEntity> {
     const user = await this.findByUsername(username);
     if (user) {
@@ -103,6 +73,11 @@ export class UsersService {
 
   async generateHashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 10);
+  }
+
+  async updatePassword(userId: number, password: string) {
+    const hashedNewPassword = await this.generateHashPassword(password);
+    await this.userRepository.update(userId, { password: hashedNewPassword });
   }
 
   async isPasswordValid(password: string, user: UserEntity): Promise<boolean> {
