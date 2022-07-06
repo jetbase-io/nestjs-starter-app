@@ -10,6 +10,7 @@ import {
   setUserTokensToLocalStorage,
 } from "../../helpers/user";
 import {
+  ACTIVATE_SUBSCRIPTION_URL,
   FULL_SIGN_OUT_URL,
   RESET_PASSWORD_URL,
   SIGN_IN_URL,
@@ -122,6 +123,38 @@ export const user = createModel<RootModel>()({
         }
       } catch (err) {
         console.log(err);
+      }
+    },
+
+    async activateSubscription({ email, result }) {
+      if (result.error) {
+        console.log(result.error.message);
+      } else {
+        const res = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
+          paymentMethod: result.paymentMethod.id,
+          email,
+        });
+        console.log("RES DATA: ", res.data);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { client_secret, status } = res.data;
+        //
+        // if (status === "requires_action") {
+        //   stripe.confirmCardPayment(client_secret).then((paymentResult) => {
+        //     if (paymentResult.error) {
+        //       console.log("There was an issue!");
+        //       console.log(paymentResult.error);
+        //       // Display error message in your UI.
+        //       // The card was declined (i.e. insufficient funds, card has expired, etc)
+        //     } else {
+        //       console.log("You got the money!");
+        //       // Show a success message to your customer
+        //     }
+        //   });
+        // } else {
+        //   console.log("You got the money!");
+        //   // No additional information was needed
+        //   // Show a success message to your customer
+        // }
       }
     },
 

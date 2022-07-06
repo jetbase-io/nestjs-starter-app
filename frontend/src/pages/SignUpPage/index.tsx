@@ -16,17 +16,20 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
   const formik = useFormik({
     initialValues: {
       username: "",
+      email: "",
       password: "",
       confirmPassword: "",
     },
     validationSchema: Yup.object({
       username: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
+      email: Yup.string().email("Invalid email format").min(6, "Minimum 6 characters required").required("Required"),
       password: Yup.string().min(6, "Minimum 6 characters required").required("Required"),
       confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords must match"),
     }),
     onSubmit: (values) => {
       signUp({
         username: values.username,
+        email: values.email,
         password: values.password,
       });
       navigate(SIGN_IN_ROUTE);
@@ -64,6 +67,20 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
             {formik.touched.username && formik.errors.username ? (
               <p className="text-red-500">{formik.errors.username}</p>
             ) : null}
+          </div>
+          <div>
+            <label htmlFor="email" className="text-sm font-bold text-gray-600 block">
+              Username
+            </label>
+            <input
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+            />
+            {formik.touched.email && formik.errors.email ? <p className="text-red-500">{formik.errors.email}</p> : null}
           </div>
           <div>
             <label htmlFor="password" className="text-sm font-bold text-gray-600 block">
