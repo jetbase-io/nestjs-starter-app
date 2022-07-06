@@ -1,5 +1,6 @@
 import { createModel } from "@rematch/core";
 
+import { setChosenPlan } from "../../helpers/plan";
 import { GET_PLANS_URL } from "../constants/api-contstants";
 import http from "../http/http-common";
 import type { RootModel } from "./index";
@@ -27,6 +28,7 @@ export const plan = createModel<RootModel>()({
     },
     setChosenPlan(state, planId: string) {
       const chosenPlan = state.plans.find(({ id }) => id === planId);
+      setChosenPlan(chosenPlan || {});
       return {
         ...state,
         chosenPlan,

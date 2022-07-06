@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
+import { getChosenPlan } from "../../helpers/plan";
 import { HOME_ROUTE } from "../../store/constants/route-constants";
 import { Dispatch, RootState } from "../../store/store";
 
@@ -16,7 +17,8 @@ const BillingPage: FC = () => {
 
   const stripe = useStripe();
   const elements = useElements();
-  const { chosenPlan } = planState;
+  const chosenPlan = getChosenPlan();
+  console.log("chosenPlan: ", chosenPlan);
 
   const formik = useFormik({
     initialValues: {
