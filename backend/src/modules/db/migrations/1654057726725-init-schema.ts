@@ -35,6 +35,18 @@ export class initSchema1654057726725 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_610102b60fea1455310ccd299de" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
+    await queryRunner.query(
+      `CREATE TABLE "plans" ("id" SERIAL NOT NULL, "title" character varying NOT NULL, "stripePriceId" character varying NOT NULL, CONSTRAINT "UQ_b668f86e99301be2d56e0c9aa4e" UNIQUE ("title"), CONSTRAINT "UQ_b671aaeeecb098232ba628bf2e6" UNIQUE ("stripePriceId"), CONSTRAINT "PK_3720521a81c7c24fe9b7202ba61" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD "email" character varying NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email")`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD "customerStripeId" character varying`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -61,5 +73,13 @@ export class initSchema1654057726725 implements MigrationInterface {
     );
     await queryRunner.query(`DROP TABLE "refresh_tokens"`);
     await queryRunner.query(`DROP TABLE "expired_access_tokens"`);
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP COLUMN "customerStripeId"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3"`,
+    );
+    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "email"`);
+    await queryRunner.query(`DROP TABLE "plans"`);
   }
 }

@@ -24,9 +24,17 @@ export class UserEntity {
   @Column({ unique: true })
   username: string;
 
+  @ApiProperty({ example: 'email', description: 'Unique email' })
+  @Column({ unique: true })
+  email: string;
+
   @ApiProperty({ example: 'test1234', description: 'Password' })
   @Column({ nullable: false })
   password: string;
+
+  @ApiProperty({ example: 'cus_sfeIEff3fj', description: 'Stripe ID' })
+  @Column()
+  customerStripeId: string;
 
   @CreateDateColumn()
   createdAt: Date;

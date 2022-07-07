@@ -9,7 +9,6 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
-import {Repository} from "typeorm";
 
 @Module({
   imports: [

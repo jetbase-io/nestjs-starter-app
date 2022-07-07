@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsNotEmpty,
   IsString,
   MinLength,
@@ -7,6 +8,7 @@ import {
 } from 'class-validator';
 import { UsernameUnique } from '../validator/user-unique.validator';
 import { UserEntity } from '../models/users.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserByRoleDto {
   @IsNotEmpty()
@@ -17,6 +19,17 @@ export class CreateUserByRoleDto {
       `${targetName} with the same pair of ${property} already exist`,
   })
   username: string;
+
+  @ApiProperty({ example: 'email', description: 'Unique email' })
+  @IsNotEmpty()
+  @IsEmail()
+  @IsString()
+  @MinLength(6)
+  @Validate(UsernameUnique, [UserEntity, ['email']], {
+    message: ({ targetName, constraints, property }: ValidationArguments) =>
+      `${targetName} with the same pair of ${property} already exist`,
+  })
+  email: string;
 
   @IsNotEmpty()
   @MinLength(6)
