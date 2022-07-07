@@ -3,7 +3,8 @@ import classNames from "classnames";
 import { useFormik } from "formik";
 import React, { FC } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import * as Yup from "yup";
 
 import { getChosenPlan } from "../../helpers/plan";
@@ -12,13 +13,16 @@ import { Dispatch, RootState } from "../../store/store";
 
 const BillingPage: FC = () => {
   const dispatch = useDispatch<Dispatch>();
-  const planState = useSelector((state: RootState) => state.plan);
+  const userState = useSelector((state: RootState) => state.user);
   const navigate = useNavigate();
 
   const stripe = useStripe();
   const elements = useElements();
   const chosenPlan = getChosenPlan();
-  console.log("chosenPlan: ", chosenPlan);
+
+  if (!userState.isAuthenticated) {
+    return <Navigate to="/" />;
+  }
 
   const formik = useFormik({
     initialValues: {
@@ -43,9 +47,27 @@ const BillingPage: FC = () => {
       });
       const args = {
         email: values.email,
+        priceId: chosenPlan.id,
         result,
       };
-      dispatch.user.activateSubscription(args);
+      const resultData = await dispatch.user.activateSubscription(args);
+      if (resultData) {
+        const { clientSecret, status } = resultData;
+
+        if (status === "requires_action") {
+          stripe.confirmCardPayment(clientSecret).then((res) => {
+            if (result.error) {
+              toast.error("Payment failed");
+            } else {
+              console.log("You got the money!");
+              toast.success("Payment was successfully applied!");
+            }
+          });
+        } else {
+          console.log("You got the money!");
+          toast.success("Payment was successfully applied!");
+        }
+      }
       navigate(HOME_ROUTE);
     },
   });

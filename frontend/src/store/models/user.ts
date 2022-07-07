@@ -126,36 +126,22 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    async activateSubscription({ email, result }) {
+    async activateSubscription({ email, result, priceId }) {
+      let data = null;
       if (result.error) {
         console.log(result.error.message);
       } else {
         const res = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
-          paymentMethod: result.paymentMethod.id,
           email,
+          paymentMethod: result.paymentMethod.id,
+          priceId,
         });
         console.log("RES DATA: ", res.data);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { client_secret, status } = res.data;
-        //
-        // if (status === "requires_action") {
-        //   stripe.confirmCardPayment(client_secret).then((paymentResult) => {
-        //     if (paymentResult.error) {
-        //       console.log("There was an issue!");
-        //       console.log(paymentResult.error);
-        //       // Display error message in your UI.
-        //       // The card was declined (i.e. insufficient funds, card has expired, etc)
-        //     } else {
-        //       console.log("You got the money!");
-        //       // Show a success message to your customer
-        //     }
-        //   });
-        // } else {
-        //   console.log("You got the money!");
-        //   // No additional information was needed
-        //   // Show a success message to your customer
-        // }
+        const { clientSecret, status } = res.data;
+        console.log("Client secret: ", clientSecret);
+        data = res.data;
       }
+      return data;
     },
 
     logOutUser() {
