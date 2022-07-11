@@ -1,7 +1,7 @@
-import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { CardElement, CardNumberElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import classNames from "classnames";
 import { useFormik } from "formik";
-import React, { FC } from "react";
+import React, { FC, MouseEventHandler, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -23,6 +23,33 @@ const BillingPage: FC = () => {
   if (!userState.isAuthenticated) {
     return <Navigate to="/" />;
   }
+
+  useEffect(() => {
+    if (userState.paymentMethods.length === 0) {
+      dispatch.user.getPaymentMethods();
+    }
+  }, []);
+
+  const handleResultData = (resultData: { clientSecret: string; status: string }) => {
+    if (!stripe || !elements) {
+      return;
+    }
+    if (resultData) {
+      const { clientSecret, status } = resultData;
+
+      if (status === "requires_action") {
+        stripe.confirmCardPayment(clientSecret).then((res) => {
+          if (res.error) {
+            toast.error("Payment failed");
+          } else {
+            toast.success("Payment was successfully applied!");
+          }
+        });
+      } else {
+        toast.success("Payment was successfully applied!");
+      }
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -48,26 +75,10 @@ const BillingPage: FC = () => {
       const args = {
         email: values.email,
         priceId: chosenPlan.id,
-        result,
+        paymentMethodId: result.paymentMethod?.id,
       };
       const resultData = await dispatch.user.activateSubscription(args);
-      if (resultData) {
-        const { clientSecret, status } = resultData;
-
-        if (status === "requires_action") {
-          stripe.confirmCardPayment(clientSecret).then((res) => {
-            if (result.error) {
-              toast.error("Payment failed");
-            } else {
-              console.log("You got the money!");
-              toast.success("Payment was successfully applied!");
-            }
-          });
-        } else {
-          console.log("You got the money!");
-          toast.success("Payment was successfully applied!");
-        }
-      }
+      handleResultData(resultData);
       navigate(HOME_ROUTE);
     },
   });
@@ -76,6 +87,17 @@ const BillingPage: FC = () => {
     "bg-blue-600 hover:bg-blue-600": formik.isValid,
     "bg-gray-400 ": !formik.isValid,
   });
+
+  const onExistedCardClick = async (paymentMethodId: string, priceId: string) => {
+    const result = await dispatch.user.activateSubscription({ paymentMethodId, priceId });
+    handleResultData(result);
+    navigate(HOME_ROUTE);
+  };
+
+  const onDetachCardClick = (paymentMethodId: string) => {
+    dispatch.user.detachPaymentMethod(paymentMethodId);
+    navigate(HOME_ROUTE);
+  };
 
   return (
     <div>
@@ -118,6 +140,35 @@ const BillingPage: FC = () => {
               </button>
             </div>
           </form>
+        </div>
+        <div className="max-w-md w-full mx-auto ">
+          {userState.paymentMethods?.map(({ id, card }) => (
+            <div
+              key={id}
+              className="flex mb-0.5 border border-r-2 lg:px-4 py-1 text-center text-primary-dark bg-primary-white"
+            >
+              <input
+                type="text"
+                disabled={true}
+                className="text-left w-1/2 text-gray-600 font-bold text-center pl-1 align-baseline"
+                placeholder={`${card.brand} - ${card.last4}`}
+              />
+              <p className="text-right w-1/2 pr-1">
+                <button
+                  onClick={() => onDetachCardClick(id)}
+                  className="bg-blue-600 hover:bg-blue-600 py-2 px-4 rounded-md text-white text-sm mr-1"
+                >
+                  Detach
+                </button>
+                <button
+                  onClick={() => onExistedCardClick(id, chosenPlan.id)}
+                  className="bg-blue-600 hover:bg-blue-600 py-2 px-4 rounded-md text-white text-sm"
+                >
+                  Use Card
+                </button>
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

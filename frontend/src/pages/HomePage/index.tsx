@@ -1,17 +1,25 @@
-import React, { FC } from "react";
-import { useSelector } from "react-redux";
+import React, { FC, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import Header from "../../components/Header";
 import Plans from "../../components/Plans";
-import { RootState } from "../../store/store";
+import { Dispatch, RootState } from "../../store/store";
 
 const HomePage: FC = () => {
+  const dispatch = useDispatch<Dispatch>();
   const userState = useSelector((state: RootState) => state.user);
+  const { isAuthenticated } = userState;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch.user.checkSubscription();
+    }
+  }, []);
 
   return (
     <div>
       <Header />
-      {userState.isAuthenticated ? <Plans /> : null}
+      {isAuthenticated ? <Plans /> : <div />}
     </div>
   );
 };

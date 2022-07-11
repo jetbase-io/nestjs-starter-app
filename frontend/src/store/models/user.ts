@@ -11,7 +11,10 @@ import {
 } from "../../helpers/user";
 import {
   ACTIVATE_SUBSCRIPTION_URL,
+  CHECK_SUBSCRIPTION_URL,
+  DETACH_PAYMENT_METHODS,
   FULL_SIGN_OUT_URL,
+  GET_PAYMENT_METHODS_URL,
   RESET_PASSWORD_URL,
   SIGN_IN_URL,
   SIGN_OUT_URL,
@@ -25,6 +28,8 @@ type UserState = {
   isAuthenticated: boolean;
   accessToken: "";
   refreshToken: "";
+  paymentMethods: Array<{ id: string; card: { brand: string; last4: string } }>;
+  subscription: { nickname: string; status: string };
 };
 
 export const user = createModel<RootModel>()({
@@ -32,6 +37,8 @@ export const user = createModel<RootModel>()({
     isAuthenticated: getIsAuthenticated(),
     accessToken: getAccessToken(),
     refreshToken: getRefreshToken(),
+    paymentMethods: [],
+    subscription: { nickname: "", status: "inactive" },
   } as UserState,
   reducers: {
     setIsAuthenticated(state, { isAuthenticated }) {
@@ -46,6 +53,20 @@ export const user = createModel<RootModel>()({
         ...state,
         accessToken,
         refreshToken,
+      };
+    },
+
+    setPaymentMethods(state, paymentMethods) {
+      return {
+        ...state,
+        paymentMethods,
+      };
+    },
+
+    setSubscription(state, subscription) {
+      return {
+        ...state,
+        subscription,
       };
     },
   },
@@ -77,6 +98,7 @@ export const user = createModel<RootModel>()({
             refreshToken: result.data.refreshToken,
           });
           setUserTokensToLocalStorage(result.data.accessToken, result.data.refreshToken);
+          await this.checkSubscription();
         }
         if (result.request.status === 403) {
           toast.error("Incorrect credentials");
@@ -116,6 +138,7 @@ export const user = createModel<RootModel>()({
           confirmPassword,
         });
         if (result.request.status === 201) {
+          toast.success("Password updated!");
           this.logOutUser();
         }
         if (result.request.status === 400) {
@@ -126,22 +149,46 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    async activateSubscription({ email, result, priceId }) {
+    async activateSubscription({ paymentMethodId, priceId }): Promise<{ clientSecret: string; status: string }> {
       let data = null;
-      if (result.error) {
-        console.log(result.error.message);
-      } else {
-        const res = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
-          email,
-          paymentMethod: result.paymentMethod.id,
-          priceId,
-        });
-        console.log("RES DATA: ", res.data);
-        const { clientSecret, status } = res.data;
-        console.log("Client secret: ", clientSecret);
-        data = res.data;
-      }
+
+      const res = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
+        paymentMethod: paymentMethodId,
+        priceId,
+      });
+      console.log("RES DATA: ", res.data);
+      const { clientSecret, status } = res.data;
+      console.log("Client secret: ", clientSecret);
+      data = res.data;
+
       return data;
+    },
+
+    async detachPaymentMethod(paymentMethodId: string) {
+      const res = await http.post(DETACH_PAYMENT_METHODS, {
+        paymentMethodId,
+      });
+      if (res.data) {
+        const newArr = user.state.paymentMethods.filter((pM) => {
+          return pM.id !== paymentMethodId;
+        });
+        dispatch.user.setPaymentMethods(newArr);
+        toast.success("Card was detached successfully!");
+      }
+    },
+
+    async getPaymentMethods() {
+      const res = await http.get(GET_PAYMENT_METHODS_URL);
+      console.log("PMS: ", res.data);
+      dispatch.user.setPaymentMethods(res.data);
+    },
+
+    async checkSubscription() {
+      const res = await http.get(CHECK_SUBSCRIPTION_URL);
+      console.log("SUB STATUS: ", res.data);
+      if (res.data) {
+        dispatch.user.setSubscription(res.data);
+      }
     },
 
     logOutUser() {

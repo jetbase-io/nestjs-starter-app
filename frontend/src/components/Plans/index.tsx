@@ -8,9 +8,11 @@ import { Dispatch, RootState } from "../../store/store";
 const Plans: FC = () => {
   const navigate = useNavigate();
   const plansState = useSelector((state: RootState) => state.plan);
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<Dispatch>();
+
   useEffect(() => {
-    dispatch.plan.getPlans();
+    if (isAuthenticated) dispatch.plan.getPlans();
   }, []);
 
   const handleSubscribe = (title: string, id: string) => {
@@ -24,7 +26,7 @@ const Plans: FC = () => {
         <h2 className="text-3xl text-primary-white font-bold">Pricing</h2>
       </div>
       <div className="flex flex-col lg:flex-row items-start items-center lg:justify-center w-full w-full lg:px-10 py-12 ">
-        {plansState.plans.map(({ id, nickname, amount }) => (
+        {plansState.plans?.map(({ id, nickname, amount }) => (
           <div
             key={id}
             className="w-4/5 lg:w-custom mb-10 lg:px-4 py-10 text-center text-primary-dark bg-primary-white"

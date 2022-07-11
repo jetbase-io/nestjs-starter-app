@@ -37,12 +37,12 @@ export const plan = createModel<RootModel>()({
   },
   effects: (dispatch) => {
     return {
-      async getPlans(): Promise<any> {
+      async getPlans() {
         const response = await http(GET_PLANS_URL);
         dispatch.plan.setPlans(response.data);
       },
 
-      choosePlan(planId: string) {
+      async choosePlan(planId: string) {
         dispatch.plan.setChosenPlan(planId);
       },
     };
