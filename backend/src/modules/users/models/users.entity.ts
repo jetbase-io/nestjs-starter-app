@@ -33,8 +33,15 @@ export class UserEntity {
   password: string;
 
   @ApiProperty({ example: 'cus_sfeIEff3fj', description: 'Stripe ID' })
-  @Column()
+  @Column({ nullable: true })
   customerStripeId: string;
+
+  @ApiProperty({
+    example: 'sub_s44eIEff3fj',
+    description: 'Stripe Subscription ID',
+  })
+  @Column({ nullable: true })
+  subscriptionId: string;
 
   @CreateDateColumn()
   createdAt: Date;

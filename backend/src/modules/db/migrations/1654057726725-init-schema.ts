@@ -47,6 +47,9 @@ export class initSchema1654057726725 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "users" ADD "customerStripeId" character varying`,
     );
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD "subscriptionId" character varying`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -76,6 +79,7 @@ export class initSchema1654057726725 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "users" DROP COLUMN "customerStripeId"`,
     );
+    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "subscriptionId"`);
     await queryRunner.query(
       `ALTER TABLE "users" DROP CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3"`,
     );

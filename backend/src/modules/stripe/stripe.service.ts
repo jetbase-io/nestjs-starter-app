@@ -4,6 +4,8 @@ import { UsersService } from '../users/users.service';
 import { UserEntity } from '../users/models/users.entity';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 
+const STRIPE_INACTIVE = 'inactive';
+
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
@@ -14,15 +16,12 @@ export class StripeService {
     });
   }
 
-  async createCustomer(
-    user: UserEntity,
-    paymentMethod: string,
-    email?: string,
-  ) {
+  async createCustomer(user: UserEntity, paymentMethod: string) {
     if (!user.customerStripeId) {
       const customer = await this.stripe.customers.create({
+        name: user.username,
         payment_method: paymentMethod,
-        email: email,
+        email: user.email,
         invoice_settings: {
           default_payment_method: paymentMethod,
         },
@@ -40,27 +39,76 @@ export class StripeService {
     activateSubscriptionDto: ActivateSubscriptionDto,
   ) {
     const user = await this.usersService.getOne(userId);
-    const { paymentMethod, email, priceId } = activateSubscriptionDto;
+    const { paymentMethod, priceId } = activateSubscriptionDto;
 
-    const customerId = await this.createCustomer(user, paymentMethod, email);
-
+    const customerId = await this.createCustomer(user, paymentMethod);
     const subscription = await this.stripe.subscriptions.create({
       customer: customerId,
       default_payment_method: paymentMethod,
       items: [{ price: priceId }],
       expand: ['latest_invoice.payment_intent'],
     });
+    user.customerStripeId = customerId;
+    user.subscriptionId = subscription.id;
+    await this.usersService.saveUser(user);
 
     const status = subscription['latest_invoice']['payment_intent']['status'];
     const clientSecret =
       subscription['latest_invoice']['payment_intent']['client_secret'];
 
-    return { clientSecret, status };
+    return { clientSecret, status, subscriptionId: subscription.id };
+  }
+
+  public async detachPaymentMethod(paymentMethodId: string) {
+    return await this.stripe.paymentMethods.detach(paymentMethodId);
   }
 
   public async getPlans() {
     const plans = await this.stripe.plans.list();
     return plans.data.reverse();
+  }
+
+  public async getSubscriptionStatus(
+    userId,
+  ): Promise<{ nickname: string; status: string }> {
+    const sub = {
+      nickname: '',
+      status: '',
+    };
+    const user = await this.usersService.getOne(userId);
+    if (user.subscriptionId) {
+      const currentSubscription = await this.stripe.subscriptions.retrieve(
+        user.subscriptionId,
+      );
+      sub.nickname = currentSubscription.items.data[0].price.nickname;
+      sub.status = currentSubscription.status;
+      return sub;
+    }
+    sub.status = STRIPE_INACTIVE;
+    return sub;
+  }
+
+  public async getPaymentMethods(userId: number) {
+    const user = await this.usersService.getOne(userId);
+    if (user.customerStripeId) {
+      const result = await this.stripe.paymentMethods.list({
+        customer: user.customerStripeId,
+        type: 'card',
+      });
+      return result.data;
+    }
+    return [];
+  }
+
+  public async getSubscriptions(userId: number) {
+    const user = await this.usersService.getOne(userId);
+    if (user.customerStripeId) {
+      const result = await this.stripe.subscriptions.list({
+        customer: user.customerStripeId,
+      });
+      return result.data;
+    }
+    return [];
   }
 
   public async webhook(res, req) {
