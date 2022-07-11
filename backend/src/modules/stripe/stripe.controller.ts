@@ -15,7 +15,6 @@ export class StripeController {
   @Post('/activateSubscription')
   activateSubscription(
     @GetCurrentUserId() userId: number,
-    @Body() email: string,
     @Body() activateSubscriptionDto: ActivateSubscriptionDto,
   ) {
     return this.stripeService.activateSubscription(

@@ -21,6 +21,7 @@ import {
   SIGN_UP_URL,
 } from "../constants/api-contstants";
 import { SIGN_IN_ROUTE } from "../constants/route-constants";
+import { STRIPE_INACTIVE_STATUS } from "../constants/stripe-constants";
 import http from "../http/http-common";
 import type { RootModel } from "./index";
 
@@ -38,7 +39,7 @@ export const user = createModel<RootModel>()({
     accessToken: getAccessToken(),
     refreshToken: getRefreshToken(),
     paymentMethods: [],
-    subscription: { nickname: "", status: "inactive" },
+    subscription: { nickname: "", status: STRIPE_INACTIVE_STATUS },
   } as UserState,
   reducers: {
     setIsAuthenticated(state, { isAuthenticated }) {
