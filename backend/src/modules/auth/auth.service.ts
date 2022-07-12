@@ -13,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
+import { SignInUserDto } from '../users/dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(userDto: CreateUserDto): Promise<Tokens> {
+  async signIn(userDto: SignInUserDto): Promise<Tokens> {
     const user = await this.validateUser(userDto.username, userDto.password);
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);

@@ -24,7 +24,7 @@
     "generate-migration": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -n",
     "publish-migration": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run",
     "revert-migration": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert",
-    "seed": "ts-node -r tsconfig-paths/register src/seed.ts"
+    "seed": "cross-env SEED_ENTITY_PATH=src/**/*.entity{.ts,.js} ts-node -r tsconfig-paths/register src/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",
@@ -49,6 +49,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "stripe": "^9.10.0",
     "swagger-ui-express": "^4.4.0",
     "typeorm": "^0.2.45",
     "typeorm-test-transactions": "^3.6.1"

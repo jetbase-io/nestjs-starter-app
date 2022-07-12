@@ -21,6 +21,7 @@ export class UsersService {
     const user = new UserEntity();
     user.username = createUserDto.username;
     user.password = await this.generateHashPassword(createUserDto.password);
+    user.email = createUserDto.email;
     user.roles = userRole;
     return await this.userRepository.save(user);
   }
@@ -30,6 +31,7 @@ export class UsersService {
     const user = new UserEntity();
     user.username = createUserDto.username;
     user.password = await this.generateHashPassword(createUserDto.password);
+    user.email = createUserDto.email;
     user.roles = userRole;
     return await this.userRepository.save(user);
   }
@@ -58,6 +60,10 @@ export class UsersService {
     return {
       message: 'User deleted successfully!',
     };
+  }
+
+  async saveUser(user: UserEntity) {
+    await this.userRepository.save(user);
   }
 
   async validateUsername(username: string): Promise<UserEntity> {

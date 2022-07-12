@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsNotEmpty,
   IsString,
   MinLength,
@@ -19,6 +20,17 @@ export class CreateUserDto {
       `${targetName} with the same pair of ${property} already exist`,
   })
   username: string;
+
+  @ApiProperty({ example: 'email', description: 'Unique email' })
+  @IsNotEmpty()
+  @IsEmail()
+  @IsString()
+  @MinLength(6)
+  @Validate(UsernameUnique, [UserEntity, ['email']], {
+    message: ({ targetName, constraints, property }: ValidationArguments) =>
+      `${targetName} with the same pair of ${property} already exist`,
+  })
+  email: string;
 
   @ApiProperty({ example: 'password123', description: 'Password' })
   @IsNotEmpty()

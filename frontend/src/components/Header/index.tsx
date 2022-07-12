@@ -9,7 +9,7 @@ import HeaderLink from "../HeaderLink";
 
 type HeaderPageProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
 
-const Header: FC<HeaderPageProps> = ({ isAuthenticated, signOut, fullSignOut }) => {
+const Header: FC<HeaderPageProps> = ({ isAuthenticated, nickname, signOut, fullSignOut }) => {
   const handleSignOutClick: React.MouseEventHandler<HTMLAnchorElement> = () => {
     signOut();
   };
@@ -41,6 +41,7 @@ const Header: FC<HeaderPageProps> = ({ isAuthenticated, signOut, fullSignOut }) 
     <nav className="relative flex flex-wrap items-center justify-between px-2 py-3 bg-gray-500 mb-3">
       <div className="container px-4 mx-auto flex flex-wrap items-center justify-between">
         <div className="w-full relative flex justify-between lg:w-auto  px-4 lg:static lg:block lg:justify-start">
+          <span className="text-xs">{nickname || ""} </span>
           <a
             className="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase text-white"
             href="#pablo"
@@ -76,6 +77,7 @@ Header.propTypes = {
 
 const mapState = (state: RootState) => ({
   isAuthenticated: state.user.isAuthenticated,
+  nickname: state.user.subscription.nickname,
 });
 
 const mapDispatch = (dispatch: Dispatch) => ({

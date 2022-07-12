@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
+import { HOME_ROUTE } from "../../store/constants/route-constants";
 import { Dispatch, RootState } from "../../store/store";
 
 type SignInProps = ReturnType<typeof mapState> & ReturnType<typeof mapDispatch>;
@@ -26,7 +27,7 @@ const SignInPage: FC<SignInProps> = ({ isAuthenticated, signIn }) => {
         username: values.username,
         password: values.password,
       });
-      navigate("/");
+      navigate(HOME_ROUTE);
     },
   });
 
