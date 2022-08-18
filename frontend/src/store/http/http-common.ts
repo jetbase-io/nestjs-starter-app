@@ -1,7 +1,12 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 import history from "../../helpers/history";
-import { getAccessToken, getRefreshToken, setUserTokensToLocalStorage } from "../../helpers/user";
+import {
+  cleanUserTokensFromLocalStorage,
+  getAccessToken,
+  getRefreshToken,
+  setUserTokensToLocalStorage,
+} from "../../helpers/user";
 import { REFRESH_TOKEN_URL } from "../constants/api-contstants";
 import { SIGN_IN_ROUTE } from "../constants/route-constants";
 
@@ -46,9 +51,9 @@ http.interceptors.response.use(
         };
         return await http.request(error.config);
       } catch (er) {
-        console.log(er);
-        // refresh token expired
-        return history.push(SIGN_IN_ROUTE);
+        cleanUserTokensFromLocalStorage();
+        // eslint-disable-next-line no-return-assign
+        return (window.location.href = SIGN_IN_ROUTE);
       }
     }
     refresh = false;
