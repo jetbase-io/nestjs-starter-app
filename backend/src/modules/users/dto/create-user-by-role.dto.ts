@@ -9,13 +9,14 @@ import {
 import { UsernameUnique } from '../validator/user-unique.validator';
 import { UserEntity } from '../models/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../roles/enums/role.enum';
 
 export class CreateUserByRoleDto {
   @IsNotEmpty()
   @MinLength(6)
   @IsString()
   @Validate(UsernameUnique, [UserEntity, ['username']], {
-    message: ({ targetName, constraints, property }: ValidationArguments) =>
+    message: ({ targetName, property }: ValidationArguments) =>
       `${targetName} with the same pair of ${property} already exist`,
   })
   username: string;
@@ -26,7 +27,7 @@ export class CreateUserByRoleDto {
   @IsString()
   @MinLength(6)
   @Validate(UsernameUnique, [UserEntity, ['email']], {
-    message: ({ targetName, constraints, property }: ValidationArguments) =>
+    message: ({ targetName, property }: ValidationArguments) =>
       `${targetName} with the same pair of ${property} already exist`,
   })
   email: string;
@@ -37,5 +38,5 @@ export class CreateUserByRoleDto {
 
   @IsNotEmpty()
   @MinLength(4)
-  role: string;
+  role: Role;
 }

@@ -16,7 +16,7 @@ export class CreateUserDto {
   @IsString()
   @MinLength(6)
   @Validate(UsernameUnique, [UserEntity, ['username']], {
-    message: ({ targetName, constraints, property }: ValidationArguments) =>
+    message: ({ targetName, property }: ValidationArguments) =>
       `${targetName} with the same pair of ${property} already exist`,
   })
   username: string;
@@ -27,7 +27,7 @@ export class CreateUserDto {
   @IsString()
   @MinLength(6)
   @Validate(UsernameUnique, [UserEntity, ['email']], {
-    message: ({ targetName, constraints, property }: ValidationArguments) =>
+    message: ({ targetName, property }: ValidationArguments) =>
       `${targetName} with the same pair of ${property} already exist`,
   })
   email: string;

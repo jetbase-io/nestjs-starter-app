@@ -5,34 +5,31 @@ import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { RolesService } from '../roles/roles.service';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
+import { Role } from '../roles/enums/role.enum';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-    private readonly roleService: RolesService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const userRole = await this.roleService.getRoleByValue('USER');
     const user = new UserEntity();
     user.username = createUserDto.username;
     user.password = await this.generateHashPassword(createUserDto.password);
     user.email = createUserDto.email;
-    user.roles = userRole;
+    user.roles = [Role.USER];
     return await this.userRepository.save(user);
   }
 
   async createByRole(createUserDto: CreateUserByRoleDto): Promise<UserEntity> {
-    const userRole = await this.roleService.getRoleByValue(createUserDto.role);
     const user = new UserEntity();
     user.username = createUserDto.username;
     user.password = await this.generateHashPassword(createUserDto.password);
     user.email = createUserDto.email;
-    user.roles = userRole;
+    user.roles = [createUserDto.role];
     return await this.userRepository.save(user);
   }
 
@@ -77,7 +74,6 @@ export class UsersService {
   async findByUsername(username: string): Promise<UserEntity> {
     return await this.userRepository.findOne({
       where: { username: username },
-      relations: ['roles'],
     });
   }
 

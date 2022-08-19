@@ -4,17 +4,17 @@ import { UserEntity } from './models/users.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RolesService } from '../roles/roles.service';
-import { RoleEntity } from '../roles/models/role.entity';
+import { RoleEntity } from '../roles/enums/role.enum';
 
 describe('UsersService', () => {
   let userService: UsersService;
-  let userRepository: Partial<Repository<UserEntity>> = {
+  const userRepository: Partial<Repository<UserEntity>> = {
     save: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
   };
-  let fakeRolesService: Partial<RolesService> = {
+  const fakeRolesService: Partial<RolesService> = {
     getRoleByValue: () =>
       Promise.resolve([{ id: 2, value: 'USER' }] as RoleEntity[]),
   };

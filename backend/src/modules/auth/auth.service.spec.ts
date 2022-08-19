@@ -107,7 +107,11 @@ describe('AuthService', () => {
   });
 
   it('returns success message after logout', async () => {
-    const message = await service.signOut(mockUserId, mockAccessToken);
+    const message = await service.signOut(
+      mockUserId,
+      mockAccessToken,
+      mockRefreshToken,
+    );
 
     expect(message).toEqual({ message: 'Successfully logged out!' });
   });

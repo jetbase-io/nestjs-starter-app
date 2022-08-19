@@ -32,7 +32,8 @@ describe('Users Controller', () => {
     'returns tokens after sign in as admin',
     runInTransaction(() => {
       const createUserDto: CreateUserDto = {
-        username: 'testadmin@gmail.com',
+        username: 'testAdmin',
+        email: 'testAdmin@gmail.com',
         password: 'admin123',
       };
       return request(app.getHttpServer())

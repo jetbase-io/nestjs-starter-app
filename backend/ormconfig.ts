@@ -15,7 +15,9 @@ module.exports = {
   password: process.env.DATABASE_PASSWORD || 'secret',
   database: database[process.env.NODE_ENV || 'development'],
   entities: [process.env.SEED_ENTITY_PATH || 'dist/**/*.entity{.ts,.js}'],
-  synchronize: false,
+  migrationRun: false,
+  synchronize: true,
+  autoLoadEntities: true,
   logging: true,
   migrationsTableName: 'migrations',
   migrations: [`dist/src/modules/db/${migrationDir}/*{.ts,.js}`],
@@ -30,5 +32,3 @@ module.exports = {
         }
       : false,
 };
-
-// for running seed change entities: ['src/**/*.entity.ts']

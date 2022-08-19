@@ -14,6 +14,7 @@ import { UserEntity } from './models/users.entity';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Role } from '../roles/enums/role.enum';
 
 @ApiTags('Users')
 @Controller('api/users/')
@@ -22,7 +23,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Get users' })
   @ApiResponse({ status: 200, type: UserEntity })
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @Header('Access-Control-Expose-Headers', 'Content-range')
   @Header('Content-range', '0-5/10')
@@ -33,7 +34,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Get user' })
   @ApiResponse({ status: 200, type: UserEntity })
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @Get('/:id')
   getOne(@Param('id') id: number): Promise<UserEntity> {
@@ -52,7 +53,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Delete user' })
   @ApiResponse({ status: 200, description: 'Returns success message' })
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @Delete(':id')
   deleteOne(@Param('id') id: number): Promise<{ message: string }> {

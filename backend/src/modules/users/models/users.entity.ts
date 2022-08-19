@@ -4,11 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
   OneToMany,
 } from 'typeorm';
-import { RoleEntity } from '../../roles/models/role.entity';
+import { Role } from '../../roles/enums/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { RefreshTokenEntity } from '../../auth/models/refreshTokens.entity';
 import { Exclude } from 'class-transformer';
@@ -49,9 +47,12 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => RoleEntity, (role) => role.users)
-  @JoinTable()
-  roles: RoleEntity[];
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  roles: Role[];
 
   @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user)
   @Exclude()
