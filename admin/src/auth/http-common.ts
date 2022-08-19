@@ -32,8 +32,6 @@ http.interceptors.response.use(
   async (error) => {
     if (error.response.status === 401 && !refresh) {
       refresh = true;
-      console.log("refreshToken: ", getRefreshToken());
-      console.log("accessToken: ", getAccessToken());
       try {
         const response = await axios.post(
           `${process.env.REACT_APP_API_URL}/auth/refresh`,
@@ -50,7 +48,6 @@ http.interceptors.response.use(
         };
         return await http.request(error.config);
       } catch (er) {
-        console.log(er);
         cleanUserTokensFromLocalStorage();
         // eslint-disable-next-line no-restricted-globals,no-return-assign
         return (location.href = "/#/login");
