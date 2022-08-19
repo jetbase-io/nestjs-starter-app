@@ -5,8 +5,9 @@ export const ListComponent: FC = () => {
   return (
     <List>
       <Datagrid rowClick="edit">
-        <TextField source="id" />
         <TextField source="username" />
+        <TextField source="email" />
+        <TextField source="roles" />
       </Datagrid>
     </List>
   );
