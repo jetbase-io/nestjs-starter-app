@@ -4,13 +4,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DbModule } from './modules/db/db.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_GUARD, APP_PIPE, RouterModule } from '@nestjs/core';
 import { AccessTokenAuthGuard } from './modules/auth/guards/access-token-auth.guard';
 import { UsersModule } from './modules/users/users.module';
 import { StripeModule } from './modules/stripe/stripe.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
+    AdminModule,
     AuthModule,
     DbModule,
     UsersModule,
@@ -18,6 +20,12 @@ import { StripeModule } from './modules/stripe/stripe.module';
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
+    RouterModule.register([
+      {
+        path: 'admin',
+        module: AdminModule,
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [

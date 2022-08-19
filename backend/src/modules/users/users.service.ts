@@ -42,7 +42,7 @@ export class UsersService {
   }
 
   async updateOne(
-    id: number,
+    id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {
     await this.isUserExist(id);
@@ -51,7 +51,14 @@ export class UsersService {
     return updateUserDto;
   }
 
-  async deleteOne(id: number): Promise<{ message: string }> {
+  async deleteMany(ids: string[]): Promise<{ message: string }> {
+    await this.userRepository.delete(ids);
+    return {
+      message: 'Users deleted successfully!',
+    };
+  }
+
+  async deleteOne(id: string): Promise<{ message: string }> {
     await this.isUserExist(id);
     await this.userRepository.delete(id);
     return {
