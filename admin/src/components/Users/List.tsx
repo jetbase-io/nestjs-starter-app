@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { Datagrid, List, TextField } from "react-admin";
 
-const UserList: FC = () => {
+export const ListComponent: FC = () => {
   return (
     <List>
       <Datagrid rowClick="edit">
@@ -11,5 +11,3 @@ const UserList: FC = () => {
     </List>
   );
 };
-
-export default UserList;
