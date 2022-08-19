@@ -33,7 +33,7 @@ export class AuthController {
 
   @Post('/signOut')
   signOut(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserId() userId: string,
     @GetCurrentUser('accessToken') accessToken: string,
     @Body('refreshToken') refreshToken: string,
   ) {
@@ -42,7 +42,7 @@ export class AuthController {
 
   @Post('/fullSignOut')
   fullSignOut(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserId() userId: string,
     @GetCurrentUser('accessToken') accessToken: string,
   ) {
     return this.authService.fullSignOut(userId, accessToken);
@@ -52,7 +52,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Returns success message' })
   @Post('/resetPassword')
   resetPassword(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserId() userId: string,
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
     return this.authService.resetPassword(userId, resetPasswordDto);
@@ -62,7 +62,7 @@ export class AuthController {
   @UseGuards(RefreshTokenAuthGuard)
   @Post('/refresh')
   refreshAccessToken(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserId() userId: string,
     @GetCurrentUser('refreshToken') refreshToken: string,
   ) {
     return this.authService.refreshAccessToken(userId, refreshToken);

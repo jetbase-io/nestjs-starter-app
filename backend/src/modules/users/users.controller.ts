@@ -37,7 +37,7 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @Get('/:id')
-  getOne(@Param('id') id: number): Promise<UserEntity> {
+  getOne(@Param('id') id: string): Promise<UserEntity> {
     return this.userService.getOne(id);
   }
 

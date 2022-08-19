@@ -1,23 +1,13 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Role } from '../../roles/enums/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { RefreshTokenEntity } from '../../auth/models/refreshTokens.entity';
 import { Exclude } from 'class-transformer';
 import { ExpiredAccessTokenEntity } from '../../auth/models/expiredAccessTokens.entity';
+import { BaseEntity } from '../../base.entity';
 
 @Entity('users')
-export class UserEntity {
-  @ApiProperty({ example: '1', description: 'Unique ID' })
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class UserEntity extends BaseEntity {
   @ApiProperty({ example: 'username', description: 'Unique username' })
   @Column({ unique: true })
   username: string;
@@ -40,12 +30,6 @@ export class UserEntity {
   })
   @Column({ nullable: true })
   subscriptionId: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @Column({
     type: 'enum',

@@ -43,14 +43,14 @@ export class AuthService {
     return tokens;
   }
 
-  async signOut(userId: number, accessToken: string, refreshToken: string) {
+  async signOut(userId: string, accessToken: string, refreshToken: string) {
     await this.deleteRefreshToken(userId, refreshToken);
     await this.saveExpiredAccessToken(userId, accessToken);
     return { message: 'Successfully logged out!' };
   }
 
   async resetPassword(
-    userId: number,
+    userId: string,
     resetPassword: ResetPasswordDto,
   ): Promise<{ message: string }> {
     const user = await this.usersService.getOne(userId);
@@ -78,12 +78,12 @@ export class AuthService {
     };
   }
 
-  async fullSignOut(userId: number, accessToken: string) {
+  async fullSignOut(userId: string, accessToken: string) {
     await this.deleteAllRefreshTokens(userId);
     await this.saveExpiredAccessToken(userId, accessToken);
   }
 
-  async refreshAccessToken(userId: number, refreshToken: string) {
+  async refreshAccessToken(userId: string, refreshToken: string) {
     await this.deleteRefreshToken(userId, refreshToken);
     const user = await this.usersService.getOne(userId);
     const tokens = await this.generateTokens(user);
@@ -113,7 +113,7 @@ export class AuthService {
     await this.refreshTokenRepository.save(refreshTokenDb);
   }
 
-  async deleteRefreshToken(userId: number, refreshToken: string) {
+  async deleteRefreshToken(userId: string, refreshToken: string) {
     const foundToken = await this.refreshTokenRepository.findOne({
       where: { user: { id: userId }, token: refreshToken },
     });
@@ -125,14 +125,14 @@ export class AuthService {
     }
   }
 
-  async deleteAllRefreshTokens(userId: number) {
+  async deleteAllRefreshTokens(userId: string) {
     const foundTokens = await this.refreshTokenRepository.find({
       where: { user: { id: userId } },
     });
     await this.refreshTokenRepository.remove(foundTokens);
   }
 
-  async saveExpiredAccessToken(userId: number, accessToken: string) {
+  async saveExpiredAccessToken(userId: string, accessToken: string) {
     const user = await this.usersService.getOne(userId);
     const createdExpiredToken = new ExpiredAccessTokenEntity();
     createdExpiredToken.user = user;
