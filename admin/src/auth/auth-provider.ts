@@ -42,7 +42,7 @@ const authProvider = {
   },
   getIdentity: () =>
     Promise.resolve({
-      id: "is",
+      id: "id",
       fullName: "username",
     }),
   getPermissions: () => Promise.resolve(""),

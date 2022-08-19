@@ -1,6 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-import { getAccessToken, getRefreshToken, setUserTokensToLocalStorage } from "./helpers/auth";
+import {
+  cleanUserTokensFromLocalStorage,
+  getAccessToken,
+  getRefreshToken,
+  setUserTokensToLocalStorage,
+} from "./helpers/auth";
 
 const http = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
@@ -43,7 +48,9 @@ http.interceptors.response.use(
         };
         return await http.request(error.config);
       } catch (er) {
-        console.log(er);
+        cleanUserTokensFromLocalStorage();
+        // eslint-disable-next-line no-restricted-globals,no-return-assign
+        return (location.href = "/#/login");
       }
     }
     refresh = false;

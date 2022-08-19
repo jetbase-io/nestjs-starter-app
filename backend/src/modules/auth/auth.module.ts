@@ -15,7 +15,7 @@ import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
     UsersModule,
     TypeOrmModule.forFeature([RefreshTokenEntity, ExpiredAccessTokenEntity]),
     PassportModule.register({
-      session: true,
+      session: false,
     }),
     JwtModule.register({}),
   ],
