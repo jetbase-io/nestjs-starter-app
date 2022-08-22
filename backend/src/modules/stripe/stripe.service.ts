@@ -35,7 +35,7 @@ export class StripeService {
   }
 
   public async activateSubscription(
-    userId: number,
+    userId: string,
     activateSubscriptionDto: ActivateSubscriptionDto,
   ) {
     const user = await this.usersService.getOne(userId);
@@ -88,7 +88,7 @@ export class StripeService {
     return sub;
   }
 
-  public async getPaymentMethods(userId: number) {
+  public async getPaymentMethods(userId: string) {
     const user = await this.usersService.getOne(userId);
     if (user.customerStripeId) {
       const result = await this.stripe.paymentMethods.list({
@@ -100,7 +100,7 @@ export class StripeService {
     return [];
   }
 
-  public async getSubscriptions(userId: number) {
+  public async getSubscriptions(userId: string) {
     const user = await this.usersService.getOne(userId);
     if (user.customerStripeId) {
       const result = await this.stripe.subscriptions.list({

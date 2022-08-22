@@ -1,12 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../base.entity';
 
 @Entity('plans')
-export class PlanEntity {
-  @ApiProperty({ example: '1', description: 'Unique ID' })
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class PlanEntity extends BaseEntity {
   @ApiProperty({ example: 'Premium', description: 'Subscription title' })
   @Column({ unique: true })
   title: string;

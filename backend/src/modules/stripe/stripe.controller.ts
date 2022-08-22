@@ -14,7 +14,7 @@ export class StripeController {
   @ApiResponse({ status: 200, description: 'Activates stripe subscription' })
   @Post('/activateSubscription')
   activateSubscription(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserId() userId: string,
     @Body() activateSubscriptionDto: ActivateSubscriptionDto,
   ) {
     return this.stripeService.activateSubscription(
@@ -50,7 +50,7 @@ export class StripeController {
   @ApiOperation({ summary: 'Payment methods' })
   @ApiResponse({ status: 200, description: 'Stripe plans' })
   @Get('/paymentMethods')
-  getPaymentMethods(@GetCurrentUserId() userId: number) {
+  getPaymentMethods(@GetCurrentUserId() userId: string) {
     return this.stripeService.getPaymentMethods(userId);
   }
 

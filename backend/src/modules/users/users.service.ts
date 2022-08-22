@@ -37,7 +37,7 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
-  async getOne(id: number): Promise<UserEntity> {
+  async getOne(id: string): Promise<UserEntity> {
     return await this.userRepository.findOne({ id });
   }
 
@@ -81,7 +81,7 @@ export class UsersService {
     return await bcrypt.hash(password, 10);
   }
 
-  async updatePassword(userId: number, password: string) {
+  async updatePassword(userId: string, password: string) {
     const hashedNewPassword = await this.generateHashPassword(password);
     await this.userRepository.update(userId, { password: hashedNewPassword });
   }

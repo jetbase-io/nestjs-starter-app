@@ -1,21 +1,10 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '../../users/models/users.entity';
+import { BaseEntity } from '../../base.entity';
 
 @Entity('refresh_tokens')
-export class RefreshTokenEntity {
-  @ApiProperty({ example: '1', description: 'Unique ID' })
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class RefreshTokenEntity extends BaseEntity {
   @ApiProperty({ example: 'token23#$!34', description: 'Unique token' })
   @Column({ unique: true })
   token: string;
@@ -23,10 +12,4 @@ export class RefreshTokenEntity {
   @ManyToOne(() => UserEntity, (user) => user.refreshTokens)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
