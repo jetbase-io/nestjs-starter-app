@@ -6,7 +6,7 @@ import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Billing')
-@Controller('api/billing')
+@Controller('billing')
 export class StripeController {
   constructor(private stripeService: StripeService) {}
 

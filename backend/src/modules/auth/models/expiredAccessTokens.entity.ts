@@ -9,6 +9,8 @@ export class ExpiredAccessTokenEntity extends BaseEntity {
   @Column({ unique: true })
   token: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.expiredAccessTokens)
+  @ManyToOne(() => UserEntity, (user) => user.expiredAccessTokens, {
+    onDelete: 'CASCADE',
+  })
   user: UserEntity;
 }

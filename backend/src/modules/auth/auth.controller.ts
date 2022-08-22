@@ -11,7 +11,7 @@ import { Public } from './decorators/public.decorator';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 
 @ApiTags('Auth')
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

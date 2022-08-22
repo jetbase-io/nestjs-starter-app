@@ -18,6 +18,7 @@ export class UserEntity extends BaseEntity {
 
   @ApiProperty({ example: 'test1234', description: 'Password' })
   @Column({ nullable: false })
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @ApiProperty({ example: 'cus_sfeIEff3fj', description: 'Stripe ID' })
@@ -38,13 +39,16 @@ export class UserEntity extends BaseEntity {
   })
   roles: Role[];
 
-  @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user)
+  @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user, {
+    onDelete: 'CASCADE',
+  })
   @Exclude()
   refreshTokens: RefreshTokenEntity[];
 
   @OneToMany(
     () => ExpiredAccessTokenEntity,
     (expiredAccessToken) => expiredAccessToken.user,
+    { onDelete: 'CASCADE' },
   )
   @Exclude()
   expiredAccessTokens: ExpiredAccessTokenEntity[];
