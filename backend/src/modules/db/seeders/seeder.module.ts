@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from 'src/modules/users/users.module';
 import { DbModule } from '../db.module';
 import { Seeder } from './seeder';
-import { RolesModule } from '../../roles/roles.module';
 
 /**
  * Import and provide seeder classes.
@@ -10,7 +9,7 @@ import { RolesModule } from '../../roles/roles.module';
  * @module
  */
 @Module({
-  imports: [DbModule, UsersModule, RolesModule],
+  imports: [DbModule, UsersModule],
   providers: [Seeder],
 })
 export class SeederModule {}

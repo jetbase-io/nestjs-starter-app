@@ -1,32 +1,7 @@
 import { getConnection } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { CreateRoleDto } from '../src/modules/roles/dto/create-role.dto';
-import { CreateUserByRoleDto } from '../src/modules/users/dto/create-user-by-role.dto';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
-import { useContainer } from 'class-validator';
-import { INestApplication, Logger } from '@nestjs/common';
-import { UsersService } from '../src/modules/users/users.service';
-import { RolesService } from '../src/modules/roles/roles.service';
+import { INestApplication } from '@nestjs/common';
 import { UserEntity } from '../src/modules/users/models/users.entity';
-
-let app: INestApplication;
-let moduleFixture: TestingModule;
-
-// global.beforeEach(async () => {
-//   moduleFixture = await Test.createTestingModule({
-//     imports: [AppModule],
-//   }).compile();
-//   app = moduleFixture.createNestApplication();
-//   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-//   await app.init();
-//   await clearDB();
-//   await seed();
-// });
-
-// afterEach(async () => {
-//   await app.close();
-// });
 
 export async function clearDB(app: INestApplication) {
   const entities = getConnection().entityMetadatas;
