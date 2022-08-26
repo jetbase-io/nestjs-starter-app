@@ -4,9 +4,12 @@ import http from "../auth/http-common";
 
 const SERVICE_URL = `${process.env.REACT_APP_API_URL}/admin` || "http://localhost:5000/api/admin";
 
-const getList = async (path: string): Promise<any> => {
-  const response = await http.get(`${SERVICE_URL}/${path}`, { proxy: false });
-  return { data: response.status === 200 ? response?.data : [], total: response?.data?.length };
+const getList = async (path: string, { pagination, sort }: any): Promise<any> => {
+  const offset = (pagination.page - 1) * pagination.perPage;
+  let url = `${SERVICE_URL}/${path}?page=${offset}&limit=${pagination.perPage}`;
+  if (sort) url += `&sort=${sort.field}&order=${sort.order}`;
+  const response = await http.get(url, { proxy: false });
+  return { data: response.status === 200 ? response?.data?.items : [], total: response?.data?.count };
 };
 
 // eslint-disable-next-line consistent-return
