@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getRepository, Repository } from 'typeorm';
 import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
 import { Role } from '../roles/enums/role.enum';
+import { PaginationParams } from '../admin/dto/pagination-params.dto';
+import { PaginationResponseDto } from '../admin/dto/pagination-response.dto';
+import { getSort } from '../../utils/helpers/get-sort';
 
 @Injectable()
 export class UsersService {
@@ -33,8 +36,21 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
-  async getUsers(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
+  async getUsers(
+    query: PaginationParams,
+  ): Promise<PaginationResponseDto<UserEntity>> {
+    const sort = getSort(query, 'users');
+    const data = await getRepository(UserEntity)
+      .createQueryBuilder('users')
+      .take(+query.limit)
+      .skip(+query.page)
+      .orderBy(sort, query.order)
+      .getManyAndCount();
+
+    return {
+      items: data[0],
+      count: data[1],
+    };
   }
 
   async getOne(id: string): Promise<UserEntity> {

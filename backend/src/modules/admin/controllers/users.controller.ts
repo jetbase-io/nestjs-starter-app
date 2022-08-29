@@ -4,8 +4,8 @@ import {
   Controller,
   Delete,
   Get,
-  Header,
   Param,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,6 +13,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/modules/users/models/users.entity';
 import { UsersService } from 'src/modules/users/users.service';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
+import { PaginationParams } from '../dto/pagination-params.dto';
+import { PaginationResponseDto } from '../dto/pagination-response.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -24,8 +26,10 @@ export class UsersController {
   @ApiResponse({ status: 200, type: UserEntity })
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('')
-  getUsers(): Promise<UserEntity[]> {
-    return this.userService.getUsers();
+  getUsers(
+    @Query() query: PaginationParams,
+  ): Promise<PaginationResponseDto<UserEntity>> {
+    return this.userService.getUsers(query);
   }
 
   @ApiOperation({ summary: 'Get user' })
