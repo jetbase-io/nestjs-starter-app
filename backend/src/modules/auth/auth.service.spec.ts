@@ -30,7 +30,7 @@ describe('AuthService', () => {
         username: 'testUser',
         password: 'testPassword',
       } as UserEntity),
-    create: (userDto) =>
+    create: () =>
       Promise.resolve({
         id: 1,
         username: 'testUser',
@@ -48,8 +48,7 @@ describe('AuthService', () => {
         username,
         password: 'testPassword',
       } as UserEntity),
-    isPasswordValid: (password: string, user: UserEntity) =>
-      Promise.resolve(true),
+    isPasswordValid: () => Promise.resolve(true),
   };
 
   const mockUserDto = Promise.resolve({

@@ -15,7 +15,6 @@ describe('Authentication System', () => {
   let app: INestApplication;
   let moduleFixture: TestingModule;
   let globalAccessToken;
-  let globalRefreshToken;
 
   beforeAll(async () => {
     moduleFixture = await Test.createTestingModule({
@@ -75,7 +74,6 @@ describe('Authentication System', () => {
         .then((res) => {
           const { accessToken, refreshToken } = res.body;
           globalAccessToken = accessToken;
-          globalRefreshToken = refreshToken;
           expect(accessToken).toBeDefined();
           expect(refreshToken).toBeDefined();
         });
