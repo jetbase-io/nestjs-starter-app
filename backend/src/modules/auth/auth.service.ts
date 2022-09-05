@@ -140,7 +140,7 @@ export class AuthService {
     await this.expiredAccessTokenRepository.save(createdExpiredToken);
   }
 
-  async isAccessTokenExpired(userId: number, token: string): Promise<boolean> {
+  async isAccessTokenExpired(userId: string, token: string): Promise<boolean> {
     const foundToken = await this.expiredAccessTokenRepository.findOne({
       where: { user: { id: userId }, token: token },
     });
