@@ -73,6 +73,8 @@ export const user = createModel<RootModel>()({
   },
   effects: (dispatch) => ({
     async signUp({ username, password }) {
+      // TODO processing error...
+      // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(SIGN_UP_URL, {
           username,
@@ -82,11 +84,13 @@ export const user = createModel<RootModel>()({
           history.push(SIGN_IN_ROUTE);
         }
       } catch (err) {
-        console.log(err);
+        throw err;
       }
     },
 
     async signIn({ username, password }) {
+      // TODO processing error...
+      // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(SIGN_IN_URL, {
           username,
@@ -105,33 +109,39 @@ export const user = createModel<RootModel>()({
           toast.error("Incorrect credentials");
         }
       } catch (error) {
-        console.log(error);
+        throw error;
       }
     },
 
     async signOut() {
+      // TODO processing error...
+      // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(SIGN_OUT_URL, { refreshToken: getRefreshToken() });
         if (result.request.status === 201) {
           this.logOutUser();
         }
       } catch (error) {
-        console.log(error);
+        throw error;
       }
     },
 
     async fullSignOut() {
+      // TODO processing error...
+      // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(FULL_SIGN_OUT_URL);
         if (result.request.status === 201) {
           this.logOutUser();
         }
       } catch (error) {
-        console.log(error);
+        throw error;
       }
     },
 
     async resetPassword({ oldPassword, newPassword, confirmPassword }) {
+      // TODO processing error...
+      // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(RESET_PASSWORD_URL, {
           oldPassword,
@@ -146,21 +156,15 @@ export const user = createModel<RootModel>()({
           toast.error("Password does not match");
         }
       } catch (err) {
-        console.log(err);
+        throw err;
       }
     },
 
     async activateSubscription({ paymentMethodId, priceId }): Promise<{ clientSecret: string; status: string }> {
-      let data = null;
-
-      const res = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
+      const { data } = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
         paymentMethod: paymentMethodId,
         priceId,
       });
-      console.log("RES DATA: ", res.data);
-      const { clientSecret, status } = res.data;
-      console.log("Client secret: ", clientSecret);
-      data = res.data;
 
       return data;
     },
@@ -180,13 +184,11 @@ export const user = createModel<RootModel>()({
 
     async getPaymentMethods() {
       const res = await http.get(GET_PAYMENT_METHODS_URL);
-      console.log("PMS: ", res.data);
       dispatch.user.setPaymentMethods(res.data);
     },
 
     async checkSubscription() {
       const res = await http.get(CHECK_SUBSCRIPTION_URL);
-      console.log("SUB STATUS: ", res.data);
       if (res.data) {
         dispatch.user.setSubscription(res.data);
       }
