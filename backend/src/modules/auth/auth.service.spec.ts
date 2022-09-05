@@ -1,61 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
-import { UserEntity } from '../users/models/users.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
+import { randomUUID } from 'crypto';
+import { Role } from '../roles/enums/role.enum';
+import { ForbiddenException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
-  const refreshTokenRepo: Partial<Repository<RefreshTokenEntity>> = {
-    save: jest.fn(),
-    findOne: jest.fn(),
-    remove: jest.fn(),
-  };
-  const expiredAccessTokenRepo: Partial<Repository<ExpiredAccessTokenEntity>> =
-    {
-      save: jest.fn(),
-      findOne: jest.fn(),
-      remove: jest.fn(),
-    };
-  const fakeUserService: Partial<UsersService> = {
-    getOne: () =>
-      Promise.resolve({
-        id: 1,
-        username: 'testUser',
-        password: 'testPassword',
-      } as UserEntity),
-    create: () =>
-      Promise.resolve({
-        id: 1,
-        username: 'testUser',
-        password: 'testPassword',
-      } as UserEntity),
-    validateUsername: (username: string) =>
-      Promise.resolve({
-        id: 1,
-        username,
-        password: 'testPassword',
-      } as UserEntity),
-    findByUsername: (username: string) =>
-      Promise.resolve({
-        id: 1,
-        username,
-        password: 'testPassword',
-      } as UserEntity),
-    isPasswordValid: () => Promise.resolve(true),
+  let refreshTokenRepository;
+  let expiredAccessTokenRepository;
+
+  const fakeUserService = {
+    getOne: jest.fn(),
+    create: jest.fn(),
+    validateUsername: jest.fn(),
+    findByUsername: jest.fn(),
+    isPasswordValid: jest.fn(),
   };
 
-  const mockUserDto = Promise.resolve({
-    username: 'testUsernmae',
-    password: 'testPassword',
-  } as CreateUserDto);
-  const mockUserId = 1;
+  const mockUserId = randomUUID();
   const mockUsername = 'testUsername';
   const mockPassword = 'testPassword123';
   const mockAccessToken = 'f7ewf7e7f7ew9few9';
@@ -67,11 +36,11 @@ describe('AuthService', () => {
         AuthService,
         {
           provide: getRepositoryToken(ExpiredAccessTokenEntity),
-          useValue: expiredAccessTokenRepo,
+          useFactory: repositoryMockFactory,
         },
         {
           provide: getRepositoryToken(RefreshTokenEntity),
-          useValue: refreshTokenRepo,
+          useFactory: repositoryMockFactory,
         },
         {
           provide: JwtService,
@@ -85,6 +54,10 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get(AuthService);
+    refreshTokenRepository = module.get(getRepositoryToken(RefreshTokenEntity));
+    expiredAccessTokenRepository = module.get(
+      getRepositoryToken(ExpiredAccessTokenEntity),
+    );
   });
 
   it('should be defined', () => {
@@ -92,20 +65,78 @@ describe('AuthService', () => {
   });
 
   it('returns access and refresh token after sign up', async () => {
-    const tokens = await service.signUp(await mockUserDto);
+    fakeUserService.create.mockImplementationOnce(
+      async (userDto: CreateUserDto) => {
+        expect(userDto).toEqual({
+          username: mockUsername,
+          password: mockPassword,
+        });
+        return {
+          id: mockUserId,
+          roles: Role.USER,
+          username: mockUsername,
+          password: mockPassword,
+        };
+      },
+    );
+
+    const tokens = await service.signUp({
+      username: mockUsername,
+      password: mockPassword,
+    } as CreateUserDto);
 
     expect(tokens.refreshToken).toBeDefined();
     expect(tokens.accessToken).toBeDefined();
   });
 
   it('returns access and refresh token after sign in', async () => {
-    const tokens = await service.signIn(await mockUserDto);
+    fakeUserService.findByUsername.mockImplementationOnce(
+      async (username: string) => {
+        expect(username).toBe(mockUsername);
+        return {
+          id: mockUserId,
+          roles: Role.USER,
+          username: mockUsername,
+          password: mockPassword,
+        };
+      },
+    );
+
+    fakeUserService.isPasswordValid.mockImplementationOnce(
+      async (password, user) => {
+        expect(password).toBe(mockPassword);
+        return !!user;
+      },
+    );
+
+    const tokens = await service.signIn({
+      username: mockUsername,
+      password: mockPassword,
+    } as CreateUserDto);
 
     expect(tokens.refreshToken).toBeDefined();
     expect(tokens.accessToken).toBeDefined();
   });
 
   it('returns success message after logout', async () => {
+    const mockFoundToken = {};
+    refreshTokenRepository.findOne.mockImplementationOnce(
+      async ({
+        where: {
+          user: { id },
+          token,
+        },
+      }) => {
+        expect(id).toBe(mockUserId);
+        expect(token).toBe(mockRefreshToken);
+
+        return mockFoundToken;
+      },
+    );
+    refreshTokenRepository.remove.mockImplementationOnce(async (foundToken) => {
+      expect(foundToken).toBe(mockFoundToken);
+    });
+
     const message = await service.signOut(
       mockUserId,
       mockAccessToken,
@@ -126,12 +157,38 @@ describe('AuthService', () => {
   });
 
   it('returns tokens in refreshToken method', async () => {
-    jest.spyOn(refreshTokenRepo, 'findOne').mockResolvedValueOnce(
-      Promise.resolve({
-        id: mockUserId,
-        token: mockRefreshToken,
-      } as RefreshTokenEntity),
+    const mockFoundToken = {};
+    refreshTokenRepository.findOne.mockImplementationOnce(
+      async ({
+        where: {
+          user: { id },
+          token,
+        },
+      }) => {
+        expect(id).toBe(mockUserId);
+        expect(token).toBe(mockRefreshToken);
+
+        return mockFoundToken;
+      },
     );
+    refreshTokenRepository.remove.mockImplementationOnce(async (foundToken) => {
+      expect(foundToken).toBe(mockFoundToken);
+    });
+
+    fakeUserService.getOne.mockImplementationOnce(async (id: string) => {
+      expect(id).toBe(mockUserId);
+      return {
+        id: mockUserId,
+        roles: Role.USER,
+        username: mockUsername,
+        password: mockPassword,
+      };
+    });
+
+    expiredAccessTokenRepository.findOne.mockImplementationOnce(async () => ({
+      id: mockUserId,
+      token: mockRefreshToken,
+    }));
 
     const tokens = await service.refreshAccessToken(
       mockUserId,
@@ -142,36 +199,24 @@ describe('AuthService', () => {
     expect(tokens.accessToken).toBeDefined();
   });
 
-  it('returns UnauthorizedException if username not found', async () => {
-    jest
-      .spyOn(fakeUserService, 'findByUsername')
-      .mockResolvedValueOnce(undefined);
+  it('returns ForbiddenException if username not found', async () => {
+    fakeUserService.findByUsername.mockResolvedValueOnce(undefined);
 
-    try {
-      await expect(
-        service.validateUser(mockUsername, mockPassword),
-      ).rejects.toThrowError(UnauthorizedException);
-    } catch (e) {
-      await expect(e).rejects.toThrowError(UnauthorizedException);
-    }
+    await expect(
+      service.validateUser(mockUsername, mockPassword),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('returns UnauthorizedException if passwordInvalid', async () => {
-    jest.spyOn(fakeUserService, 'isPasswordValid').mockResolvedValueOnce(false);
+    fakeUserService.isPasswordValid.mockResolvedValueOnce(undefined);
 
-    try {
-      await expect(
-        service.validateUser(mockUsername, mockPassword),
-      ).rejects.toThrowError(UnauthorizedException);
-    } catch (e) {
-      await expect(e).rejects.toThrowError(UnauthorizedException);
-    }
+    await expect(
+      service.validateUser(mockUsername, mockPassword),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('returns false if token not expired', async () => {
-    jest
-      .spyOn(expiredAccessTokenRepo, 'findOne')
-      .mockResolvedValueOnce(undefined);
+    expiredAccessTokenRepository.findOne.mockResolvedValueOnce(undefined);
 
     const result = await service.isAccessTokenExpired(
       mockUserId,
@@ -181,17 +226,15 @@ describe('AuthService', () => {
   });
 
   it('returns true if token expired', async () => {
-    jest.spyOn(expiredAccessTokenRepo, 'findOne').mockResolvedValueOnce(
-      Promise.resolve({
-        id: mockUserId,
-        token: mockAccessToken,
-      } as ExpiredAccessTokenEntity),
-    );
+    expiredAccessTokenRepository.findOne.mockResolvedValueOnce({
+      id: mockUserId,
+      token: mockAccessToken,
+    } as ExpiredAccessTokenEntity);
 
     const result = await service.isAccessTokenExpired(
       mockUserId,
       mockAccessToken,
     );
-    expect(result).toEqual(true);
+    expect(result).toBe(true);
   });
 });
