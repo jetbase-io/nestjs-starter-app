@@ -1,9 +1,7 @@
 import { getConnection } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { INestApplication } from '@nestjs/common';
-import { UserEntity } from '../src/modules/users/models/users.entity';
 
-export async function clearDB(app: INestApplication) {
+export async function clearDB() {
   const entities = getConnection().entityMetadatas;
   for (const entity of entities) {
     const repository = await getConnection().getRepository(entity.name);
@@ -33,7 +31,7 @@ const users = [
 
 export async function seed() {
   const hashedPassword = await bcrypt.hash('user123', 10);
-  const userEntity = await getConnection().getRepository('RoleEntity').create({
+  await getConnection().getRepository('RoleEntity').create({
     id: 1,
     username: 'testuser@gmail.com',
     password: hashedPassword,
