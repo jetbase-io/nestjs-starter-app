@@ -31,12 +31,6 @@ export class AuthController {
     return this.authService.signIn(userDto);
   }
 
-  @Public()
-  @Post('/email')
-  sendEmail(): Promise<any> {
-    return this.authService.sendEmail();
-  }
-
   @Post('/signOut')
   signOut(
     @GetCurrentUserId() userId: string,

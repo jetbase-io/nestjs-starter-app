@@ -7,8 +7,8 @@ export const templates = {
   ) {
     return {
       to,
-      from: process.env.SENDGRID_FROM_EMAIL,
-      subject: 'JETBASE.IO',
+      from,
+      subject: 'Greeting Email',
       html: `
           <div>
             <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" type="text/css">

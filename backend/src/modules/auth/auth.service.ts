@@ -35,10 +35,9 @@ export class AuthService {
     return tokens;
   }
 
-  async sendEmail(): Promise<any> {
+  async sendEmail(to: string): Promise<any> {
     const email = 'This is a welcome message! Thank You for signing up!';
     const description = 'Welcome message';
-    const to = 'chyngyzchubakov@gmail.com';
     await this.emailService.sendContactForm(email, description, to);
   }
 
@@ -47,9 +46,9 @@ export class AuthService {
     const user = await this.usersService.create({
       ...createUserDto,
     });
-    // await this.emailService.sendContactForm(Email, messageEntry.description)
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
+    await this.sendEmail(createUserDto.email);
     return tokens;
   }
 
