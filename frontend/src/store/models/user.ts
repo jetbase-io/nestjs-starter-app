@@ -1,5 +1,4 @@
 import { createModel } from "@rematch/core";
-import axios from "axios";
 import { toast } from "react-toastify";
 
 import history from "../../helpers/history";
@@ -20,10 +19,8 @@ import {
   SIGN_IN_URL,
   SIGN_OUT_URL,
   SIGN_UP_URL,
-  UPDATE_USER_AVATAR,
-  UPDATE_USERNAME,
 } from "../constants/api-contstants";
-import { HOME_ROUTE, SIGN_IN_ROUTE } from "../constants/route-constants";
+import { SIGN_IN_ROUTE } from "../constants/route-constants";
 import { STRIPE_INACTIVE_STATUS } from "../constants/stripe-constants";
 import http from "../http/http-common";
 import type { RootModel } from "./index";
@@ -75,13 +72,12 @@ export const user = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    async signUp({ username, email, password }) {
+    async signUp({ username, password }) {
       // TODO processing error...
       // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(SIGN_UP_URL, {
           username,
-          email,
           password,
         });
         if (result.request.status === 201) {
@@ -158,54 +154,6 @@ export const user = createModel<RootModel>()({
         }
         if (result.request.status === 400) {
           toast.error("Password does not match");
-        }
-      } catch (err) {
-        throw err;
-      }
-    },
-
-    async updateUsername({ username }) {
-      // TODO processing error...
-      // eslint-disable-next-line no-useless-catch
-      try {
-        const result = await http.put(UPDATE_USERNAME, {
-          username,
-        });
-        if (result.request.status === 200) {
-          const newUsername = result.data.username;
-          toast.success(`Username is updated! Your new username is: ${newUsername}`);
-          history.push(HOME_ROUTE);
-        }
-        if (result.request.status === 400) {
-          toast.error("User with that username already exists!");
-        }
-      } catch (err) {
-        throw err;
-      }
-    },
-
-    async updateUserAvatar({ avatar }) {
-      // TODO processing error...
-      // eslint-disable-next-line no-useless-catch
-      try {
-        const formData = new FormData();
-        formData.append("file", avatar, avatar.name);
-        const result = await http.post(
-          UPDATE_USER_AVATAR,
-
-          formData,
-
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-
-        if (result.request.status === 201) {
-          toast.success(`User Profile picture is updated!`);
-          history.push(HOME_ROUTE);
-        }
-        if (result.request.status === 400) {
-          toast.error("Profile picture is not updated!");
         }
       } catch (err) {
         throw err;

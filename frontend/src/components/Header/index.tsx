@@ -3,12 +3,7 @@ import PropTypes from "prop-types";
 import React, { FC, useState } from "react";
 import { connect } from "react-redux";
 
-import {
-  PROFILE_ROUTE,
-  RESET_PASSWORD_ROUTE,
-  SIGN_IN_ROUTE,
-  SIGN_UP_ROUTE,
-} from "../../store/constants/route-constants";
+import { RESET_PASSWORD_ROUTE, SIGN_IN_ROUTE, SIGN_UP_ROUTE } from "../../store/constants/route-constants";
 import { Dispatch, RootState } from "../../store/store";
 import HeaderLink from "../HeaderLink";
 
@@ -29,7 +24,6 @@ const Header: FC<HeaderPageProps> = ({ isAuthenticated, nickname, signOut, fullS
     { id: 3, text: "Sign Out", to: SIGN_IN_ROUTE, isVisible: isAuthenticated, onClick: handleSignOutClick },
     { id: 4, text: "Sign In", to: SIGN_IN_ROUTE, isVisible: !isAuthenticated },
     { id: 5, text: "Sign Up", to: SIGN_UP_ROUTE, isVisible: !isAuthenticated },
-    { id: 6, text: "My Profile", to: PROFILE_ROUTE, isVisible: isAuthenticated },
   ];
 
   const [openBurger, setOpenBurger] = useState(false);

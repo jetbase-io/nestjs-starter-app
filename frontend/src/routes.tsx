@@ -1,24 +1,7 @@
 import React from "react";
 
-import {
-  BillingPage,
-  HomePage,
-  ProfilePage,
-  ResetPasswordPage,
-  SignInPage,
-  SignUpPage,
-  UpdateUserAvatarPage,
-  UpdateUsernamePage,
-} from "./pages";
-import {
-  BILLING_ROUTE,
-  PROFILE_ROUTE,
-  PROFILE_ROUTE_UPDATE_USER_AVATAR,
-  PROFILE_ROUTE_UPDATE_USERNAME,
-  RESET_PASSWORD_ROUTE,
-  SIGN_IN_ROUTE,
-  SIGN_UP_ROUTE,
-} from "./store/constants/route-constants";
+import { BillingPage, HomePage, ResetPasswordPage, SignInPage, SignUpPage } from "./pages";
+import { BILLING_ROUTE, RESET_PASSWORD_ROUTE, SIGN_IN_ROUTE, SIGN_UP_ROUTE } from "./store/constants/route-constants";
 
 interface Page {
   id: number;
@@ -57,24 +40,6 @@ const routes: Page[] = [
     path: BILLING_ROUTE,
     title: "BillingPage",
     element: <BillingPage />,
-  },
-  {
-    id: 6,
-    path: PROFILE_ROUTE,
-    title: "ProfilePage",
-    element: <ProfilePage />,
-  },
-  {
-    id: 7,
-    path: PROFILE_ROUTE_UPDATE_USERNAME,
-    title: "UpdateUsernamePage",
-    element: <UpdateUsernamePage />,
-  },
-  {
-    id: 8,
-    path: PROFILE_ROUTE_UPDATE_USER_AVATAR,
-    title: "UpdateUserAvatarPage",
-    element: <UpdateUserAvatarPage />,
   },
 ];
 

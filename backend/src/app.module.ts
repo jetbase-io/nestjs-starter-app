@@ -9,13 +9,11 @@ import { AccessTokenAuthGuard } from './modules/auth/guards/access-token-auth.gu
 import { UsersModule } from './modules/users/users.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AdminModule } from './modules/admin/admin.module';
-import { EmailModule } from './modules/emails/emails.module';
 
 @Module({
   imports: [
     AdminModule,
     AuthModule,
-    EmailModule,
     DbModule,
     UsersModule,
     StripeModule,

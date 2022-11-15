@@ -70,7 +70,7 @@ const SignUpPage: FC<SignUpProps> = ({ isAuthenticated, signUp }) => {
           </div>
           <div>
             <label htmlFor="email" className="text-sm font-bold text-gray-600 block">
-              Email
+              Username
             </label>
             <input
               name="email"
