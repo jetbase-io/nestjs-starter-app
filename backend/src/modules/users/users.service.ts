@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getRepository, Repository } from 'typeorm';
+import path from 'path';
 import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
@@ -10,12 +11,17 @@ import { Role } from '../roles/enums/role.enum';
 import { PaginationParams } from '../admin/dto/pagination-params.dto';
 import { PaginationResponseDto } from '../admin/dto/pagination-response.dto';
 import { getSort } from '../../utils/helpers/get-sort';
+import { FileUploadService } from './fileupload.service';
+import { IFile } from './file.interface';
+import { readFileSync } from 'fs';
+import { resourceLimits } from 'worker_threads';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
@@ -80,6 +86,33 @@ export class UsersService {
     return {
       message: 'User deleted successfully!',
     };
+  }
+
+  async saveWithoutOptimization(id: string, originalFile: IFile): Promise<any> {
+    const { destination, filename, mimetype } = originalFile;
+    const imagePath = `${destination}/${filename}`;
+    const file = readFileSync(imagePath);
+
+    const loadedOriginalFile: any = await this.fileUploadService.upload(
+      file,
+      filename,
+      mimetype,
+    );
+
+    await this.isUserExist(id);
+    const result = await this.userRepository
+      .createQueryBuilder()
+      .update({
+        avatar: loadedOriginalFile.Location,
+      })
+      .where({
+        id,
+      })
+      .returning(['username', 'avatar'])
+      .execute();
+    console.log(result);
+
+    return result.raw[0];
   }
 
   async saveUser(user: UserEntity) {
