@@ -10,3 +10,5 @@ export const ACTIVATE_SUBSCRIPTION_URL = "billing/activateSubscription";
 export const GET_PAYMENT_METHODS_URL = "billing/paymentMethods";
 export const CHECK_SUBSCRIPTION_URL = "billing/subscriptionStatus";
 export const DETACH_PAYMENT_METHODS = "billing/detach";
+export const UPDATE_USERNAME = "users/";
+export const UPDATE_USER_AVATAR = "users/avatar";

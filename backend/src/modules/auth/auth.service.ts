@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { SignInUserDto } from '../users/dto/login-user.dto';
+import { EmailService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     @InjectRepository(ExpiredAccessTokenEntity)
     private readonly expiredAccessTokenRepository: Repository<ExpiredAccessTokenEntity>,
+    private readonly emailService: EmailService,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
@@ -33,11 +35,19 @@ export class AuthService {
     return tokens;
   }
 
+  async sendEmail(): Promise<any> {
+    const email = 'This is a welcome message! Thank You for signing up!';
+    const description = 'Welcome message';
+    const to = 'chyngyzchubakov@gmail.com';
+    await this.emailService.sendContactForm(email, description, to);
+  }
+
   async signUp(createUserDto: CreateUserDto): Promise<Tokens> {
     await this.usersService.validateUsername(createUserDto.username);
     const user = await this.usersService.create({
       ...createUserDto,
     });
+    // await this.emailService.sendContactForm(Email, messageEntry.description)
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
     return tokens;

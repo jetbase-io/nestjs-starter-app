@@ -33,7 +33,7 @@ let refresh = false;
 http.interceptors.response.use(
   (resp) => resp,
   async (error) => {
-    if (error.response.status === 401 && !refresh) {
+    if (error?.response?.status === 401 && !refresh) {
       refresh = true;
       try {
         const response = await axios.post(
