@@ -9,9 +9,11 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
+import { EmailModule } from '../emails/emails.module';
 
 @Module({
   imports: [
+    EmailModule,
     UsersModule,
     TypeOrmModule.forFeature([RefreshTokenEntity, ExpiredAccessTokenEntity]),
     PassportModule.register({
