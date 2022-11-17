@@ -212,7 +212,10 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    async activateSubscription({ paymentMethodId, priceId }): Promise<{ clientSecret: string; status: string }> {
+    async activateSubscription({
+      paymentMethodId,
+      priceId,
+    }): Promise<{ clientSecret: string; status: string; nickname: string | null }> {
       const { data } = await http.post(ACTIVATE_SUBSCRIPTION_URL, {
         paymentMethod: paymentMethodId,
         priceId,

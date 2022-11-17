@@ -8,7 +8,7 @@ import { Dispatch, RootState } from "../../store/store";
 
 type ProfileProps = ReturnType<typeof mapState>;
 
-const ProfilePage: FC<ProfileProps> = ({ isAuthenticated }) => {
+const ProfilePage: FC<ProfileProps> = ({ isAuthenticated, subscriptionPlan, subscriptionStatus }) => {
   if (!isAuthenticated) {
     return <Navigate to="/" />;
   }
@@ -18,7 +18,15 @@ const ProfilePage: FC<ProfileProps> = ({ isAuthenticated }) => {
       <div className="max-w-md w-full mx-auto">
         <div className="text-center font-medium text-xl">Profile Page</div>
       </div>
+
       <div className="max-w-md w-full mx-auto mt-4 bg-white p-8 border border-gray-300">
+        <div>
+          <p className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-black">
+            Current subscription plan:{" "}
+            {subscriptionPlan && subscriptionStatus !== "inactive" ? subscriptionPlan : "Free tier"}
+          </p>
+        </div>
+        <br></br>
         <div>
           <a
             href="/profile/updateUsername"
@@ -43,6 +51,8 @@ const ProfilePage: FC<ProfileProps> = ({ isAuthenticated }) => {
 
 const mapState = (state: RootState) => ({
   isAuthenticated: state.user?.isAuthenticated,
+  subscriptionPlan: state.user?.subscription.nickname,
+  subscriptionStatus: state.user?.subscription.status,
 });
 
 export default connect(mapState)(ProfilePage);

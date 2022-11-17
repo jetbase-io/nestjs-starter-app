@@ -39,6 +39,8 @@ export const plan = createModel<RootModel>()({
     return {
       async getPlans() {
         const response = await http(GET_PLANS_URL);
+        console.log(response);
+
         dispatch.plan.setPlans(response.data);
       },
 
