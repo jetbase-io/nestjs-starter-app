@@ -17,12 +17,16 @@ export class EmailService {
     else console.warn('process.env.SENDGRID_API_KEY is undefined!');
   }
 
-  async sendContactForm(clientEmail: string, description: string, to: string) {
+  async sendContactForm(
+    emailContent: string,
+    emailDescription: string,
+    to: string,
+  ) {
     const email = templates.registerCompanyEmail(
       to,
       process.env.SENDGRID_FROM_EMAIL,
-      description,
-      clientEmail,
+      emailDescription,
+      emailContent,
     );
 
     await this.send(email);

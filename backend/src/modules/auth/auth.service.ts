@@ -36,9 +36,9 @@ export class AuthService {
   }
 
   async sendEmail(to: string): Promise<any> {
-    const email = 'This is a welcome message! Thank You for signing up!';
-    const description = 'Welcome message';
-    await this.emailService.sendContactForm(email, description, to);
+    const emailContent = 'This is a welcome message! Thank You for signing up!';
+    const emailDescription = 'Welcome message';
+    await this.emailService.sendContactForm(emailContent, emailDescription, to);
   }
 
   async signUp(createUserDto: CreateUserDto): Promise<Tokens> {
@@ -167,11 +167,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: `.${process.env.NODE_ENV}.${process.env.ACCESS_TOKEN_JWT_SECRET}`,
-        expiresIn: '30d',
+        expiresIn: process.env.ACCESS_TOKEN_LIFESPAN,
       }),
       this.jwtService.signAsync(payload, {
         secret: `.${process.env.NODE_ENV}.${process.env.REFRESH_TOKEN_JWT_SECRET}`,
-        expiresIn: '30d',
+        expiresIn: process.env.REFRESH_TOKEN_LIFESPAN,
       }),
     ]);
 
