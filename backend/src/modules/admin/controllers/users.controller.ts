@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  Put,
   Query,
   UseGuards,
   UseInterceptors,
@@ -15,6 +16,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
+import { UpdateUserDto } from 'src/modules/users/dto/update-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -38,6 +40,17 @@ export class UsersController {
   @Get('/:id')
   getOne(@Param('id') id: string): Promise<UserEntity> {
     return this.userService.getOne(id);
+  }
+
+  @ApiOperation({ summary: 'Update user' })
+  @ApiResponse({ status: 200, type: UserEntity })
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Put('/:id')
+  updateOne(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserDto> {
+    return this.userService.updateOne(id, updateUserDto);
   }
 
   @ApiOperation({ summary: 'Delete many users' })

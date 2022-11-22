@@ -11,7 +11,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-// import path from 'path';
 import { IFile } from './file.interface';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,10 +18,12 @@ import { UserEntity } from './models/users.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
 
+const uploadDir = './uploads/temp';
+
 export const storage = {
   storage: diskStorage({
     destination: (req, file, cb) => {
-      cb(null, './uploads/temp');
+      cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
       const filename: string = uuidv4();
