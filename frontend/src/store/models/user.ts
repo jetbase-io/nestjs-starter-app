@@ -190,15 +190,9 @@ export const user = createModel<RootModel>()({
       try {
         const formData = new FormData();
         formData.append("file", avatar, avatar.name);
-        const result = await http.post(
-          UPDATE_USER_AVATAR,
-
-          formData,
-
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
+        const result = await http.post(UPDATE_USER_AVATAR, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
         if (result.request.status === 201) {
           toast.success(`User Profile picture is updated!`);

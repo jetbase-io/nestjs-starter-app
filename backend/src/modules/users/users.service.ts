@@ -109,7 +109,6 @@ export class UsersService {
       })
       .returning(['username', 'avatar'])
       .execute();
-    console.log(result);
 
     return result.raw[0];
   }

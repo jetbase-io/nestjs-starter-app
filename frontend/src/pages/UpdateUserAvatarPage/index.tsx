@@ -25,7 +25,6 @@ const UpdateUserAvatarPage: FC<ProfileProps> = ({ isAuthenticated, updateUserAva
         .test("FILE TYPE", "Invalid!", (value: any) => value && ["image/png", "image/jpeg"].includes(value.type)),
     }),
     onSubmit: (values) => {
-      console.log(values);
       updateUserAvatar({
         avatar: values.image,
       });
@@ -89,40 +88,6 @@ const UpdateUserAvatarPage: FC<ProfileProps> = ({ isAuthenticated, updateUserAva
             </div>
           </div>
         </form>
-
-        {/* <div className="grid grid-cols-1 space-y-2">
-        <form onSubmit={formik.handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <div className="flex items-center justify-center w-full">
-            <label className="flex flex-col rounded-lg border-4 border-dashed w-full h-60 p-10 group text-center">
-              <div className="h-full w-full text-center flex flex-col items-center justify-center items-center  ">
-                <p className="pointer-none text-gray-500 ">
-                  <span>Drag and drop</span> image here <br /> or <span>select an image</span> from your computer
-                </p>
-              </div>
-              <input
-                name="image"
-                onChange={(e) => {
-                  formik.setFieldValue("image", e.target.files[0]);
-                  setPreview(URL.createObjectURL(e.target.files[0]));
-                }}
-                type="file"
-                style={{ display: "none" }}
-              />
-            </label>
-          </div>
-          {formik.errors.image && (
-            <p className="text-center text-sm font-bold text-red-600 block">{formik.errors.image}</p>
-          )}
-          <div className="flex flex-row justify-center">
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-400 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150 mt-2 ml-3"
-            >
-              Upload Picture
-            </button>
-          </div>
-        </form>
-      </div> */}
       </div>
     </div>
   );
