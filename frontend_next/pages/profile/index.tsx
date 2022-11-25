@@ -1,9 +1,8 @@
+import { Button } from "@mui/material";
 import Link from "next/link";
 import React from "react";
-import {
-  PROFILE_ROUTE_UPDATE_USERNAME,
-  PROFILE_ROUTE_UPDATE_USER_AVATAR,
-} from "../../store/constants/route-constants";
+
+import { PROFILE_ROUTE_UPDATE_USER_AVATAR, PROFILE_ROUTE_UPDATE_USERNAME } from "../../store/constants/route-constants";
 
 export default function ProfilePage() {
   return (

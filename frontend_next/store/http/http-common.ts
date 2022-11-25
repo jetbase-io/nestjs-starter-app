@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-import history from "../../helpers/history";
 import {
   cleanUserTokensFromLocalStorage,
   getAccessToken,
@@ -11,7 +10,7 @@ import { REFRESH_TOKEN_URL } from "../constants/api-contstants";
 import { SIGN_IN_ROUTE } from "../constants/route-constants";
 
 const http = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 http.interceptors.request.use(

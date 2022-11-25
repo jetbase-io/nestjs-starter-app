@@ -1,8 +1,8 @@
 import { createModel } from "@rematch/core";
-import axios from "axios";
+import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import { createBrowserHistory } from "history";
 
-import history from "../../helpers/history";
 import {
   cleanUserTokensFromLocalStorage,
   getAccessToken,
@@ -75,7 +75,7 @@ export const user = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    async signUp({ username, email, password }) {
+    async signUp({ username, email, password, router }) {
       // TODO processing error...
       // eslint-disable-next-line no-useless-catch
       try {
@@ -85,7 +85,7 @@ export const user = createModel<RootModel>()({
           password,
         });
         if (result.request.status === 201) {
-          history.push(SIGN_IN_ROUTE);
+          router.push(SIGN_IN_ROUTE);
         }
       } catch (err) {
         throw err;
@@ -117,26 +117,26 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    async signOut() {
+    async signOut({ router }) {
       // TODO processing error...
       // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(SIGN_OUT_URL, { refreshToken: getRefreshToken() });
         if (result.request.status === 201) {
-          this.logOutUser();
+          this.logOutUser({ router });
         }
       } catch (error) {
         throw error;
       }
     },
 
-    async fullSignOut() {
+    async fullSignOut({ router }) {
       // TODO processing error...
       // eslint-disable-next-line no-useless-catch
       try {
         const result = await http.post(FULL_SIGN_OUT_URL);
         if (result.request.status === 201) {
-          this.logOutUser();
+          this.logOutUser({ router });
         }
       } catch (error) {
         throw error;
@@ -164,7 +164,7 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    async updateUsername({ username }) {
+    async updateUsername({ username, router }) {
       // TODO processing error...
       // eslint-disable-next-line no-useless-catch
       try {
@@ -174,7 +174,7 @@ export const user = createModel<RootModel>()({
         if (result.request.status === 200) {
           const newUsername = result.data.username;
           toast.success(`Username is updated! Your new username is: ${newUsername}`);
-          history.push(HOME_ROUTE);
+          router.push(SIGN_IN_ROUTE);
         }
         if (result.request.status === 400) {
           toast.error("User with that username already exists!");
@@ -184,7 +184,7 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    async updateUserAvatar({ avatar }) {
+    async updateUserAvatar({ avatar, router }) {
       // TODO processing error...
       // eslint-disable-next-line no-useless-catch
       try {
@@ -202,7 +202,7 @@ export const user = createModel<RootModel>()({
 
         if (result.request.status === 201) {
           toast.success(`User Profile picture is updated!`);
-          history.push(HOME_ROUTE);
+          router.push(SIGN_IN_ROUTE);
         }
         if (result.request.status === 400) {
           toast.error("Profile picture is not updated!");
@@ -224,7 +224,7 @@ export const user = createModel<RootModel>()({
       return data;
     },
 
-    async detachPaymentMethod(paymentMethodId: string) {
+    async detachPaymentMethod(paymentMethodId) {
       const res = await http.post(DETACH_PAYMENT_METHODS, {
         paymentMethodId,
       });
@@ -249,10 +249,10 @@ export const user = createModel<RootModel>()({
       }
     },
 
-    logOutUser() {
+    logOutUser({ router }) {
       dispatch.user.setIsAuthenticated({ isAuthenticated: false });
       cleanUserTokensFromLocalStorage();
-      history.push(SIGN_IN_ROUTE);
+      router.push(SIGN_IN_ROUTE);
     },
   }),
 });
