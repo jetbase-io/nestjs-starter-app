@@ -34,12 +34,13 @@ interface activateSubscriptionProps {
   priceId: string;
 }
 
-interface detachPaymentProps {
-  paymentMethodId: string;
-}
-
 interface logOutUserProps {
   router: NextRouter;
+}
+
+interface setSubscriptionProps {
+  nickname: string | null;
+  status: string;
 }
 
 export const mapState = (state: RootState) => ({
@@ -62,10 +63,11 @@ export const mapDispatch = (dispatch: Dispatch) => ({
   updateUserAvatar: ({ avatar, router }: updateUserAvatarProps) => dispatch.user.updateUserAvatar({ avatar, router }),
   activateSubscription: ({ paymentMethodId, priceId }: activateSubscriptionProps) =>
     dispatch.user.activateSubscription({ paymentMethodId, priceId }),
-  detachPayment: ({ paymentMethodId }: detachPaymentProps) => dispatch.user.detachPaymentMethod({ paymentMethodId }),
+  detachPaymentMethod: (paymentMethodId: string) => dispatch.user.detachPaymentMethod(paymentMethodId),
   getPaymentMethods: () => dispatch.user.getPaymentMethods(),
   checkSubscription: () => dispatch.user.checkSubscription(),
   logOutUser: ({ router }: logOutUserProps) => dispatch.user.logOutUser({ router }),
+  setSubscription: ({ nickname, status }: setSubscriptionProps) => dispatch.user.setSubscription({ nickname, status }),
 });
 type StateProps = ReturnType<typeof mapState>;
 type DispatchProps = ReturnType<typeof mapDispatch>;

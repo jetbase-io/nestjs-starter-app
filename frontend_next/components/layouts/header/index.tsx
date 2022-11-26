@@ -34,7 +34,7 @@ const AppHeader: React.FC<UserSliceProps> = (props) => {
   ];
 
   return (
-    <AppBar color="primary">
+    <AppBar color="primary" position="sticky">
       <Toolbar>
         <Link href={HOME_ROUTE}>HOME</Link>
         <div style={{ marginLeft: "auto" }}>
