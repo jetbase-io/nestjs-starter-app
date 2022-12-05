@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { SignInUserDto } from '../users/dto/login-user.dto';
+import { EmailService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     @InjectRepository(ExpiredAccessTokenEntity)
     private readonly expiredAccessTokenRepository: Repository<ExpiredAccessTokenEntity>,
+    private readonly emailService: EmailService,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
@@ -33,6 +35,12 @@ export class AuthService {
     return tokens;
   }
 
+  async sendEmail(to: string): Promise<any> {
+    const emailContent = 'This is a welcome message! Thank You for signing up!';
+    const emailDescription = 'Welcome message';
+    await this.emailService.sendContactForm(emailContent, emailDescription, to);
+  }
+
   async signUp(createUserDto: CreateUserDto): Promise<Tokens> {
     await this.usersService.validateUsername(createUserDto.username);
     const user = await this.usersService.create({
@@ -40,6 +48,7 @@ export class AuthService {
     });
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
+    await this.sendEmail(createUserDto.email);
     return tokens;
   }
 
@@ -158,11 +167,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: `.${process.env.NODE_ENV}.${process.env.ACCESS_TOKEN_JWT_SECRET}`,
-        expiresIn: '10m',
+        expiresIn: process.env.ACCESS_TOKEN_LIFESPAN,
       }),
       this.jwtService.signAsync(payload, {
         secret: `.${process.env.NODE_ENV}.${process.env.REFRESH_TOKEN_JWT_SECRET}`,
-        expiresIn: '30d',
+        expiresIn: process.env.REFRESH_TOKEN_LIFESPAN,
       }),
     ]);
 

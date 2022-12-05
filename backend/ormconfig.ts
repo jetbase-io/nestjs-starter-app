@@ -1,4 +1,4 @@
-const migrationDir = process.env.DEV_SEED === 'true' ? 'seeds' : 'migrations';
+const migrationDir = process.env.DEV_SEED === 'true' ? 'seeders' : 'migrations';
 
 const database = {
   development: process.env.DATABASE_DATABASE || 'mvpngn_development',
@@ -20,7 +20,7 @@ module.exports = {
   autoLoadEntities: true,
   logging: true,
   migrationsTableName: 'migrations',
-  migrations: [`dist/src/modules/db/${migrationDir}/*{.ts,.js}`],
+  migrations: [__dirname + `/modules/db/${migrationDir}/*{.ts,.js}`],
   cli: {
     entitiesDir: 'src/*/',
     migrationsDir: __dirname + `/src/modules/db/${migrationDir}`,

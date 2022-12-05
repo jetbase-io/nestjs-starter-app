@@ -55,8 +55,9 @@ export class StripeService {
     const status = subscription['latest_invoice']['payment_intent']['status'];
     const clientSecret =
       subscription['latest_invoice']['payment_intent']['client_secret'];
+    const nickname = subscription['plan']['nickname'];
 
-    return { clientSecret, status, subscriptionId: subscription.id };
+    return { clientSecret, status, subscriptionId: subscription.id, nickname };
   }
 
   public async detachPaymentMethod(paymentMethodId: string) {

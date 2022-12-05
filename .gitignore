@@ -1,1 +1,6 @@
 /.idea
+
+.env.development
+.env
+.env.production
+.env.local

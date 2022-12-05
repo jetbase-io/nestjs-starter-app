@@ -30,22 +30,24 @@ const BillingPage: FC = () => {
     }
   }, []);
 
-  const handleResultData = (resultData: { clientSecret: string; status: string }) => {
+  const handleResultData = (resultData: { clientSecret: string; status: string; nickname: string | null }) => {
     if (!stripe || !elements) {
       return;
     }
     if (resultData) {
-      const { clientSecret, status } = resultData;
+      const { clientSecret, status, nickname } = resultData;
 
       if (status === "requires_action") {
         stripe.confirmCardPayment(clientSecret).then((res) => {
           if (res.error) {
             toast.error("Payment failed");
           } else {
+            dispatch.user.setSubscription({ status: "active", nickname });
             toast.success("Payment was successfully applied!");
           }
         });
       } else {
+        dispatch.user.setSubscription({ status: "active", nickname });
         toast.success("Payment was successfully applied!");
       }
     }

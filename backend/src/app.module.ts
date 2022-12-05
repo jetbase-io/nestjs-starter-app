@@ -9,13 +9,17 @@ import { AccessTokenAuthGuard } from './modules/auth/guards/access-token-auth.gu
 import { UsersModule } from './modules/users/users.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { EmailModule } from './modules/emails/emails.module';
+import { PostsModule } from './modules/posts/posts.module';
 
 @Module({
   imports: [
     AdminModule,
     AuthModule,
+    EmailModule,
     DbModule,
     UsersModule,
+    PostsModule,
     StripeModule,
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,

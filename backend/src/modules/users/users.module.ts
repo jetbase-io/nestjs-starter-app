@@ -4,11 +4,16 @@ import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './models/users.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { FileUploadService } from './fileupload.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity]), JwtModule],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity]),
+    JwtModule,
+    FileUploadService,
+  ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, FileUploadService],
   exports: [UsersService],
 })
 export class UsersModule {}

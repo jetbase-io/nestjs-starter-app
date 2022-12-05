@@ -39,6 +39,9 @@ export class UserEntity extends BaseEntity {
   })
   roles: Role[];
 
+  @Column({ nullable: true })
+  avatar: string;
+
   @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user, {
     onDelete: 'CASCADE',
   })
