@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser2\",\n    \"email\": \"test2@mvp.com\",\n    \"password\": \"pass123\"\n}",
+							"raw": "{\n    \"username\": \"testuser3\",\n    \"email\": \"test3@mvp.com\",\n    \"password\": \"pass123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -213,6 +213,33 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Email confirmation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/auth/confirmation?confirmation_token=b21364fd-caac-471b-93e6-a1021baba73d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"confirmation"
+							],
+							"query": [
+								{
+									"key": "confirmation_token",
+									"value": "b21364fd-caac-471b-93e6-a1021baba73d"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -223,7 +250,7 @@
 					"name": "Admin",
 					"item": [
 						{
-							"name": "!!!Get users",
+							"name": "Get users",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -234,7 +261,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://localhost:3000/api/admin/users",
+									"raw": "http://localhost:3000/api/admin/users?limit=4&page=1",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -244,6 +271,16 @@
 										"api",
 										"admin",
 										"users"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "4"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										}
 									]
 								}
 							},
@@ -508,7 +545,7 @@
 					"name": "Admin",
 					"item": [
 						{
-							"name": "!!!Get posts",
+							"name": "Get posts",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -519,7 +556,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://localhost:3000/api/admin/posts",
+									"raw": "http://localhost:3000/api/admin/posts?page=0&limit=3&order=ASC",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -529,6 +566,20 @@
 										"api",
 										"admin",
 										"posts"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "3"
+										},
+										{
+											"key": "order",
+											"value": "ASC"
+										}
 									]
 								}
 							},
@@ -712,7 +763,7 @@
 					]
 				},
 				{
-					"name": "!!!Get posts",
+					"name": "Get posts",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -723,7 +774,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:3000/api/posts",
+							"raw": "http://localhost:3000/api/posts?page=1&limit=3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -732,6 +783,16 @@
 							"path": [
 								"api",
 								"posts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								}
 							]
 						}
 					},
@@ -904,6 +965,9 @@
 			"item": [
 				{
 					"name": "!!!Get plans",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -923,6 +987,10 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "http://localhost:3000/api/billing/plans",
 							"protocol": "http",
@@ -1006,7 +1074,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"paymentMethod\": \"pay_asdfas4f4ffw\",\n  \"priceId\": \"pay_asdfas4f4ffw\"\n}",
+							"raw": "{\n  \"paymentMethod\": \"pay_asdfas4l4ffw\",\n  \"priceId\": \"pay_asdfas8f4ffw\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
