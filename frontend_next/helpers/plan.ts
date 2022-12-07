@@ -1,7 +1,14 @@
 export const setChosenPlan = (chosenPlan: {}) => {
-  localStorage.setItem("chosenPlan", JSON.stringify(chosenPlan));
+  if (typeof window !== "undefined") {
+    // Perform localStorage action
+    localStorage.setItem("chosenPlan", JSON.stringify(chosenPlan));
+  }
 };
 
 export const getChosenPlan = () => {
-  return JSON.parse(localStorage.getItem("chosenPlan") || "");
+  if (typeof window !== "undefined") {
+    // Perform localStorage action
+
+    return JSON.parse(localStorage.getItem("chosenPlan") || "");
+  }
 };
