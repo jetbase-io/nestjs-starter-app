@@ -213,6 +213,33 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Email confirmation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/auth/confirmation?confirmation_token=b21364fd-caac-471b-93e6-a1021baba73d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"confirmation"
+							],
+							"query": [
+								{
+									"key": "confirmation_token",
+									"value": "b21364fd-caac-471b-93e6-a1021baba73d"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
