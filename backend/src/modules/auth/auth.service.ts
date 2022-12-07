@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
@@ -15,6 +17,7 @@ import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { SignInUserDto } from '../users/dto/login-user.dto';
 import { EmailService } from '../emails/emails.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -41,15 +44,37 @@ export class AuthService {
     await this.emailService.sendContactForm(emailContent, emailDescription, to);
   }
 
-  async signUp(createUserDto: CreateUserDto): Promise<Tokens> {
+  async sendConfirmationEmail(
+    to: string,
+    confirmationToken: string,
+  ): Promise<any> {
+    const CONFIRM_URL =
+      process.env.API_URL + '/api/auth/confirmation?confirmation_token=';
+    const emailContent = `Please confirm your account via this link: ${CONFIRM_URL}${confirmationToken}`;
+    const emailDescription = 'Email confirmation';
+    await this.emailService.sendContactForm(emailContent, emailDescription, to);
+  }
+
+  async signUp(createUserDto: CreateUserDto) {
     await this.usersService.validateUsername(createUserDto.username);
-    const user = await this.usersService.create({
-      ...createUserDto,
-    });
-    const tokens = await this.generateTokens(user);
-    await this.updateRefreshToken(user, tokens.refreshToken);
-    await this.sendEmail(createUserDto.email);
-    return tokens;
+    createUserDto.confirmationToken = uuidv4();
+    await this.usersService.create({ ...createUserDto });
+    await this.sendConfirmationEmail(
+      createUserDto.email,
+      createUserDto.confirmationToken,
+    );
+    return { message: 'Successfully signed up! We sent confirmation email' };
+  }
+
+  async confirmEmail(confirmationToken: string) {
+    const user = await this.usersService.findByConfirmationToken(
+      confirmationToken,
+    );
+    if (!user)
+      throw new HttpException('Invalid confirmation token', HttpStatus.UNPROCESSABLE_ENTITY)
+    user.confirmedAt = new Date(Date.now());
+    await this.usersService.saveUser(user);
+    return { message: 'Now you can sign in!' };
   }
 
   async signOut(userId: string, accessToken: string, refreshToken: string) {

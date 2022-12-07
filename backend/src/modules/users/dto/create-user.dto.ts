@@ -32,6 +32,8 @@ export class CreateUserDto {
   })
   email: string;
 
+  confirmationToken?: string;
+
   @ApiProperty({ example: 'password123', description: 'Password' })
   @IsNotEmpty()
   @MinLength(6)
