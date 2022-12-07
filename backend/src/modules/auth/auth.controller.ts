@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Query, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -19,7 +19,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Returns tokens' })
   @Public()
   @Post('/signUp')
-  signUp(@Body() userDto: CreateUserDto): Promise<Tokens> {
+  signUp(@Body() userDto: CreateUserDto): Promise<object> {
     return this.authService.signUp(userDto);
   }
 
@@ -66,5 +66,13 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
   ) {
     return this.authService.refreshAccessToken(userId, refreshToken);
+  }
+
+  @ApiOperation({ summary: 'Email confirmation' })
+  @ApiResponse({ status: 200, description: 'Returns confirmation link' })
+  @Public()
+  @Get('/confirmation')
+  confirmEmail(@Query('confirmation_token') confirmationToken: string) {
+    return this.authService.confirmEmail(confirmationToken)
   }
 }

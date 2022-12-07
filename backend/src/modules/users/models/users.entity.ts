@@ -42,6 +42,12 @@ export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   avatar: string;
 
+  @Column({ nullable: true })
+  confirmationToken: string;
+
+  @Column({ type: 'timestamptz', nullable: true, default: null })
+  confirmedAt: Date;
+
   @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user, {
     onDelete: 'CASCADE',
   })

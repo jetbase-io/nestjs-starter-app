@@ -29,6 +29,7 @@ export class UsersService {
     user.password = await this.generateHashPassword(createUserDto.password);
     user.email = createUserDto.email;
     user.roles = [Role.USER];
+    user.confirmationToken = createUserDto.confirmationToken
     return await this.userRepository.save(user);
   }
 
@@ -128,6 +129,12 @@ export class UsersService {
   async findByUsername(username: string): Promise<UserEntity> {
     return await this.userRepository.findOne({
       where: { username: username },
+    });
+  }
+
+  async findByConfirmationToken(confirmationToken: string): Promise<UserEntity> {
+    return await this.userRepository.findOne({
+      where: { confirmationToken },
     });
   }
 
