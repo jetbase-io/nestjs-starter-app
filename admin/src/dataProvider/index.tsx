@@ -23,7 +23,7 @@ const getOne = async (path: string, params: any): Promise<any> => {
 
 // eslint-disable-next-line consistent-return
 const create = async (path: string, data: any): Promise<any> => {
-  const response = await http.post(`${SERVICE_URL}/${path}`, data, { proxy: false });
+  const response = await http.post(`${SERVICE_URL}/${path}`, data.data, { proxy: false });
   if (response.status === 201) {
     // eslint-disable-next-line no-underscore-dangle
     return { data: { ...response?.data, id: response.data._id } };
@@ -32,13 +32,23 @@ const create = async (path: string, data: any): Promise<any> => {
 
 // eslint-disable-next-line consistent-return
 const update = async (path: string, data: any): Promise<any> => {
-  // eslint-disable-next-line no-underscore-dangle
-  delete data.data._id;
-  // eslint-disable-next-line no-underscore-dangle
-  delete data.data.__v;
+  if (path === "users") {
+    delete data.data.email;
+    delete data.data.avatar;
+    delete data.data.roles;
+    delete data.data.subscriptionId;
+    delete data.data.customerStripeId;
+  }
+  delete data.data.updated_at;
+  delete data.data.created_at;
   delete data.data.id;
-  const response = await http.put(`${SERVICE_URL}/${path}/${data.id}`, { updatedData: data.data }, { proxy: false });
-  if (response.status === 201) {
+  delete data.data.internalComment;
+
+  // eslint-disable-next-line no-underscore-dangle
+  // eslint-disable-next-line no-underscore-dangle
+
+  const response = await http.put(`${SERVICE_URL}/${path}/${data.id}`, data.data, { proxy: false });
+  if (response.status === 200) {
     // eslint-disable-next-line no-underscore-dangle
     return { data: { ...response?.data, id: response.data._id } };
   }

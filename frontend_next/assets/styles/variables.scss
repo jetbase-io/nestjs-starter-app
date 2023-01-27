@@ -1,0 +1,128 @@
+$carmine-pink: #eb4d3d;
+$bleu-de-france: #2f80ed;
+$spanish-grey-color: #979797;
+$errigal-white: #f1f1f5;
+$pearl: #f8f8fa;
+$carbon-fiber: #2e2e2e;
+$alpine-goat: #f2f2f7;
+$white: #ffffff;
+$dark-tone-ink: #121212;
+$black-beauty: #26252b;
+$red: red;
+$island-green: #27ae60;
+
+$xs: 320px;
+$sm: 600px;
+$xsm: 768px;
+$md: 900px;
+$xmd: 1024px;
+$lg: 1200px;
+$xl: 1536px;
+
+$container-width: 1200px;
+
+$logo-path: "/logo.svg";
+
+$font-family: -apple-system, var(--sf-ui-text), var(--sf-ar-text) !important;
+$font-family-bold: -apple-system, var(--sf-ui-text-bold), var(--sf-ar-text) !important;
+$font-family-ar: -apple-system, "SF Arabic" !important;
+
+@mixin cardTitle {
+  @include font-family-sf-text-bold;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@mixin cardSubTitle {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 18px;
+  color: $spanish-grey-color;
+}
+
+@mixin link {
+  font-style: normal;
+  font-size: 16px;
+  line-height: 100%;
+  color: $carmine-pink;
+  user-select: none;
+}
+
+@mixin font-family-sf-text {
+  font-family: -apple-system, var(--sf-ui-text) !important;
+  &:lang(ar) {
+    font-family: -apple-system, var(--sf-ar-text) !important;
+  }
+}
+@mixin font-family-sf-text-bold {
+  font-family: -apple-system, var(--sf-ui-text-bold) !important;
+  &:lang(ar) {
+    font-family: -apple-system, var(--sf-ar-text) !important;
+  }
+}
+
+@mixin ar {
+  font-family: -apple-system, var(--sf-ar-text) !important;
+}
+
+@mixin linear-grey-bg {
+  background: linear-gradient(180deg, rgba($color: #000, $alpha: 0) 55%, var(--bg-grey) 100%);
+}
+
+@mixin outline-none {
+  outline: none;
+  border: none;
+}
+
+@mixin shadow($px) {
+  -webkit-box-shadow: 0px 10px $px 1px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0px 10px $px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 10px $px 1px rgba(0, 0, 0, 0.3);
+}
+
+@mixin mobile {
+  @media only screen and (max-width: $sm) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media only screen and (max-width: $md) {
+    @content;
+  }
+}
+
+@mixin desctop {
+  @media only screen and (max-width: $lg) {
+    @content;
+  }
+}
+
+@mixin desctop-xl {
+  @media only screen and (max-width: $xl) {
+    @content;
+  }
+}
+
+@mixin max($media) {
+  @media only screen and (max-width: $media) {
+    @content;
+  }
+}
+
+@mixin min($media) {
+  @media only screen and (min-width: $media) {
+    @content;
+  }
+}
+
+@mixin minmax($min, $max) {
+  @media only screen and (min-width: $min) and (max-width: $max) {
+    @content;
+  }
+}

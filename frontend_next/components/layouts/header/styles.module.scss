@@ -1,0 +1,46 @@
+.header {
+  width: 100%;
+  padding: 19px 0;
+}
+
+.elements {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: block;
+  width: 90px;
+  height: 30px;
+  background: url($logo-path) no-repeat center center / contain;
+}
+
+.links {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  // justify-content: space-around;
+}
+.link {
+  cursor: pointer;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0.36px;
+  user-select: none;
+  margin: 0 40px;
+}
+
+.login {
+  span {
+    margin: 0 15px;
+  }
+}
+
+.controls {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}

@@ -1,0 +1,11 @@
+.container {
+  height: 100%;
+  position: relative;
+  max-width: $container_width;
+  padding: 0 20px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  @include max($sm) {
+    padding: 0 15px;
+  }
+}
