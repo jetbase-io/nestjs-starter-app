@@ -71,7 +71,10 @@ export class AuthService {
       confirmationToken,
     );
     if (!user)
-      throw new HttpException('Invalid confirmation token', HttpStatus.UNPROCESSABLE_ENTITY)
+      throw new HttpException(
+        'Invalid confirmation token',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     user.confirmedAt = new Date(Date.now());
     await this.usersService.saveUser(user);
     return { message: 'Now you can sign in!' };

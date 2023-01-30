@@ -13,7 +13,6 @@ import { getSort } from '../../utils/helpers/get-sort';
 import { FileUploadService } from './fileupload.service';
 import { IFile } from './file.interface';
 import { readFileSync } from 'fs';
-import { resourceLimits } from 'worker_threads';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +28,7 @@ export class UsersService {
     user.password = await this.generateHashPassword(createUserDto.password);
     user.email = createUserDto.email;
     user.roles = [Role.USER];
-    user.confirmationToken = createUserDto.confirmationToken
+    user.confirmationToken = createUserDto.confirmationToken;
     return await this.userRepository.save(user);
   }
 
@@ -132,7 +131,9 @@ export class UsersService {
     });
   }
 
-  async findByConfirmationToken(confirmationToken: string): Promise<UserEntity> {
+  async findByConfirmationToken(
+    confirmationToken: string,
+  ): Promise<UserEntity> {
     return await this.userRepository.findOne({
       where: { confirmationToken },
     });

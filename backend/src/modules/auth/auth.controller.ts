@@ -73,6 +73,6 @@ export class AuthController {
   @Public()
   @Get('/confirmation')
   confirmEmail(@Query('confirmation_token') confirmationToken: string) {
-    return this.authService.confirmEmail(confirmationToken)
+    return this.authService.confirmEmail(confirmationToken);
   }
 }
