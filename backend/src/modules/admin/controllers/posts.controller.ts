@@ -16,16 +16,16 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
-import { PostsService } from 'src/modules/posts/posts.service';
-import { PostEntity } from 'src/modules/posts/models/posts.entity';
-import { CreatePostDto } from 'src/modules/posts/dto/create-post-dto';
-import { UpdatePostDto } from 'src/modules/posts/dto/update-post-dto';
+import { PostsService } from '../../../modules/posts/posts.service';
+import { PostEntity } from '../../../modules/posts/models/posts.entity';
+import { CreatePostDto } from '../../../modules/posts/dto/create-post-dto';
+import { UpdatePostDto } from '../../../modules/posts/dto/update-post-dto';
 
 @ApiTags('Posts')
 @Controller('posts')
 @UseGuards(AdminAuthGuard)
 export class PostsController {
-  constructor(private postService: PostsService) {}
+  constructor(private postService: PostsService) { }
 
   @ApiOperation({ summary: 'Get posts' })
   @ApiResponse({ status: 200, type: PostEntity })

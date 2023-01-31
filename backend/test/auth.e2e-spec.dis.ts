@@ -8,6 +8,7 @@ import {
   initialiseTestTransactions,
   runInTransaction,
 } from 'typeorm-test-transactions';
+import { SignInUserDto } from 'src/modules/users/dto/login-user.dto';
 
 initialiseTestTransactions();
 
@@ -30,7 +31,8 @@ describe('Authentication System', () => {
     'returns tokens after sign up',
     runInTransaction(async () => {
       const createUserDto: CreateUserDto = {
-        username: 'signUp@gmail.com',
+        username: "TestUser",
+        email: 'signUp@gmail.com',
         password: 'user123',
       };
       return request(app.getHttpServer())
@@ -49,7 +51,8 @@ describe('Authentication System', () => {
     'returns tokens after sign up with incorrect username and password',
     runInTransaction(async () => {
       const createUserDto: CreateUserDto = {
-        username: 'si',
+        username: "si",
+        email: '@gmail.com',
         password: 'us',
       };
       return request(app.getHttpServer())
@@ -63,13 +66,13 @@ describe('Authentication System', () => {
   it(
     'returns tokens after sign in',
     runInTransaction(() => {
-      const createUserDto: CreateUserDto = {
-        username: 'testuser@gmail.com',
+      const signIneUserDto: SignInUserDto = {
+        username: "TestUser",
         password: 'user123',
       };
       return request(app.getHttpServer())
         .post('/api/auth/signIn')
-        .send(createUserDto)
+        .send(signIneUserDto)
         .expect(201)
         .then((res) => {
           const { accessToken, refreshToken } = res.body;
@@ -81,13 +84,13 @@ describe('Authentication System', () => {
   );
 
   it('returns 401 after sign in with incorrect password', () => {
-    const createUserDto: CreateUserDto = {
-      username: 'testuser@gmail.com',
+    const signIneUserDto: SignInUserDto = {
+      username: "TestUser",
       password: 'user123incorrect',
     };
     return request(app.getHttpServer())
       .post('/api/auth/signIn')
-      .send(createUserDto)
+      .send(signIneUserDto)
       .expect(401);
   });
 

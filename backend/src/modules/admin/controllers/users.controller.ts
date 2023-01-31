@@ -11,18 +11,18 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserEntity } from 'src/modules/users/models/users.entity';
-import { UsersService } from 'src/modules/users/users.service';
+import { UserEntity } from '../../../modules/users/models/users.entity';
+import { UsersService } from '../../../modules/users/users.service';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
-import { UpdateUserDto } from 'src/modules/users/dto/update-user.dto';
+import { UpdateUserDto } from '../../../modules/users/dto/update-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
 @UseGuards(AdminAuthGuard)
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(private userService: UsersService) { }
 
   @ApiOperation({ summary: 'Get users' })
   @ApiResponse({ status: 200, type: UserEntity })

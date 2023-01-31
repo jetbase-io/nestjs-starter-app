@@ -19,7 +19,7 @@ $ npm install
 #### Create DB and a role for it
 Setup Postgres if you didn't do it yet
 
-Create a role and DB
+##### Create a role and development DB
 ```bash
 psql -U postgres
 create user nest_react_saas password 'nest_react_saas_pass';
@@ -30,7 +30,17 @@ create extension if not exists "uuid-ossp";
 
 ```
 
-Run migrations and seed
+##### Create test DB
+```bash
+psql -U postgres
+create database test_nest_react_saas_db owner 'nest_react_saas';
+\c test_nest_react_saas_db
+create extension if not exists "uuid-ossp";
+\q
+
+```
+
+##### Run migrations and seed for development DB
 ```bash
 npm run publish-migration
 npm run seed

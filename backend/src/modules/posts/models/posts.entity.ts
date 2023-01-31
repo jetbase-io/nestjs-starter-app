@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseEntity } from 'src/modules/base.entity';
+import { BaseEntity } from '../../../modules/base.entity';
 import { Column, Entity } from 'typeorm';
 
 @Entity('posts')

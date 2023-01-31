@@ -1,6 +1,6 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getSort } from 'src/utils/helpers/get-sort';
+import { getSort } from '../../utils/helpers/get-sort';
 import { getRepository, Repository } from 'typeorm';
 import { PaginationParams } from '../admin/dto/pagination-params.dto';
 import { PaginationResponseDto } from '../admin/dto/pagination-response.dto';
@@ -13,7 +13,7 @@ export class PostsService {
   constructor(
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
-  ) {}
+  ) { }
 
   async createPost(createPostDto: CreatePostDto): Promise<PostEntity> {
     const post = new PostEntity();
