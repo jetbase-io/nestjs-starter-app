@@ -13,7 +13,7 @@ export class PostsService {
   constructor(
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
-  ) { }
+  ) {}
 
   async createPost(createPostDto: CreatePostDto): Promise<PostEntity> {
     const post = new PostEntity();

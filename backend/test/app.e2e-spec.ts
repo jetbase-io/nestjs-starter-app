@@ -24,7 +24,7 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it("Response status", async () => {
+  it('Response status', async () => {
     const res = await request(app.getHttpServer()).get('/');
     expect(res.status).toBe(401);
   });

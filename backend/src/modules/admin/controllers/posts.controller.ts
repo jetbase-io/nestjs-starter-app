@@ -25,7 +25,7 @@ import { UpdatePostDto } from '../../../modules/posts/dto/update-post-dto';
 @Controller('posts')
 @UseGuards(AdminAuthGuard)
 export class PostsController {
-  constructor(private postService: PostsService) { }
+  constructor(private postService: PostsService) {}
 
   @ApiOperation({ summary: 'Get posts' })
   @ApiResponse({ status: 200, type: PostEntity })

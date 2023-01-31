@@ -22,7 +22,7 @@ import { UpdateUserDto } from '../../../modules/users/dto/update-user.dto';
 @Controller('users')
 @UseGuards(AdminAuthGuard)
 export class UsersController {
-  constructor(private userService: UsersService) { }
+  constructor(private userService: UsersService) {}
 
   @ApiOperation({ summary: 'Get users' })
   @ApiResponse({ status: 200, type: UserEntity })

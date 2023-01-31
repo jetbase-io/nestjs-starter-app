@@ -31,7 +31,7 @@ describe('Authentication System', () => {
     'returns tokens after sign up',
     runInTransaction(async () => {
       const createUserDto: CreateUserDto = {
-        username: "TestUser",
+        username: 'TestUser',
         email: 'signUp@gmail.com',
         password: 'user123',
       };
@@ -51,7 +51,7 @@ describe('Authentication System', () => {
     'returns tokens after sign up with incorrect username and password',
     runInTransaction(async () => {
       const createUserDto: CreateUserDto = {
-        username: "si",
+        username: 'si',
         email: '@gmail.com',
         password: 'us',
       };
@@ -67,7 +67,7 @@ describe('Authentication System', () => {
     'returns tokens after sign in',
     runInTransaction(() => {
       const signIneUserDto: SignInUserDto = {
-        username: "TestUser",
+        username: 'TestUser',
         password: 'user123',
       };
       return request(app.getHttpServer())
@@ -85,7 +85,7 @@ describe('Authentication System', () => {
 
   it('returns 401 after sign in with incorrect password', () => {
     const signIneUserDto: SignInUserDto = {
-      username: "TestUser",
+      username: 'TestUser',
       password: 'user123incorrect',
     };
     return request(app.getHttpServer())
