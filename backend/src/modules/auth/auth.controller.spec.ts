@@ -4,13 +4,21 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
 import { UserEntity } from '../users/models/users.entity';
 import { UsersService } from '../users/users.service';
+import { FileUploadService } from '../users/fileupload.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
+import { EmailService } from '../emails/emails.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
+
+  const fakeEmailService = {
+    sendContactForm: async () => {
+      return;
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,10 +37,15 @@ describe('AuthController', () => {
         },
         JwtService,
         UsersService,
+        FileUploadService,
+        EmailService,
         AuthService,
       ],
       controllers: [AuthController],
-    }).compile();
+    })
+      .overrideProvider(EmailService)
+      .useValue(fakeEmailService)
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
   });

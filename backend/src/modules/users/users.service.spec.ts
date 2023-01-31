@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
+import { FileUploadService } from './fileupload.service';
 import { UserEntity } from './models/users.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from '../roles/enums/role.enum';
@@ -15,9 +16,20 @@ describe('UsersService', () => {
     update: jest.fn(),
     delete: jest.fn(),
   };
+  const fileUploadService = {
+    upload: async () => {
+      return;
+    },
+    uploadS3: async () => {
+      return;
+    },
+    getS3: () => {
+      return;
+    },
+  };
 
   const mockUserId = randomUUID();
-  const mockUsername = 'testUsernmae';
+  const mockUsername = 'testUsername';
   const mockUserEmail = 'testEmail@email.com';
   const mockUserPassword = 'password';
   const mockUserDto: CreateUserDto = {
@@ -44,6 +56,10 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(UserEntity),
           useValue: userRepository,
+        },
+        {
+          provide: FileUploadService,
+          useValue: fileUploadService,
         },
       ],
     }).compile();

@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
 import { UserEntity } from '../users/models/users.entity';
 import { UsersService } from '../users/users.service';
+import { FileUploadService } from '../users/fileupload.service';
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
 
@@ -17,6 +18,7 @@ describe('StripeController', () => {
           useFactory: repositoryMockFactory,
         },
         UsersService,
+        FileUploadService,
         StripeService,
       ],
       controllers: [StripeController],

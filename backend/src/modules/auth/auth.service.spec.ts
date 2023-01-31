@@ -10,6 +10,10 @@ import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
 import { randomUUID } from 'crypto';
 import { Role } from '../roles/enums/role.enum';
 import { ForbiddenException } from '@nestjs/common';
+import { EmailService } from '../emails/emails.service';
+
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -22,6 +26,12 @@ describe('AuthService', () => {
     validateUsername: jest.fn(),
     findByUsername: jest.fn(),
     isPasswordValid: jest.fn(),
+  };
+
+  const fakeEmailService = {
+    sendContactForm: async () => {
+      return;
+    },
   };
 
   const mockUserId = randomUUID();
@@ -50,6 +60,10 @@ describe('AuthService', () => {
           provide: UsersService,
           useValue: fakeUserService,
         },
+        {
+          provide: EmailService,
+          useValue: fakeEmailService,
+        },
       ],
     }).compile();
 
@@ -64,13 +78,12 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  it('returns access and refresh token after sign up', async () => {
+  it('returns message after sign up', async () => {
     fakeUserService.create.mockImplementationOnce(
       async (userDto: CreateUserDto) => {
-        expect(userDto).toEqual({
-          username: mockUsername,
-          password: mockPassword,
-        });
+        expect(userDto.confirmationToken).toBeDefined();
+        expect(userDto.username).toEqual(mockUsername);
+        expect(userDto.password).toEqual(mockPassword);
         return {
           id: mockUserId,
           roles: Role.USER,
@@ -80,13 +93,14 @@ describe('AuthService', () => {
       },
     );
 
-    const tokens = await service.signUp({
+    const message = await service.signUp({
       username: mockUsername,
       password: mockPassword,
     } as CreateUserDto);
 
-    expect(tokens.refreshToken).toBeDefined();
-    expect(tokens.accessToken).toBeDefined();
+    expect(message).toEqual({
+      message: 'Successfully signed up! We sent confirmation email',
+    });
   });
 
   it('returns access and refresh token after sign in', async () => {
