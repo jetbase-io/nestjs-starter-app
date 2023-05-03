@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Query, UseGuards, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Query,
+  UseGuards,
+  Get,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -9,8 +17,10 @@ import { GetCurrentUserId } from './decorators/get-current-user-id.decorator';
 import { GetCurrentUser } from './decorators/get-current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
+import { SentryInterceptor } from '../sentry/sentry.interceptor';
 
 @ApiTags('Auth')
+@UseInterceptors(SentryInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

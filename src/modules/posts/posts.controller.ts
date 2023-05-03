@@ -17,8 +17,10 @@ import { PostEntity } from './models/posts.entity';
 import { UpdatePostDto } from './dto/update-post-dto';
 import { PaginationParams } from '../admin/dto/pagination-params.dto';
 import { PaginationResponseDto } from '../admin/dto/pagination-response.dto';
+import { SentryInterceptor } from '../sentry/sentry.interceptor';
 
 @ApiTags('Posts')
+@UseInterceptors(SentryInterceptor)
 @Controller('posts')
 export class PostsController {
   constructor(private postService: PostsService) {}

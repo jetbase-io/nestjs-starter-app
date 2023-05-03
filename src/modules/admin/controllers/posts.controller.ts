@@ -20,8 +20,10 @@ import { PostsService } from '../../../modules/posts/posts.service';
 import { PostEntity } from '../../../modules/posts/models/posts.entity';
 import { CreatePostDto } from '../../../modules/posts/dto/create-post-dto';
 import { UpdatePostDto } from '../../../modules/posts/dto/update-post-dto';
+import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
 
 @ApiTags('Posts')
+@UseInterceptors(SentryInterceptor)
 @Controller('posts')
 @UseGuards(AdminAuthGuard)
 export class PostsController {
