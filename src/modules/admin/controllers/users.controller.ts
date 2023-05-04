@@ -17,8 +17,10 @@ import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
 import { UpdateUserDto } from '../../../modules/users/dto/update-user.dto';
+import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
 
 @ApiTags('Users')
+@UseInterceptors(SentryInterceptor)
 @Controller('users')
 @UseGuards(AdminAuthGuard)
 export class UsersController {

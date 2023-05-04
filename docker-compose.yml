@@ -1,0 +1,24 @@
+version: "3.5"
+services:
+  api-starter:
+    build:
+      context: .
+    restart: always
+    container_name: api
+    volumes:
+      - ./uploads:/home/uploads
+    ports:
+      - ${PORT}:3000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    networks:
+      - proxynet
+    env_file:
+      - .env
+
+networks:
+  proxynet:
+    name: db_postgres_production

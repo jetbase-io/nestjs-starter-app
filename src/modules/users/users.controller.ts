@@ -17,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './models/users.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
+import { SentryInterceptor } from '../sentry/sentry.interceptor';
 
 const uploadDir = './uploads/temp';
 
@@ -35,6 +36,7 @@ export const storage = {
 };
 
 @ApiTags('Users')
+@UseInterceptors(SentryInterceptor)
 @Controller('users/')
 export class UsersController {
   constructor(private userService: UsersService) {}

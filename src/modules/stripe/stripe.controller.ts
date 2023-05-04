@@ -1,11 +1,21 @@
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseInterceptors,
+} from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 import { Public } from '../auth/decorators/public.decorator';
+import { SentryInterceptor } from '../sentry/sentry.interceptor';
 
 @ApiTags('Billing')
+@UseInterceptors(SentryInterceptor)
 @Controller('billing')
 export class StripeController {
   constructor(private stripeService: StripeService) {}
