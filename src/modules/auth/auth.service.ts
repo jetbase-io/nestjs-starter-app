@@ -194,7 +194,9 @@ export class AuthService {
     };
 
     const { secretForAccessToken, secretForRefreshToken } = getSecrets(
-      user.roles[0],
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      user.roles,
     );
 
     const [accessToken, refreshToken] = await Promise.all([
