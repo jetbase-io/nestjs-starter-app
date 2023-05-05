@@ -18,6 +18,7 @@ import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { SignInUserDto } from '../users/dto/login-user.dto';
 import { EmailService } from '../emails/emails.service';
 import { v4 as uuidv4 } from 'uuid';
+import { getSecrets } from '../../utils/helpers/getSecrets';
 
 @Injectable()
 export class AuthService {
@@ -192,13 +193,17 @@ export class AuthService {
       roles: user.roles,
     };
 
+    const { secretForAccessToken, secretForRefreshToken } = getSecrets(
+      user.roles[0],
+    );
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: `.${process.env.NODE_ENV}.${process.env.ACCESS_TOKEN_JWT_SECRET}`,
+        secret: secretForAccessToken,
         expiresIn: process.env.ACCESS_TOKEN_LIFESPAN,
       }),
       this.jwtService.signAsync(payload, {
-        secret: `.${process.env.NODE_ENV}.${process.env.REFRESH_TOKEN_JWT_SECRET}`,
+        secret: secretForRefreshToken,
         expiresIn: process.env.REFRESH_TOKEN_LIFESPAN,
       }),
     ]);

@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
+import { SecretTypes, secretProvider } from '../../../utils/helpers/getSecrets';
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(
@@ -13,7 +14,7 @@ export class AccessTokenStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: `.${process.env.NODE_ENV}.${process.env.ACCESS_TOKEN_JWT_SECRET}`,
+      secretOrKeyProvider: secretProvider(SecretTypes.ACCESS),
       passReqToCallback: true,
     });
   }
