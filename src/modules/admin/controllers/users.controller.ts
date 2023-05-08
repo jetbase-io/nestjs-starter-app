@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  Post,
   Put,
   Query,
   UseGuards,
@@ -18,6 +19,7 @@ import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
 import { UpdateUserDto } from '../../../modules/users/dto/update-user.dto';
 import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
+import { CreateUserDto } from '../../../modules/users/dto/create-user.dto';
 
 @ApiTags('Users')
 @UseInterceptors(SentryInterceptor)
@@ -25,6 +27,13 @@ import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
 @UseGuards(AdminAuthGuard)
 export class UsersController {
   constructor(private userService: UsersService) {}
+
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({ status: 200, type: UpdateUserDto })
+  @Post()
+  create(@Body() createUserDto: CreateUserDto): Promise<CreateUserDto> {
+    return this.userService.create(createUserDto);
+  }
 
   @ApiOperation({ summary: 'Get users' })
   @ApiResponse({ status: 200, type: UserEntity })
