@@ -2,10 +2,10 @@ import {
   Body,
   Controller,
   Post,
-  Query,
   UseGuards,
-  Get,
   UseInterceptors,
+  Req,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -18,6 +18,8 @@ import { GetCurrentUser } from './decorators/get-current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { SentryInterceptor } from '../sentry/sentry.interceptor';
+import { Request } from 'express';
+import { UpdateUserConfirmationDto } from '../users/dto/update-user-confirmed-at.dto';
 
 @ApiTags('Auth')
 @UseInterceptors(SentryInterceptor)
@@ -29,8 +31,16 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Returns tokens' })
   @Public()
   @Post('/signUp')
-  signUp(@Body() userDto: CreateUserDto): Promise<object> {
-    return this.authService.signUp(userDto);
+  signUp(@Req() req: Request, @Body() userDto: CreateUserDto): Promise<object> {
+    return this.authService.signUp(userDto, req.headers.origin);
+  }
+
+  @ApiOperation({ summary: 'Confirm' })
+  @ApiResponse({ status: 200, description: 'Returns message' })
+  @Public()
+  @Patch('/confirmation')
+  confirm(@Body() userUpdateDto: UpdateUserConfirmationDto): Promise<object> {
+    return this.authService.confirmEmail(userUpdateDto.token);
   }
 
   @ApiOperation({ summary: 'Sign In' })
@@ -76,13 +86,5 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
   ) {
     return this.authService.refreshAccessToken(userId, refreshToken);
-  }
-
-  @ApiOperation({ summary: 'Email confirmation' })
-  @ApiResponse({ status: 200, description: 'Returns confirmation link' })
-  @Public()
-  @Get('/confirmation')
-  confirmEmail(@Query('confirmation_token') confirmationToken: string) {
-    return this.authService.confirmEmail(confirmationToken);
   }
 }
