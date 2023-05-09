@@ -54,7 +54,7 @@ export class AuthService {
     url: string,
     confirmationToken: string,
   ): Promise<any> {
-    const CONFIRM_URL = `${url}/sign-in/?confirmation_token=${confirmationToken}`;
+    const CONFIRM_URL = `${url}/confirmation/?confirmation_token=${confirmationToken}`;
     await this.emailService.sendConfirmationLink(to, CONFIRM_URL);
   }
 
