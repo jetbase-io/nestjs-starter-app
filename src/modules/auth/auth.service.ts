@@ -139,16 +139,17 @@ export class AuthService {
     const user = await this.usersService.findByUsername(username);
     const message = 'Incorrect password or username';
 
-    if (user && user.confirmedAt) {
-      const isPasswordsEqual = await this.usersService.isPasswordValid(
-        password,
-        user,
-      );
-      if (isPasswordsEqual) return user;
-      throw new ForbiddenException({ message });
-    } else {
+    if (!user?.confirmedAt) {
       throw new ForbiddenException({ message });
     }
+    const isPasswordsEqual = await this.usersService.isPasswordValid(
+      password,
+      user,
+    );
+    if (!isPasswordsEqual) {
+      throw new ForbiddenException({ message });
+    }
+    return user;
   }
 
   async updateRefreshToken(user: UserEntity, refreshToken: string) {
