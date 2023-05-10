@@ -42,26 +42,29 @@ export class AuthService {
   async sendEmail(to: string): Promise<any> {
     const emailContent = 'This is a welcome message! Thank You for signing up!';
     const emailDescription = 'Welcome message';
-    await this.emailService.sendContactForm(emailContent, emailDescription, to);
+    await this.emailService.sendGeneralEmail(
+      to,
+      emailContent,
+      emailDescription,
+    );
   }
 
   async sendConfirmationEmail(
     to: string,
+    url: string,
     confirmationToken: string,
   ): Promise<any> {
-    const CONFIRM_URL =
-      process.env.API_URL + '/api/auth/confirmation?confirmation_token=';
-    const emailContent = `Please confirm your account via this link: ${CONFIRM_URL}${confirmationToken}`;
-    const emailDescription = 'Email confirmation';
-    await this.emailService.sendContactForm(emailContent, emailDescription, to);
+    const CONFIRM_URL = `${url}/confirmation/?confirmation_token=${confirmationToken}`;
+    await this.emailService.sendConfirmationLink(to, CONFIRM_URL);
   }
 
-  async signUp(createUserDto: CreateUserDto) {
+  async signUp(createUserDto: CreateUserDto, url: string) {
     await this.usersService.validateUsername(createUserDto.username);
     createUserDto.confirmationToken = uuidv4();
     await this.usersService.create({ ...createUserDto });
     await this.sendConfirmationEmail(
       createUserDto.email,
+      url,
       createUserDto.confirmationToken,
     );
     return { message: 'Successfully signed up! We sent confirmation email' };
@@ -78,7 +81,10 @@ export class AuthService {
       );
     user.confirmedAt = new Date(Date.now());
     await this.usersService.saveUser(user);
-    return { message: 'Now you can sign in!' };
+    return {
+      message:
+        'Your email address has been successfully confirmed! Now you can sign in!',
+    };
   }
 
   async signOut(userId: string, accessToken: string, refreshToken: string) {
@@ -131,16 +137,19 @@ export class AuthService {
 
   async validateUser(username: string, password: string) {
     const user = await this.usersService.findByUsername(username);
+    const message = 'Incorrect password or username';
+
+    if (!user?.confirmedAt) {
+      throw new ForbiddenException({ message });
+    }
     const isPasswordsEqual = await this.usersService.isPasswordValid(
       password,
       user,
     );
-    if (user && isPasswordsEqual) {
-      return user;
+    if (!isPasswordsEqual) {
+      throw new ForbiddenException({ message });
     }
-    throw new ForbiddenException({
-      message: 'Incorrect password or username',
-    });
+    return user;
   }
 
   async updateRefreshToken(user: UserEntity, refreshToken: string) {
