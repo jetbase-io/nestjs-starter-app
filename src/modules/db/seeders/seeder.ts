@@ -8,7 +8,7 @@ export class Seeder {
   async seed() {
     for await (const iterator of users) {
       await this.userService
-        .createByRole(iterator)
+        .createBySeed(iterator)
         .then((completed) => {
           Promise.resolve(completed);
         })

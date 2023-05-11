@@ -13,6 +13,7 @@ import { getSort } from '../../utils/helpers/get-sort';
 import { FileUploadService } from './fileupload.service';
 import { IFile } from './file.interface';
 import { readFileSync } from 'fs';
+import { CreateUserBySeedDto } from './dto/create-user-by-seed.dto';
 
 @Injectable()
 export class UsersService {
@@ -38,6 +39,12 @@ export class UsersService {
     user.password = await this.generateHashPassword(createUserDto.password);
     user.email = createUserDto.email;
     user.roles = [createUserDto.role];
+    return await this.userRepository.save(user);
+  }
+
+  async createBySeed(createUserDto: CreateUserBySeedDto): Promise<UserEntity> {
+    let user = new UserEntity();
+    user = { ...user, ...createUserDto };
     return await this.userRepository.save(user);
   }
 
