@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { UsersService } from '../users/users.service';
 import { UserEntity } from '../users/models/users.entity';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
+import { CreateStripePlanDto } from './dto/stripe-plan.dto';
+import { CreateStripeProductDto } from './dto/stripe-product';
 
 const STRIPE_INACTIVE = 'inactive';
 
@@ -14,6 +16,14 @@ export class StripeService {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2020-08-27',
     });
+  }
+
+  async createProduct(createStripeProductDto: CreateStripeProductDto) {
+    return await this.stripe.products.create(createStripeProductDto);
+  }
+
+  async createPlan(createStripePlanDto: CreateStripePlanDto) {
+    return await this.stripe.plans.create(createStripePlanDto);
   }
 
   async createCustomer(user: UserEntity, paymentMethod: string) {
@@ -32,6 +42,24 @@ export class StripeService {
       customer: user.customerStripeId,
     });
     return user.customerStripeId;
+  }
+
+  async createDataBySeed(
+    createStripeProductDto: CreateStripeProductDto,
+    createStripePlansDto: CreateStripePlanDto[],
+  ) {
+    const newProduct = await this.createProduct(createStripeProductDto);
+
+    for await (const plan of createStripePlansDto) {
+      const planByProductId = { ...plan, product: newProduct.id };
+      await this.createPlan(planByProductId)
+        .then((completed) => {
+          Promise.resolve(completed);
+        })
+        .catch((error) => {
+          Promise.reject(error);
+        });
+    }
   }
 
   public async activateSubscription(
@@ -62,6 +90,11 @@ export class StripeService {
 
   public async detachPaymentMethod(paymentMethodId: string) {
     return await this.stripe.paymentMethods.detach(paymentMethodId);
+  }
+
+  public async getProducts() {
+    const products = await this.stripe.products.list();
+    return products.data.reverse();
   }
 
   public async getPlans() {
