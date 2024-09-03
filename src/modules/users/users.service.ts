@@ -44,7 +44,9 @@ export class UsersService {
 
   async createBySeed(createUserDto: CreateUserBySeedDto): Promise<UserEntity> {
     let user = new UserEntity();
-    user = { ...user, ...createUserDto };
+    const { role, ...restData } = createUserDto;
+    user = { ...user, ...restData };
+    user.roles = [role];
     return await this.userRepository.save(user);
   }
 
