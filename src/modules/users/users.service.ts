@@ -39,14 +39,10 @@ export class UsersService {
     user.password = await this.generateHashPassword(createUserDto.password);
     user.email = createUserDto.email;
     user.roles = [createUserDto.role];
-    return await this.userRepository.save(user);
-  }
 
-  async createBySeed(createUserDto: CreateUserBySeedDto): Promise<UserEntity> {
-    let user = new UserEntity();
-    const { role, ...restData } = createUserDto;
-    user = { ...user, ...restData };
-    user.roles = [role];
+    if (createUserDto.confirmedAt) {
+      user.confirmedAt = createUserDto.confirmedAt;
+    }
     return await this.userRepository.save(user);
   }
 

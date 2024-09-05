@@ -14,7 +14,7 @@ export class Seeder {
   async seed() {
     for await (const iterator of users) {
       await this.userService
-        .createBySeed(iterator)
+        .createByRole(iterator)
         .then((completed) => {
           Promise.resolve(completed);
         })
