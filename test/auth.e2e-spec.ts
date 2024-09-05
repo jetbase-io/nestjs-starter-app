@@ -31,47 +31,41 @@ describe('Authentication System', () => {
     const res = await request(app.getHttpServer())
       .post('/auth/signUp')
       .send(createUserDto)
-      .expect(201)
+      .expect(201);
 
     expect(res.body).toEqual({
       message: 'Successfully signed up! We sent confirmation email',
     });
   });
 
-  it(
-    'returns tokens after sign up with incorrect username and password',
-    async () => {
-      const createUserDto: CreateUserDto = {
-        username: 'si',
-        email: '@gmail.com',
-        password: 'us',
-      };
+  it('returns tokens after sign up with incorrect username and password', async () => {
+    const createUserDto: CreateUserDto = {
+      username: 'si',
+      email: '@gmail.com',
+      password: 'us',
+    };
 
-      await request(app.getHttpServer())
-        .post('/auth/signUp')
-        .send(createUserDto)
-        .expect(400)
-    }
-  );
+    await request(app.getHttpServer())
+      .post('/auth/signUp')
+      .send(createUserDto)
+      .expect(400);
+  });
 
-  it.only(
-    'returns tokens after sign in',
-    async () => {
-      const signInUserDto: SignInUserDto = {
-        username: 'TestUser',
-        password: 'user123',
-      };
-      const res = await request(app.getHttpServer())
-        .post('/auth/signIn')
-        .send(signInUserDto)
-        .expect(201)
+  it.only('returns tokens after sign in', async () => {
+    const signInUserDto: SignInUserDto = {
+      username: 'TestUser',
+      password: 'user123',
+    };
+    const res = await request(app.getHttpServer())
+      .post('/auth/signIn')
+      .send(signInUserDto)
+      .expect(201);
 
-      const { accessToken, refreshToken } = res.body;
-      globalAccessToken = accessToken;
-      expect(accessToken).toBeDefined();
-      expect(refreshToken).toBeDefined();
-    }
-  );
+    const { accessToken, refreshToken } = res.body;
+    globalAccessToken = accessToken;
+    expect(accessToken).toBeDefined();
+    expect(refreshToken).toBeDefined();
+  });
 
   it('returns 401 after sign in with incorrect password', () => {
     const signIneUserDto: SignInUserDto = {
@@ -84,14 +78,11 @@ describe('Authentication System', () => {
       .expect(401);
   });
 
-  it(
-    'returns success message after after sign out',
-    () => {
-      return request(app.getHttpServer())
-        .post('/api/auth/signOut')
-        .set('Authorization', `Bearer ${globalAccessToken}`)
-        .expect(201)
-        .then();
-    }
-  );
+  it('returns success message after after sign out', () => {
+    return request(app.getHttpServer())
+      .post('/api/auth/signOut')
+      .set('Authorization', `Bearer ${globalAccessToken}`)
+      .expect(201)
+      .then();
+  });
 });
