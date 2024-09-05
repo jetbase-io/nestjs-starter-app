@@ -1,7 +1,7 @@
+import { CreateUserByRoleDto } from 'src/modules/users/dto/create-user-by-role.dto';
 import { Role } from '../../../roles/enums/role.enum';
-import { CreateUserBySeedDto } from 'src/modules/users/dto/create-user-by-seed.dto';
 
-export const users: CreateUserBySeedDto[] = [
+export const users: CreateUserByRoleDto[] = [
   {
     username: 'testUser',
     email: 'testuser@mail.com',
