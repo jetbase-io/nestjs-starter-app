@@ -14,6 +14,7 @@ import { Tokens } from '../../../modules/auth/types/tokens.type';
 import { GetCurrentUserId } from '../../../modules/auth/decorators/get-current-user-id.decorator';
 import { GetCurrentUser } from '../../../modules/auth/decorators/get-current-user.decorator';
 import { RefreshTokenAuthGuard } from '../../../modules/auth/guards/refresh-token-auth.guard';
+import { RoleCheckInterceptor } from '../interceptors/role-check.interceptor';
 
 @ApiTags('Auth')
 @UseInterceptors(SentryInterceptor)
@@ -24,6 +25,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign In' })
   @ApiResponse({ status: 200, description: 'Returns tokens' })
   @Public()
+  @UseInterceptors(RoleCheckInterceptor)
   @Post('/signIn')
   signIn(@Body() userDto: SignInUserDto): Promise<Tokens> {
     return this.authService.signIn(userDto);
