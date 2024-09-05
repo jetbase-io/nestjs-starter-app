@@ -13,7 +13,6 @@ import { getSort } from '../../utils/helpers/get-sort';
 import { FileUploadService } from './fileupload.service';
 import { IFile } from './file.interface';
 import { readFileSync } from 'fs';
-import { CreateUserBySeedDto } from './dto/create-user-by-seed.dto';
 
 @Injectable()
 export class UsersService {

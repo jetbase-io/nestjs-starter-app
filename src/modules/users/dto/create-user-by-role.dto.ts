@@ -1,5 +1,5 @@
 import {
-  IsDateString,
+  IsDate,
   IsEmail,
   IsNotEmpty,
   IsString,
@@ -41,6 +41,6 @@ export class CreateUserByRoleDto {
   @MinLength(4)
   role: Role;
 
-  @IsDateString()
+  @IsDate()
   confirmedAt?: Date;
 }
