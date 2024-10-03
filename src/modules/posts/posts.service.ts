@@ -7,6 +7,7 @@ import { PaginationResponseDto } from '../admin/dto/pagination-response.dto';
 import { CreatePostDto } from './dto/create-post-dto';
 import { UpdatePostDto } from './dto/update-post-dto';
 import { PostEntity } from './models/posts.entity';
+import { PostEntityDto } from './dto/post-entity-dto';
 
 @Injectable()
 export class PostsService {
@@ -15,17 +16,19 @@ export class PostsService {
     private readonly postRepository: Repository<PostEntity>,
   ) {}
 
-  async createPost(createPostDto: CreatePostDto): Promise<PostEntity> {
+  async createPost(createPostDto: CreatePostDto): Promise<PostEntityDto> {
     const post = new PostEntity();
     post.title = createPostDto.title;
     post.description = createPostDto.description;
     post.published_at = createPostDto.pubslished_at;
-    return await this.postRepository.save(post);
+    const result = await this.postRepository.save(post);
+
+    return PostEntityDto.fromEntity(result);
   }
 
   async getAllPosts(
     query: PaginationParams,
-  ): Promise<PaginationResponseDto<PostEntity>> {
+  ): Promise<PaginationResponseDto<PostEntityDto>> {
     const sort = getSort(query, 'posts');
     const data = await getRepository(PostEntity)
       .createQueryBuilder('posts')
@@ -35,14 +38,16 @@ export class PostsService {
       .getManyAndCount();
 
     return {
-      items: data[0],
+      items: data[0].map((item) => PostEntityDto.fromEntity(item)),
       count: data[1],
     };
   }
 
-  async getPostById(id: string): Promise<PostEntity> {
+  async getPostById(id: string): Promise<PostEntityDto> {
     await this.isPostExist(id);
-    return await this.postRepository.findOne({ id });
+    const post = await this.postRepository.findOne({ id });
+
+    return PostEntityDto.fromEntity(post);
   }
 
   async deletePostById(id: string): Promise<{ message: string }> {
@@ -70,7 +75,7 @@ export class PostsService {
   }
 
   async isPostExist(id: string): Promise<boolean> {
-    const post = this.postRepository.findOne({ id });
+    const post = await this.postRepository.findOne({ id });
     if (!post) {
       throw new BadRequestException({
         message: 'Post with provided id does not exist!',
