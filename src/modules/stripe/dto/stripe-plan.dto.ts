@@ -7,6 +7,7 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import Stripe from 'stripe';
 
 export enum Interval {
   Day = 'day',
@@ -87,4 +88,69 @@ export class CreateStripePlanDto {
   @IsOptional()
   @IsEnum(['metered', 'licensed'])
   usage_type?: 'metered' | 'licensed';
+}
+
+export class StripePlanResponseDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  active: boolean;
+
+  @ApiProperty({ nullable: true })
+  aggregate_usage: string | null;
+
+  @ApiProperty({ nullable: true })
+  amount: number | null;
+
+  @ApiProperty({ nullable: true })
+  amount_decimal: string | null;
+
+  @ApiProperty()
+  billing_scheme: string;
+
+  @ApiProperty()
+  created: number;
+
+  @ApiProperty()
+  currency: string;
+
+  @ApiProperty()
+  interval: string;
+
+  @ApiProperty()
+  interval_count: number;
+
+  @ApiProperty()
+  livemode: boolean;
+
+  @ApiProperty({ nullable: true })
+  nickname: string | null;
+
+  @ApiProperty({ nullable: true })
+  trial_period_days: number | null;
+
+  @ApiProperty()
+  usage_type: string;
+
+  static fromEntity(entity: Stripe.Plan) {
+    const dto = new StripePlanResponseDto();
+
+    dto.id = entity.id;
+    dto.active = entity.active;
+    dto.aggregate_usage = entity.aggregate_usage;
+    dto.amount = entity.amount;
+    dto.amount_decimal = entity.amount_decimal;
+    dto.billing_scheme = entity.billing_scheme;
+    dto.created = entity.created;
+    dto.currency = entity.currency;
+    dto.interval = entity.interval;
+    dto.interval_count = entity.interval_count;
+    dto.livemode = entity.livemode;
+    dto.nickname = entity.nickname;
+    dto.trial_period_days = entity.trial_period_days;
+    dto.usage_type = entity.usage_type;
+
+    return dto;
+  }
 }

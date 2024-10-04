@@ -3,8 +3,21 @@ import Stripe from 'stripe';
 import { UsersService } from '../users/users.service';
 import { UserEntity } from '../users/models/users.entity';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
-import { CreateStripePlanDto } from './dto/stripe-plan.dto';
-import { CreateStripeProductDto } from './dto/stripe-product';
+import {
+  CreateStripePlanDto,
+  StripePlanResponseDto,
+} from './dto/stripe-plan.dto';
+import {
+  CreateStripeProductDto,
+  StripeProductResponseDto,
+} from './dto/stripe-product';
+import { Request, Response } from 'express';
+import { ActivatedSubscriptionResponseDto } from './dto/activated-sub-response.dto';
+import { StripeSubscriptionStatus } from './dto/stripe-subscription.dto';
+import {
+  DetachMethodResponseDto,
+  StripePaymentMethodResponseDto,
+} from './dto/stripe-payment-method.dto';
 
 const STRIPE_INACTIVE = 'inactive';
 
@@ -18,12 +31,20 @@ export class StripeService {
     });
   }
 
-  async createProduct(createStripeProductDto: CreateStripeProductDto) {
-    return await this.stripe.products.create(createStripeProductDto);
+  async createProduct(
+    createStripeProductDto: CreateStripeProductDto,
+  ): Promise<StripeProductResponseDto> {
+    const res = await this.stripe.products.create(createStripeProductDto);
+
+    return StripeProductResponseDto.fromEntity(res);
   }
 
-  async createPlan(createStripePlanDto: CreateStripePlanDto) {
-    return await this.stripe.plans.create(createStripePlanDto);
+  async createPlan(
+    createStripePlanDto: CreateStripePlanDto,
+  ): Promise<StripePlanResponseDto> {
+    const res = await this.stripe.plans.create(createStripePlanDto);
+
+    return StripePlanResponseDto.fromEntity(res);
   }
 
   async createCustomer(user: UserEntity, paymentMethod: string) {
@@ -65,7 +86,7 @@ export class StripeService {
   public async activateSubscription(
     userId: string,
     activateSubscriptionDto: ActivateSubscriptionDto,
-  ) {
+  ): Promise<ActivatedSubscriptionResponseDto> {
     const user = await this.usersService.getOne(userId);
     const { paymentMethod, priceId } = activateSubscriptionDto;
 
@@ -80,32 +101,47 @@ export class StripeService {
     user.subscriptionId = subscription.id;
     await this.usersService.saveUser(user);
 
-    const status = subscription['latest_invoice']['payment_intent']['status'];
-    const clientSecret =
-      subscription['latest_invoice']['payment_intent']['client_secret'];
+    //use "as" because of expand parameter
+    const paymentIntent = (subscription.latest_invoice as Stripe.Invoice)
+      .payment_intent as Stripe.PaymentIntent;
+
+    const status = paymentIntent.status;
+    const clientSecret = paymentIntent.client_secret;
+
+    //???
+    //subscription.items has plans
+    //TODO check response
     const nickname = subscription['plan']['nickname'];
 
     return { clientSecret, status, subscriptionId: subscription.id, nickname };
   }
 
-  public async detachPaymentMethod(paymentMethodId: string) {
-    return await this.stripe.paymentMethods.detach(paymentMethodId);
+  public async detachPaymentMethod(
+    paymentMethodId: string,
+  ): Promise<DetachMethodResponseDto> {
+    const res = await this.stripe.paymentMethods.detach(paymentMethodId);
+
+    return { id: res.id };
   }
 
-  public async getProducts() {
+  public async getProducts(): Promise<StripeProductResponseDto[]> {
     const products = await this.stripe.products.list();
-    return products.data.reverse();
+    return products.data
+      .reverse()
+      .map((i) => StripeProductResponseDto.fromEntity(i));
   }
 
-  public async getPlans() {
+  public async getPlans(): Promise<StripePlanResponseDto[]> {
     const plans = await this.stripe.plans.list();
-    return plans.data.reverse();
+    return plans.data
+      .reverse()
+      .map((item) => StripePlanResponseDto.fromEntity(item));
   }
 
   public async getSubscriptionStatus(
-    userId,
-  ): Promise<{ nickname: string; status: string }> {
-    const sub = {
+    userId: string,
+  ): Promise<StripeSubscriptionStatus> {
+    const sub: StripeSubscriptionStatus = {
       nickname: '',
       status: '',
     };
@@ -122,14 +158,18 @@ export class StripeService {
     return sub;
   }
 
-  public async getPaymentMethods(userId: string) {
+  public async getPaymentMethods(
+    userId: string,
+  ): Promise<StripePaymentMethodResponseDto[]> {
     const user = await this.usersService.getOne(userId);
     if (user.customerStripeId) {
       const result = await this.stripe.paymentMethods.list({
         customer: user.customerStripeId,
         type: 'card',
       });
-      return result.data;
+      return result.data.map((i) =>
+        StripePaymentMethodResponseDto.fromEntity(i),
+      );
     }
     return [];
   }
@@ -145,7 +185,7 @@ export class StripeService {
     return [];
   }
 
-  public async webhook(res, req) {
+  public async webhook(res: Response, req: Request) {
     const event = req.body;
     const customer = event['data']['object']['customer'];
     switch (event.type) {

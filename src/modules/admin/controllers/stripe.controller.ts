@@ -10,39 +10,63 @@ import {
 } from '@nestjs/common';
 import { StripeService } from '../../stripe/stripe.service';
 import { GetCurrentUserId } from '../../auth/decorators/get-current-user-id.decorator';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActivateSubscriptionDto } from 'src/modules/stripe/dto/activate-subscription.dto';
 import { SentryInterceptor } from 'src/modules/sentry/sentry.interceptor';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { Public } from 'src/modules/auth/decorators/public.decorator';
-import { CreateStripePlanDto } from 'src/modules/stripe/dto/stripe-plan.dto';
-import { CreateStripeProductDto } from 'src/modules/stripe/dto/stripe-product';
+import {
+  CreateStripePlanDto,
+  StripePlanResponseDto,
+} from 'src/modules/stripe/dto/stripe-plan.dto';
+import {
+  CreateStripeProductDto,
+  StripeProductResponseDto,
+} from 'src/modules/stripe/dto/stripe-product';
+import { Request, Response } from 'express';
+import { ActivatedSubscriptionResponseDto } from 'src/modules/stripe/dto/activated-sub-response.dto';
+import { StripeSubscriptionStatus } from 'src/modules/stripe/dto/stripe-subscription.dto';
+import {
+  DetachMethodBodyDto,
+  DetachMethodResponseDto,
+  StripePaymentMethodResponseDto,
+} from 'src/modules/stripe/dto/stripe-payment-method.dto';
 
 @ApiTags('Billing')
 @UseInterceptors(SentryInterceptor)
 @Controller('billing')
 @UseGuards(AdminAuthGuard)
+@ApiBearerAuth()
 export class StripeController {
   constructor(private stripeService: StripeService) {}
 
   @ApiOperation({ summary: 'Stripe webhook endpoint' })
   @ApiResponse({
     status: 200,
-    description: 'Gets notification fro stripe events',
+    description: 'Gets notification from stripe events',
   })
   @Public()
   @Post('/webhook')
-  webhook(@Res() res, @Req() req) {
+  webhook(@Res() res: Response, @Req() req: Request) {
     return this.stripeService.webhook(res, req);
   }
 
   @ApiOperation({ summary: 'Activate Subscription' })
-  @ApiResponse({ status: 200, description: 'Activates stripe subscription' })
+  @ApiResponse({
+    status: 200,
+    description: 'Activates stripe subscription',
+    type: ActivatedSubscriptionResponseDto,
+  })
   @Post('/activateSubscription')
   activateSubscription(
     @GetCurrentUserId() userId: string,
     @Body() activateSubscriptionDto: ActivateSubscriptionDto,
-  ) {
+  ): Promise<ActivatedSubscriptionResponseDto> {
     return this.stripeService.activateSubscription(
       userId,
       activateSubscriptionDto,
@@ -53,51 +77,84 @@ export class StripeController {
   @ApiResponse({
     status: 200,
     description: 'Detach Payment Method from Customer',
+    type: DetachMethodResponseDto,
   })
   @Post('/detach')
-  detachPaymentMethod(@Body() data) {
+  detachPaymentMethod(@Body() data: DetachMethodBodyDto) {
     return this.stripeService.detachPaymentMethod(data.paymentMethodId);
   }
 
   @ApiOperation({ summary: 'Create plan' })
-  @ApiResponse({ status: 200, description: 'Plan created' })
+  @ApiResponse({
+    status: 200,
+    description: 'Plan created',
+    type: StripePlanResponseDto,
+  })
   @Post('/plans')
-  createPlan(@Body() createStripePlanDto: CreateStripePlanDto) {
+  createPlan(
+    @Body() createStripePlanDto: CreateStripePlanDto,
+  ): Promise<StripePlanResponseDto> {
     return this.stripeService.createPlan(createStripePlanDto);
   }
 
   @ApiOperation({ summary: 'Create product' })
-  @ApiResponse({ status: 200, description: 'Product created' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product created',
+    type: StripeProductResponseDto,
+  })
   @Post('/products')
-  createProduct(@Body() createStripeProductDto: CreateStripeProductDto) {
+  createProduct(
+    @Body() createStripeProductDto: CreateStripeProductDto,
+  ): Promise<StripeProductResponseDto> {
     return this.stripeService.createProduct(createStripeProductDto);
   }
 
   @ApiOperation({ summary: 'Plans' })
-  @ApiResponse({ status: 200, description: 'Stripe plans' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stripe plans',
+    type: [StripePlanResponseDto],
+  })
   @Get('/plans')
-  getPlans() {
+  getPlans(): Promise<StripePlanResponseDto[]> {
     return this.stripeService.getPlans();
   }
 
   @ApiOperation({ summary: 'Products' })
-  @ApiResponse({ status: 200, description: 'Stripe products' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stripe products',
+    type: [StripeProductResponseDto],
+  })
   @Get('/products')
-  getProducts() {
+  getProducts(): Promise<StripeProductResponseDto[]> {
     return this.stripeService.getProducts();
   }
 
   @ApiOperation({ summary: 'Subscription' })
-  @ApiResponse({ status: 200, description: 'Get subscription status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Get subscription status',
+    type: StripeSubscriptionStatus,
+  })
   @Get('/subscriptionStatus')
-  getSubscriptionStatus(@GetCurrentUserId() userId) {
+  getSubscriptionStatus(
+    @GetCurrentUserId() userId: string,
+  ): Promise<StripeSubscriptionStatus> {
     return this.stripeService.getSubscriptionStatus(userId);
   }
 
   @ApiOperation({ summary: 'Payment methods' })
-  @ApiResponse({ status: 200, description: 'Stripe plans' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stripe plans',
+    type: [StripePaymentMethodResponseDto],
+  })
   @Get('/paymentMethods')
-  getPaymentMethods(@GetCurrentUserId() userId: string) {
+  getPaymentMethods(
+    @GetCurrentUserId() userId: string,
+  ): Promise<StripePaymentMethodResponseDto[]> {
     return this.stripeService.getPaymentMethods(userId);
   }
 }
