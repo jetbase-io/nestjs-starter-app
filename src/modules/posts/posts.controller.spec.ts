@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaginationParams } from '../admin/dto/pagination-params.dto';
+import {
+  OrderDirection,
+  PaginationParams,
+} from '../admin/dto/pagination-params.dto';
 import { CreatePostDto } from './dto/create-post-dto';
 import { UpdatePostDto } from './dto/update-post-dto';
 import { PostEntity } from './models/posts.entity';
@@ -111,7 +114,7 @@ describe('PostsController', () => {
       page: '0',
       limit: '100',
       sort: 'id',
-      order: 'ASC',
+      order: OrderDirection.ASC,
     });
     expect(data).toEqual(Promise.resolve(postList));
   });

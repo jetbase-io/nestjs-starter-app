@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { IsOptional, Max } from 'class-validator';
 
-enum OrderDirection {
+export enum OrderDirection {
   ASC = 'ASC',
   DESC = 'DESC',
 }
@@ -9,6 +9,7 @@ export class PaginationParams {
   @ApiProperty()
   page: string;
 
+  @Max(50)
   @ApiProperty()
   limit: string;
 
