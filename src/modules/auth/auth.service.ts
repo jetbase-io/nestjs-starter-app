@@ -9,7 +9,6 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserEntity } from '../users/models/users.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Tokens } from './types/tokens.type';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,6 +18,7 @@ import { SignInUserDto } from '../users/dto/login-user.dto';
 import { EmailService } from '../emails/emails.service';
 import { v4 as uuidv4 } from 'uuid';
 import { getSecrets } from '../../utils/helpers/getSecrets';
+import { TokensDto } from '../../common/dto/tokens.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(userDto: SignInUserDto): Promise<Tokens> {
+  async signIn(userDto: SignInUserDto): Promise<TokensDto> {
     const user = await this.validateUser(userDto.username, userDto.password);
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
@@ -194,7 +194,7 @@ export class AuthService {
     return foundToken !== undefined;
   }
 
-  private async generateTokens(user: UserEntity): Promise<Tokens> {
+  private async generateTokens(user: UserEntity): Promise<TokensDto> {
     const payload = {
       id: user.id,
       username: user.username,
