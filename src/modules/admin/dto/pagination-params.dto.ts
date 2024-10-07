@@ -1,17 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, Max } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsNumber, IsOptional, Max } from 'class-validator';
 
 export enum OrderDirection {
   ASC = 'ASC',
   DESC = 'DESC',
 }
 export class PaginationParams {
+  @Transform(({ value }) => +value)
   @ApiProperty()
-  page: string;
+  @IsNumber()
+  page: number;
 
+  @Transform(({ value }) => +value)
   @Max(50)
+  @IsNumber()
   @ApiProperty()
-  limit: string;
+  limit: number;
 
   @IsOptional()
   @ApiProperty({

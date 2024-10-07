@@ -37,7 +37,7 @@ export class UserEntity extends BaseEntity {
     enum: Role,
     default: Role.USER,
   })
-  roles: Role[];
+  roles: Role;
 
   @Column({ nullable: true })
   avatar: string;

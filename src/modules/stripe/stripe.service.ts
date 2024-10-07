@@ -18,6 +18,7 @@ import {
   DetachMethodResponseDto,
   StripePaymentMethodResponseDto,
 } from './dto/stripe-payment-method.dto';
+import { UserRepository } from '../users/users.repository';
 
 const STRIPE_INACTIVE = 'inactive';
 
@@ -25,7 +26,10 @@ const STRIPE_INACTIVE = 'inactive';
 export class StripeService {
   private stripe: Stripe;
 
-  constructor(private readonly usersService: UsersService) {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly usersRepository: UserRepository,
+  ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2020-08-27',
     });
@@ -87,7 +91,7 @@ export class StripeService {
     userId: string,
     activateSubscriptionDto: ActivateSubscriptionDto,
   ): Promise<ActivatedSubscriptionResponseDto> {
-    const user = await this.usersService.getOne(userId);
+    const user = await this.usersRepository.getOneById(userId);
     const { paymentMethod, priceId } = activateSubscriptionDto;
 
     const customerId = await this.createCustomer(user, paymentMethod);
@@ -99,7 +103,7 @@ export class StripeService {
     });
     user.customerStripeId = customerId;
     user.subscriptionId = subscription.id;
-    await this.usersService.saveUser(user);
+    await this.usersRepository.save(user);
 
     //use "as" because of expand parameter
     const paymentIntent = (subscription.latest_invoice as Stripe.Invoice)

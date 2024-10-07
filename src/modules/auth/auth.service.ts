@@ -19,6 +19,8 @@ import { EmailService } from '../emails/emails.service';
 import { v4 as uuidv4 } from 'uuid';
 import { getSecrets } from '../../utils/helpers/getSecrets';
 import { TokensDto } from '../../common/dto/tokens.dto';
+import { UserEntityDto } from '../users/dto/user.dto';
+import { UserRepository } from '../users/users.repository';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +30,7 @@ export class AuthService {
     @InjectRepository(ExpiredAccessTokenEntity)
     private readonly expiredAccessTokenRepository: Repository<ExpiredAccessTokenEntity>,
     private readonly emailService: EmailService,
+    private readonly userRepository: UserRepository,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
@@ -80,7 +83,7 @@ export class AuthService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     user.confirmedAt = new Date(Date.now());
-    await this.usersService.saveUser(user);
+    await this.userRepository.save(user);
     return {
       message:
         'Your email address has been successfully confirmed! Now you can sign in!',
@@ -129,7 +132,7 @@ export class AuthService {
 
   async refreshAccessToken(userId: string, refreshToken: string) {
     await this.deleteRefreshToken(userId, refreshToken);
-    const user = await this.usersService.getOne(userId);
+    const user = await this.userRepository.getOneById(userId);
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
     return tokens;
@@ -180,7 +183,7 @@ export class AuthService {
   }
 
   async saveExpiredAccessToken(userId: string, accessToken: string) {
-    const user = await this.usersService.getOne(userId);
+    const user = await this.userRepository.getOneById(userId);
     const createdExpiredToken = new ExpiredAccessTokenEntity();
     createdExpiredToken.user = user;
     createdExpiredToken.token = accessToken;
@@ -194,7 +197,7 @@ export class AuthService {
     return foundToken !== undefined;
   }
 
-  private async generateTokens(user: UserEntity): Promise<TokensDto> {
+  private async generateTokens(user: UserEntityDto): Promise<TokensDto> {
     const payload = {
       id: user.id,
       username: user.username,

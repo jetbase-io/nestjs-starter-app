@@ -46,7 +46,7 @@ describe('UsersService', () => {
   const mockUserEntity = Promise.resolve({
     id: mockUserId,
     username: mockUsername,
-    roles: [Role.USER],
+    roles: Role.USER,
   } as Partial<UserEntity>);
 
   beforeEach(async () => {

@@ -18,6 +18,7 @@ import { UserEntity } from './models/users.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
 import { SentryInterceptor } from '../sentry/sentry.interceptor';
+import { UserEntityDto } from './dto/user.dto';
 
 const uploadDir = './uploads/temp';
 
@@ -42,9 +43,9 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @ApiOperation({ summary: 'Get user' })
-  @ApiResponse({ status: 200, type: UserEntity })
+  @ApiResponse({ status: 200, type: UserEntityDto })
   @Get('/:id')
-  getOne(@Param('id') id: string): Promise<UserEntity> {
+  getOne(@Param('id') id: string): Promise<UserEntityDto> {
     return this.userService.getOne(id);
   }
 
