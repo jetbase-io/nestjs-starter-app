@@ -21,6 +21,7 @@ import { getSecrets } from '../../utils/helpers/getSecrets';
 import { TokensDto } from '../../common/dto/tokens.dto';
 import { UserEntityDto } from '../users/dto/user.dto';
 import { UserRepository } from '../users/users.repository';
+import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @Injectable()
 export class AuthService {
@@ -61,7 +62,10 @@ export class AuthService {
     await this.emailService.sendConfirmationLink(to, CONFIRM_URL);
   }
 
-  async signUp(createUserDto: CreateUserDto, url: string) {
+  async signUp(
+    createUserDto: CreateUserDto,
+    url: string,
+  ): Promise<MessageResponse> {
     await this.usersService.validateUsername(createUserDto.username);
     createUserDto.confirmationToken = uuidv4();
     await this.usersService.create({ ...createUserDto });
@@ -70,10 +74,11 @@ export class AuthService {
       url,
       createUserDto.confirmationToken,
     );
-    return { message: 'Successfully signed up! We sent confirmation email' };
+    const message = 'Successfully signed up! We sent confirmation email';
+    return MessageResponse.call(message);
   }
 
-  async confirmEmail(confirmationToken: string) {
+  async confirmEmail(confirmationToken: string): Promise<MessageResponse> {
     const user = await this.usersService.findByConfirmationToken(
       confirmationToken,
     );
@@ -84,22 +89,27 @@ export class AuthService {
       );
     user.confirmedAt = new Date(Date.now());
     await this.userRepository.save(user);
-    return {
-      message:
-        'Your email address has been successfully confirmed! Now you can sign in!',
-    };
+
+    const message =
+      'Your email address has been successfully confirmed! Now you can sign in!';
+    return MessageResponse.call(message);
   }
 
-  async signOut(userId: string, accessToken: string, refreshToken: string) {
+  async signOut(
+    userId: string,
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<MessageResponse> {
     await this.deleteRefreshToken(userId, refreshToken);
     await this.saveExpiredAccessToken(userId, accessToken);
-    return { message: 'Successfully logged out!' };
+    const message = 'Successfully logged out!';
+    return MessageResponse.call(message);
   }
 
   async resetPassword(
     userId: string,
     resetPassword: ResetPasswordDto,
-  ): Promise<{ message: string }> {
+  ): Promise<MessageResponse> {
     const user = await this.usersService.getOne(userId);
     const isMatch = await this.usersService.isPasswordValid(
       resetPassword.oldPassword,
@@ -120,9 +130,9 @@ export class AuthService {
 
     await this.usersService.updatePassword(userId, resetPassword.newPassword);
     await this.deleteAllRefreshTokens(userId);
-    return {
-      message: 'Password updated successfully!',
-    };
+
+    const message = 'Password updated successfully!';
+    return MessageResponse.call(message);
   }
 
   async fullSignOut(userId: string, accessToken: string) {
@@ -139,7 +149,7 @@ export class AuthService {
   }
 
   async validateUser(username: string, password: string) {
-    const user = await this.usersService.findByUsername(username);
+    const user = await this.userRepository.getOneByName(username);
     const message = 'Incorrect password or username';
 
     if (!user?.confirmedAt) {
@@ -222,9 +232,6 @@ export class AuthService {
       }),
     ]);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return TokensDto.call(accessToken, refreshToken);
   }
 }

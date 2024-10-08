@@ -15,40 +15,37 @@ export interface IAbstractRepository<Entity extends ObjectLiteral> {
   getRepository(qr?: QueryRunner): Repository<Entity>;
 }
 
-export function BaseRepository<Entity extends ObjectLiteral>(
-  ref: EntityTarget<Entity>,
-) {
-  abstract class AbstractRepository implements IAbstractRepository<Entity> {
-    async save(data: DeepPartial<Entity>, qr?: QueryRunner): Promise<Entity> {
-      try {
-        const repo = this.getRepository(qr);
+export abstract class AbstractRepository<Entity extends ObjectLiteral>
+  implements IAbstractRepository<Entity>
+{
+  constructor(private readonly ref: EntityTarget<Entity>) {}
+  async save(data: DeepPartial<Entity>, qr?: QueryRunner): Promise<Entity> {
+    try {
+      const repo = this.getRepository(qr);
 
-        return await repo.save(data, { reload: true });
-      } catch (error) {
-        throw new DatabaseException(error.message, error);
-      }
-    }
-
-    async saveMany(
-      data: DeepPartial<Entity>[],
-      qr?: QueryRunner,
-    ): Promise<Entity[]> {
-      try {
-        const repo = this.getRepository(qr);
-
-        return await repo.save(data);
-      } catch (error) {
-        throw new DatabaseException(error.message, error);
-      }
-    }
-
-    getRepository(qr?: QueryRunner) {
-      if (qr) {
-        return qr.manager.getRepository(ref);
-      }
-      return getRepository(ref);
+      return await repo.save(data, { reload: true });
+    } catch (error) {
+      throw new DatabaseException(error.message, error);
     }
   }
 
-  return AbstractRepository as any;
+  async saveMany(
+    data: DeepPartial<Entity>[],
+    qr?: QueryRunner,
+  ): Promise<Entity[]> {
+    try {
+      const repo = this.getRepository(qr);
+
+      return await repo.save(data);
+    } catch (error) {
+      throw new DatabaseException(error.message, error);
+    }
+  }
+
+  getRepository(qr?: QueryRunner) {
+    if (qr) {
+      return qr.manager.getRepository(this.ref);
+    }
+    return getRepository(this.ref);
+  }
 }

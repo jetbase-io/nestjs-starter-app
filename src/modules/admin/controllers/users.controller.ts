@@ -28,6 +28,7 @@ import { CreateUserDto } from '../../../modules/users/dto/create-user.dto';
 import { MessageResponse } from 'src/common/responses/messageResponse';
 import { UserEntityDto } from 'src/modules/users/dto/user.dto';
 import { ApiOkResponsePaginated } from 'src/common/responses/successResponses';
+import { UuidListParam, UuidParam } from 'src/common/params/uuid.param';
 
 @ApiTags('Users')
 @UseInterceptors(SentryInterceptor)
@@ -58,8 +59,8 @@ export class UsersController {
   @ApiResponse({ status: 200, type: UserEntityDto })
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/:id')
-  getOne(@Param('id') id: string): Promise<UserEntityDto> {
-    return this.userService.getOne(id);
+  getOne(@Param() param: UuidParam): Promise<UserEntityDto> {
+    return this.userService.getOne(param.id);
   }
 
   @ApiOperation({ summary: 'Update user' })
@@ -67,10 +68,10 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Put('/:id')
   updateOne(
-    @Param('id') id: string,
+    @Param() param: UuidParam,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {
-    return this.userService.updateOne(id, updateUserDto);
+    return this.userService.updateOne(param.id, updateUserDto);
   }
 
   @ApiOperation({ summary: 'Delete many users' })
@@ -80,8 +81,8 @@ export class UsersController {
     type: MessageResponse,
   })
   @Delete('delete')
-  deleteMany(@Body() { ids }: any): Promise<MessageResponse> {
-    return this.userService.deleteMany(ids);
+  deleteMany(@Body() body: UuidListParam): Promise<MessageResponse> {
+    return this.userService.deleteMany(body.ids);
   }
 
   @ApiOperation({ summary: 'Delete user' })
@@ -91,7 +92,7 @@ export class UsersController {
     type: MessageResponse,
   })
   @Delete(':id')
-  deleteOne(@Param('id') id: string): Promise<MessageResponse> {
-    return this.userService.deleteOne(id);
+  deleteOne(@Param() param: UuidParam): Promise<MessageResponse> {
+    return this.userService.deleteOne(param.id);
   }
 }

@@ -1,16 +1,21 @@
-import { BaseRepository } from 'src/common/base/classes/base.repository';
+import { AbstractRepository } from 'src/common/base/classes/base.repository';
 import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from '../roles/enums/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { OrderDirection } from '../admin/dto/pagination-params.dto';
+import { UpdateResult } from 'typeorm';
 
-export class UserRepository extends BaseRepository(UserEntity) {
+export class UserRepository extends AbstractRepository<UserEntity> {
+  constructor() {
+    super(UserEntity);
+  }
+
   async createUser(
     createUserDto: CreateUserDto,
     role: Role,
     hashedPassword: string,
-  ) {
+  ): Promise<UserEntity> {
     const repo = this.getRepository();
     const newUserBbid = repo.create({
       username: createUserDto.username,
@@ -27,7 +32,7 @@ export class UserRepository extends BaseRepository(UserEntity) {
     take: number,
     sort: string,
     order: OrderDirection,
-  ) {
+  ): Promise<[UserEntity[], number]> {
     const repo = this.getRepository();
 
     const data = await repo
@@ -40,7 +45,7 @@ export class UserRepository extends BaseRepository(UserEntity) {
     return data;
   }
 
-  async getOneById(id: string) {
+  async getOneById(id: string): Promise<UserEntity> {
     const repo = this.getRepository();
 
     const user = await repo.findOne({ id });
@@ -48,7 +53,7 @@ export class UserRepository extends BaseRepository(UserEntity) {
     return user;
   }
 
-  async getOneByName(username: string) {
+  async getOneByName(username: string): Promise<UserEntity> {
     const repo = this.getRepository();
 
     return await repo.findOne({
@@ -56,7 +61,9 @@ export class UserRepository extends BaseRepository(UserEntity) {
     });
   }
 
-  async getOneByConfirmationToken(confirmationToken: string) {
+  async getOneByConfirmationToken(
+    confirmationToken: string,
+  ): Promise<UserEntity> {
     const repo = this.getRepository();
 
     return await repo.findOne({
@@ -64,12 +71,17 @@ export class UserRepository extends BaseRepository(UserEntity) {
     });
   }
 
-  async updateById(id: string, update: UpdateUserDto) {
+  async updateById(id: string, update: UpdateUserDto): Promise<void> {
     const repo = this.getRepository();
     await repo.update(id, update);
   }
 
-  async updateUserAvatarById(id: string, avatarLocation: string) {
+  //TODO
+  //return type definition
+  async updateUserAvatarById(
+    id: string,
+    avatarLocation: string,
+  ): Promise<UpdateResult> {
     const repo = this.getRepository();
     const result = await repo
       .createQueryBuilder()
@@ -82,11 +94,26 @@ export class UserRepository extends BaseRepository(UserEntity) {
       .returning(['username', 'avatar'])
       .execute();
 
-    return result.raw[0];
+    console.log('user repo| update avatar\n', result);
+
+    return result;
   }
 
-  async updatePassword(userId: string, hashedNewPassword: string) {
+  async updatePassword(
+    userId: string,
+    hashedNewPassword: string,
+  ): Promise<void> {
     const repo = this.getRepository();
     await repo.update(userId, { password: hashedNewPassword });
+  }
+
+  async deleteMany(ids: string[]): Promise<void> {
+    const repo = this.getRepository();
+    await repo.delete(ids);
+  }
+
+  async deleteOne(id: string): Promise<void> {
+    const repo = this.getRepository();
+    await repo.delete(id);
   }
 }

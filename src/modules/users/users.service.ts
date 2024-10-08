@@ -13,8 +13,13 @@ import { getSort } from '../../utils/helpers/get-sort';
 import { FileUploadService } from './fileupload.service';
 import { IFile } from './file.interface';
 import { readFileSync } from 'fs';
-import { UserEntityDto } from './dto/user.dto';
+import {
+  PaginatedUsersResponseDto,
+  UploadUserAvatarResponseDto,
+  UserEntityDto,
+} from './dto/user.dto';
 import { UserRepository } from './users.repository';
+import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @Injectable()
 export class UsersService {
@@ -34,10 +39,12 @@ export class UsersService {
     user.confirmationToken = createUserDto.confirmationToken;
     const createdUser = await this.newUserRepository.save(user);
 
-    return UserEntityDto.fromEntity(createdUser);
+    return UserEntityDto.call(createdUser);
   }
 
-  async createByRole(createUserDto: CreateUserByRoleDto): Promise<UserEntity> {
+  async createByRole(
+    createUserDto: CreateUserByRoleDto,
+  ): Promise<UserEntityDto> {
     const user = new UserEntity();
     user.username = createUserDto.username;
     user.password = await this.generateHashPassword(createUserDto.password);
@@ -47,12 +54,12 @@ export class UsersService {
     if (createUserDto.confirmedAt) {
       user.confirmedAt = createUserDto.confirmedAt;
     }
-    return await this.newUserRepository.save(user);
+    const result = await this.newUserRepository.save(user);
+
+    return UserEntityDto.call(result);
   }
 
-  async getUsers(
-    query: PaginationParams,
-  ): Promise<PaginationResponseDto<UserEntityDto>> {
+  async getUsers(query: PaginationParams): Promise<PaginatedUsersResponseDto> {
     const sort = getSort(query, 'users');
     const data = await this.newUserRepository.getMany(
       query.page,
@@ -61,16 +68,13 @@ export class UsersService {
       query.order,
     );
 
-    return {
-      items: data[0].map((u) => UserEntityDto.fromEntity(u)),
-      count: data[1],
-    };
+    return PaginatedUsersResponseDto.call(data);
   }
 
   async getOne(id: string): Promise<UserEntityDto> {
     const user = await this.newUserRepository.getOneById(id);
 
-    return UserEntityDto.fromEntity(user);
+    return UserEntityDto.call(user);
   }
 
   async updateOne(
@@ -83,27 +87,30 @@ export class UsersService {
     return updateUserDto;
   }
 
-  async deleteMany(ids: string[]): Promise<{ message: string }> {
-    // await this.userRepository.delete(ids);
-    return {
-      message: 'Users deleted successfully!',
-    };
+  async deleteMany(ids: string[]): Promise<MessageResponse> {
+    await this.newUserRepository.deleteMany(ids);
+    const message = 'Users deleted successfully!';
+
+    return MessageResponse.call(message);
   }
 
-  async deleteOne(id: string): Promise<{ message: string }> {
+  async deleteOne(id: string): Promise<MessageResponse> {
     await this.isUserExist(id);
-    // await this.userRepository.delete(id);
-    return {
-      message: 'User deleted successfully!',
-    };
+    await this.newUserRepository.deleteOne(id);
+    const message = 'User deleted successfully!';
+
+    return MessageResponse.call(message);
   }
 
-  async saveWithoutOptimization(id: string, originalFile: IFile): Promise<any> {
+  async saveWithoutOptimization(
+    id: string,
+    originalFile: Express.Multer.File,
+  ): Promise<UploadUserAvatarResponseDto> {
     const { destination, filename, mimetype } = originalFile;
     const imagePath = `${destination}/${filename}`;
     const file = readFileSync(imagePath);
 
-    const loadedOriginalFile: any = await this.fileUploadService.upload(
+    const loadedOriginalFile = await this.fileUploadService.upload(
       file,
       filename,
       mimetype,
@@ -112,37 +119,39 @@ export class UsersService {
     await this.isUserExist(id);
     const result = await this.newUserRepository.updateUserAvatarById(
       id,
-      loadedOriginalFile.Location,
+      loadedOriginalFile?.Location ?? imagePath,
     );
 
-    return result;
+    return UploadUserAvatarResponseDto.call(result);
   }
 
-  async validateUsername(username: string): Promise<UserEntity> {
+  async validateUsername(username: string): Promise<void> {
     const user = await this.findByUsername(username);
     if (user) {
       throw new BadRequestException({ message: 'User already exist' });
     }
-    return user;
   }
 
-  async findByUsername(username: string): Promise<UserEntity> {
-    return await this.newUserRepository.getOneByName(username);
+  async findByUsername(username: string): Promise<UserEntityDto> {
+    const res = await this.newUserRepository.getOneByName(username);
+
+    return UserEntityDto.call(res);
   }
 
   async findByConfirmationToken(
     confirmationToken: string,
-  ): Promise<UserEntity> {
-    return await this.newUserRepository.getOneByConfirmationToken(
+  ): Promise<UserEntityDto> {
+    const res = await this.newUserRepository.getOneByConfirmationToken(
       confirmationToken,
     );
+    return UserEntityDto.call(res);
   }
 
   async generateHashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 10);
   }
 
-  async updatePassword(userId: string, password: string) {
+  async updatePassword(userId: string, password: string): Promise<void> {
     const hashedNewPassword = await this.generateHashPassword(password);
     await this.newUserRepository.updatePassword(userId, hashedNewPassword);
   }
@@ -157,7 +166,7 @@ export class UsersService {
     return false;
   }
 
-  async isUserExist(id): Promise<boolean> {
+  async isUserExist(id: string): Promise<boolean> {
     const user = await this.newUserRepository.getOneById(id);
     if (!user) {
       throw new BadRequestException({

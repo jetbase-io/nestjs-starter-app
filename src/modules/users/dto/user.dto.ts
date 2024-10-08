@@ -3,6 +3,20 @@ import { UserEntity } from '../models/users.entity';
 import { Role } from 'src/modules/roles/enums/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { PaginationResponseDto } from 'src/modules/admin/dto/pagination-response.dto';
+import { UpdateResult } from 'typeorm';
+import { UploadedFile } from '@nestjs/common';
+
+export class PaginatedUsersResponseDto extends PaginationResponseDto<UserEntityDto> {
+  static call(
+    data: [UserEntity[], number],
+  ): PaginationResponseDto<UserEntityDto> {
+    const userDtos = data[0].map((u) => UserEntityDto.call(u));
+    const dto = PaginationResponseDto.generateResponse([userDtos, data[1]]);
+
+    return dto;
+  }
+}
 
 export class UserEntityDto extends BaseEntityDto {
   @ApiProperty()
@@ -25,7 +39,7 @@ export class UserEntityDto extends BaseEntityDto {
   @Exclude()
   password: string;
 
-  static fromEntity(entity: UserEntity): UserEntityDto {
+  static call(entity: UserEntity): UserEntityDto {
     const baseDto = BaseEntityDto.fromEntity(entity);
 
     const dto = new UserEntityDto();
@@ -40,6 +54,30 @@ export class UserEntityDto extends BaseEntityDto {
     dto.confirmationToken = entity.confirmationToken;
     dto.confirmedAt = entity.confirmedAt;
     dto.password = entity.password;
+
+    return dto;
+  }
+}
+
+export class UploadUserAvatarDto {
+  @ApiProperty({ format: 'binary', type: 'string', required: true })
+  file: Express.Multer.File;
+}
+
+export class UploadUserAvatarResponseDto {
+  @ApiProperty()
+  username: string;
+
+  @ApiProperty()
+  avatar: string;
+
+  static call(body: UpdateResult): UploadUserAvatarResponseDto {
+    const dto = new UploadUserAvatarResponseDto();
+
+    const { username, avatar } = body.raw[0];
+
+    dto.username = username;
+    dto.avatar = avatar;
 
     return dto;
   }
