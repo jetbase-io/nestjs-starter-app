@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { Readable } from 'stream';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -15,6 +16,8 @@ describe('UsersController', () => {
     filename: 'b0d82301-55bd-4817-913a-889e30176c07.png',
     path: 'uploads/temp/b0d82301-55bd-4817-913a-889e30176c07.png',
     size: 1011131,
+    buffer: Buffer.from('one, two'),
+    stream: new Readable(),
   };
 
   const mockUsersService = {
@@ -64,7 +67,7 @@ describe('UsersController', () => {
   });
 
   it('should return a user by id', async () => {
-    const data = controller.getOne(userId);
+    const data = controller.getOne({ id: userId });
     expect(data).toEqual(
       Promise.resolve({
         id: '4b35f168-74ef-44e3-8df9-f7232a408e8a',
