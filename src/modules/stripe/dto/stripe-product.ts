@@ -50,7 +50,7 @@ export class StripeProductResponseDto {
   @ApiProperty({ nullable: true })
   url: string | null;
 
-  static fromEntity(entity: Stripe.Product): StripeProductResponseDto {
+  static invoke(entity: Stripe.Product): StripeProductResponseDto {
     const dto = new StripeProductResponseDto();
 
     dto.id = entity.id;
@@ -62,7 +62,7 @@ export class StripeProductResponseDto {
 
     const enDefaultPrice = entity.default_price;
     if (typeof enDefaultPrice !== 'string') {
-      const price = StripePriceResponseDto.fromEntity(enDefaultPrice);
+      const price = StripePriceResponseDto.invoke(enDefaultPrice);
 
       dto.default_price = price;
     } else {
@@ -81,5 +81,13 @@ export class StripeProductResponseDto {
     dto.url = entity.url;
 
     return dto;
+  }
+}
+
+export class GetStripeProductsResponseDto {
+  static invoke(
+    products: Stripe.Response<Stripe.ApiList<Stripe.Product>>,
+  ): StripeProductResponseDto[] {
+    return products.data.reverse().map((i) => StripeProductResponseDto.invoke(i));
   }
 }

@@ -8,7 +8,7 @@ export class MessageResponse {
     this.message = customMessage;
   }
 
-  static call(message: string) {
+  static invoke(message: string) {
     return new MessageResponse(message);
   }
 }

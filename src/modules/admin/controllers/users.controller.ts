@@ -23,7 +23,7 @@ import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
 import { UpdateUserDto } from '../../../modules/users/dto/update-user.dto';
-import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
+import { SentryInterceptor } from '../../../common/interceptors/sentry.interceptor';
 import { CreateUserDto } from '../../../modules/users/dto/create-user.dto';
 import { MessageResponse } from 'src/common/responses/messageResponse';
 import { UserEntityDto } from 'src/modules/users/dto/user.dto';

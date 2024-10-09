@@ -5,22 +5,23 @@ import { UserEntity } from '../users/models/users.entity';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 import {
   CreateStripePlanDto,
+  GetStripePlansResponseDto,
   StripePlanResponseDto,
 } from './dto/stripe-plan.dto';
 import {
   CreateStripeProductDto,
+  GetStripeProductsResponseDto,
   StripeProductResponseDto,
 } from './dto/stripe-product';
 import { Request, Response } from 'express';
 import { ActivatedSubscriptionResponseDto } from './dto/activated-sub-response.dto';
-import { StripeSubscriptionStatus } from './dto/stripe-subscription.dto';
+import { StripeSubscriptionStatusResponseDto } from './dto/stripe-subscription.dto';
 import {
   DetachMethodResponseDto,
+  GetStripePaymentMethodsResponseDto,
   StripePaymentMethodResponseDto,
 } from './dto/stripe-payment-method.dto';
-import { UserRepository } from '../users/users.repository';
-
-const STRIPE_INACTIVE = 'inactive';
+import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class StripeService {
@@ -28,7 +29,7 @@ export class StripeService {
 
   constructor(
     private readonly usersService: UsersService,
-    private readonly usersRepository: UserRepository,
+    private readonly usersRepository: UsersRepository,
   ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2020-08-27',
@@ -40,7 +41,7 @@ export class StripeService {
   ): Promise<StripeProductResponseDto> {
     const res = await this.stripe.products.create(createStripeProductDto);
 
-    return StripeProductResponseDto.fromEntity(res);
+    return StripeProductResponseDto.invoke(res);
   }
 
   async createPlan(
@@ -48,31 +49,47 @@ export class StripeService {
   ): Promise<StripePlanResponseDto> {
     const res = await this.stripe.plans.create(createStripePlanDto);
 
-    return StripePlanResponseDto.fromEntity(res);
+    return StripePlanResponseDto.invoke(res);
   }
 
-  async createCustomer(user: UserEntity, paymentMethod: string) {
+  private async createCustomer(
+    username: string,
+    email: string,
+    paymentMethod: string,
+  ): Promise<Stripe.Response<Stripe.Customer>> {
+    const customer = await this.stripe.customers.create({
+      name: username,
+      payment_method: paymentMethod,
+      email: email,
+      invoice_settings: {
+        default_payment_method: paymentMethod,
+      },
+    });
+
+    return customer;
+  }
+
+  private async getOrCreateCustomerId(user: UserEntity, paymentMethod: string) {
     if (!user.customerStripeId) {
-      const customer = await this.stripe.customers.create({
-        name: user.username,
-        payment_method: paymentMethod,
-        email: user.email,
-        invoice_settings: {
-          default_payment_method: paymentMethod,
-        },
-      });
+      const customer = await this.createCustomer(
+        user.username,
+        user.email,
+        paymentMethod,
+      );
       return customer.id;
     }
+
     await this.stripe.paymentMethods.attach(paymentMethod, {
       customer: user.customerStripeId,
     });
+
     return user.customerStripeId;
   }
 
   async createDataBySeed(
     createStripeProductDto: CreateStripeProductDto,
     createStripePlansDto: CreateStripePlanDto[],
-  ) {
+  ): Promise<void> {
     const newProduct = await this.createProduct(createStripeProductDto);
 
     for await (const plan of createStripePlansDto) {
@@ -92,32 +109,25 @@ export class StripeService {
     activateSubscriptionDto: ActivateSubscriptionDto,
   ): Promise<ActivatedSubscriptionResponseDto> {
     const user = await this.usersRepository.getOneById(userId);
+
     const { paymentMethod, priceId } = activateSubscriptionDto;
 
-    const customerId = await this.createCustomer(user, paymentMethod);
+    const customerId = await this.getOrCreateCustomerId(user, paymentMethod);
+
     const subscription = await this.stripe.subscriptions.create({
       customer: customerId,
       default_payment_method: paymentMethod,
       items: [{ price: priceId }],
       expand: ['latest_invoice.payment_intent'],
     });
-    user.customerStripeId = customerId;
-    user.subscriptionId = subscription.id;
-    await this.usersRepository.save(user);
 
-    //use "as" because of expand parameter
-    const paymentIntent = (subscription.latest_invoice as Stripe.Invoice)
-      .payment_intent as Stripe.PaymentIntent;
+    await this.usersRepository.updateUserStripeInfo(
+      user.id,
+      customerId,
+      subscription.id,
+    );
 
-    const status = paymentIntent.status;
-    const clientSecret = paymentIntent.client_secret;
-
-    //???
-    //subscription.items has plans
-    //TODO check response
-    const nickname = subscription['plan']['nickname'];
-
-    return { clientSecret, status, subscriptionId: subscription.id, nickname };
+    return ActivatedSubscriptionResponseDto.invoke(subscription);
   }
 
   public async detachPaymentMethod(
@@ -125,68 +135,66 @@ export class StripeService {
   ): Promise<DetachMethodResponseDto> {
     const res = await this.stripe.paymentMethods.detach(paymentMethodId);
 
-    return { id: res.id };
+    return DetachMethodResponseDto.invoke(res);
   }
 
   public async getProducts(): Promise<StripeProductResponseDto[]> {
     const products = await this.stripe.products.list();
-    return products.data
-      .reverse()
-      .map((i) => StripeProductResponseDto.fromEntity(i));
+    return GetStripeProductsResponseDto.invoke(products);
   }
 
   public async getPlans(): Promise<StripePlanResponseDto[]> {
     const plans = await this.stripe.plans.list();
-    return plans.data
-      .reverse()
-      .map((item) => StripePlanResponseDto.fromEntity(item));
+    return GetStripePlansResponseDto.invoke(plans);
   }
 
   public async getSubscriptionStatus(
     userId: string,
-  ): Promise<StripeSubscriptionStatus> {
-    const sub: StripeSubscriptionStatus = {
-      nickname: '',
-      status: '',
-    };
+  ): Promise<StripeSubscriptionStatusResponseDto> {
     const user = await this.usersService.getOne(userId);
-    if (user.subscriptionId) {
-      const currentSubscription = await this.stripe.subscriptions.retrieve(
-        user.subscriptionId,
-      );
-      sub.nickname = currentSubscription.items.data[0].price.nickname;
-      sub.status = currentSubscription.status;
-      return sub;
+
+    if (!user.subscriptionId) {
+      return StripeSubscriptionStatusResponseDto.invoke();
     }
-    sub.status = STRIPE_INACTIVE;
-    return sub;
+
+    const currentSubscription = await this.stripe.subscriptions.retrieve(
+      user.subscriptionId,
+    );
+
+    return StripeSubscriptionStatusResponseDto.invoke(currentSubscription);
   }
 
   public async getPaymentMethods(
     userId: string,
   ): Promise<StripePaymentMethodResponseDto[]> {
     const user = await this.usersService.getOne(userId);
-    if (user.customerStripeId) {
-      const result = await this.stripe.paymentMethods.list({
-        customer: user.customerStripeId,
-        type: 'card',
-      });
-      return result.data.map((i) =>
-        StripePaymentMethodResponseDto.fromEntity(i),
-      );
+
+    if (!user.customerStripeId) {
+      return GetStripePaymentMethodsResponseDto.invoke();
     }
-    return [];
+
+    const result = await this.stripe.paymentMethods.list({
+      customer: user.customerStripeId,
+      type: 'card',
+    });
+
+    return GetStripePaymentMethodsResponseDto.invoke(result);
   }
 
+  //TODO
+  //Review unnecessary method
   public async getSubscriptions(userId: string) {
     const user = await this.usersService.getOne(userId);
+
     if (user.customerStripeId) {
-      const result = await this.stripe.subscriptions.list({
-        customer: user.customerStripeId,
-      });
-      return result.data;
+      return [];
     }
-    return [];
+
+    const result = await this.stripe.subscriptions.list({
+      customer: user.customerStripeId,
+    });
+
+    return result.data;
   }
 
   public async webhook(res: Response, req: Request) {

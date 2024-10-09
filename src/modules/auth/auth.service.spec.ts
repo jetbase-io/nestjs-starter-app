@@ -8,7 +8,7 @@ import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
 import { randomUUID } from 'crypto';
-import { Role } from '../roles/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import { ForbiddenException } from '@nestjs/common';
 import { EmailService } from '../emails/emails.service';
 

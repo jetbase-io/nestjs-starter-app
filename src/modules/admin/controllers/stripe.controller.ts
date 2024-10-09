@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { StripeService } from '../../stripe/stripe.service';
-import { GetCurrentUserId } from '../../auth/decorators/get-current-user-id.decorator';
+import { GetCurrentUserId } from '../../../common/decorators/get-current-user-id.decorator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -17,9 +17,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ActivateSubscriptionDto } from 'src/modules/stripe/dto/activate-subscription.dto';
-import { SentryInterceptor } from 'src/modules/sentry/sentry.interceptor';
+import { SentryInterceptor } from 'src/common/interceptors/sentry.interceptor';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
-import { Public } from 'src/modules/auth/decorators/public.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 import {
   CreateStripePlanDto,
   StripePlanResponseDto,
@@ -30,7 +30,7 @@ import {
 } from 'src/modules/stripe/dto/stripe-product';
 import { Request, Response } from 'express';
 import { ActivatedSubscriptionResponseDto } from 'src/modules/stripe/dto/activated-sub-response.dto';
-import { StripeSubscriptionStatus } from 'src/modules/stripe/dto/stripe-subscription.dto';
+import { StripeSubscriptionStatusResponseDto } from 'src/modules/stripe/dto/stripe-subscription.dto';
 import {
   DetachMethodBodyDto,
   DetachMethodResponseDto,
@@ -80,7 +80,9 @@ export class StripeController {
     type: DetachMethodResponseDto,
   })
   @Post('/detach')
-  detachPaymentMethod(@Body() data: DetachMethodBodyDto) {
+  detachPaymentMethod(
+    @Body() data: DetachMethodBodyDto,
+  ): Promise<DetachMethodResponseDto> {
     return this.stripeService.detachPaymentMethod(data.paymentMethodId);
   }
 
@@ -136,19 +138,19 @@ export class StripeController {
   @ApiResponse({
     status: 200,
     description: 'Get subscription status',
-    type: StripeSubscriptionStatus,
+    type: StripeSubscriptionStatusResponseDto,
   })
   @Get('/subscriptionStatus')
   getSubscriptionStatus(
     @GetCurrentUserId() userId: string,
-  ): Promise<StripeSubscriptionStatus> {
+  ): Promise<StripeSubscriptionStatusResponseDto> {
     return this.stripeService.getSubscriptionStatus(userId);
   }
 
   @ApiOperation({ summary: 'Payment methods' })
   @ApiResponse({
     status: 200,
-    description: 'Stripe plans',
+    description: 'Stripe payment methods',
     type: [StripePaymentMethodResponseDto],
   })
   @Get('/paymentMethods')

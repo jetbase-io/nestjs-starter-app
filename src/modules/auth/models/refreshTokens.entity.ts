@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '../../users/models/users.entity';
-import { BaseEntity } from '../../base.entity';
+import { BaseEntity } from '../../../common/base/classes/base.entity';
 
 @Entity('refresh_tokens')
 export class RefreshTokenEntity extends BaseEntity {

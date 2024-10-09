@@ -12,6 +12,16 @@ export class DetachMethodBodyDto {
 export class DetachMethodResponseDto {
   @ApiProperty()
   id: string;
+
+  static invoke(
+    data: Stripe.Response<Stripe.PaymentMethod>,
+  ): DetachMethodResponseDto {
+    const dto = new DetachMethodResponseDto();
+
+    dto.id = data.id;
+
+    return dto;
+  }
 }
 
 export class StripeCardResponseDto {
@@ -30,7 +40,7 @@ export class StripeCardResponseDto {
   @ApiProperty()
   last4: string;
 
-  static fromEntity(entity: Stripe.PaymentMethod.Card): StripeCardResponseDto {
+  static invoke(entity: Stripe.PaymentMethod.Card): StripeCardResponseDto {
     const dto = new StripeCardResponseDto();
 
     dto.brand = entity.brand;
@@ -57,15 +67,13 @@ export class StripePaymentMethodResponseDto {
   @ApiProperty()
   type: string;
 
-  static fromEntity(
-    entity: Stripe.PaymentMethod,
-  ): StripePaymentMethodResponseDto {
+  static invoke(entity: Stripe.PaymentMethod): StripePaymentMethodResponseDto {
     const dto = new StripePaymentMethodResponseDto();
 
     dto.id = entity.id;
 
     if (dto.card) {
-      dto.card = StripeCardResponseDto.fromEntity(entity.card);
+      dto.card = StripeCardResponseDto.invoke(entity.card);
     } else {
       dto.card = entity.card;
     }
@@ -74,5 +82,17 @@ export class StripePaymentMethodResponseDto {
     dto.livemode = entity.livemode;
     dto.type = entity.type;
     return dto;
+  }
+}
+
+export class GetStripePaymentMethodsResponseDto {
+  static invoke(
+    methods?: Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>,
+  ): StripePaymentMethodResponseDto[] {
+    if (methods) {
+      return methods.data.map((i) => StripePaymentMethodResponseDto.invoke(i));
+    }
+
+    return [];
   }
 }

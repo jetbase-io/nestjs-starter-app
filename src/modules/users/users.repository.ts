@@ -1,12 +1,12 @@
 import { AbstractRepository } from 'src/common/base/classes/base.repository';
 import { UserEntity } from './models/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Role } from '../roles/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { OrderDirection } from '../admin/dto/pagination-params.dto';
 import { UpdateResult } from 'typeorm';
 
-export class UserRepository extends AbstractRepository<UserEntity> {
+export class UsersRepository extends AbstractRepository<UserEntity> {
   constructor() {
     super(UserEntity);
   }
@@ -15,6 +15,7 @@ export class UserRepository extends AbstractRepository<UserEntity> {
     createUserDto: CreateUserDto,
     role: Role,
     hashedPassword: string,
+    confirmedAt?: Date,
   ): Promise<UserEntity> {
     const repo = this.getRepository();
     const newUserBbid = repo.create({
@@ -23,6 +24,7 @@ export class UserRepository extends AbstractRepository<UserEntity> {
       email: createUserDto.email,
       roles: role,
       confirmationToken: createUserDto.confirmationToken,
+      confirmedAt: confirmedAt,
     });
     return await repo.save(newUserBbid);
   }
@@ -76,8 +78,6 @@ export class UserRepository extends AbstractRepository<UserEntity> {
     await repo.update(id, update);
   }
 
-  //TODO
-  //return type definition
   async updateUserAvatarById(
     id: string,
     avatarLocation: string,
@@ -93,8 +93,6 @@ export class UserRepository extends AbstractRepository<UserEntity> {
       })
       .returning(['username', 'avatar'])
       .execute();
-
-    console.log('user repo| update avatar\n', result);
 
     return result;
   }
@@ -115,5 +113,14 @@ export class UserRepository extends AbstractRepository<UserEntity> {
   async deleteOne(id: string): Promise<void> {
     const repo = this.getRepository();
     await repo.delete(id);
+  }
+
+  async updateUserStripeInfo(
+    userId: string,
+    customerId: string,
+    subscriptionId: string,
+  ) {
+    const repo = this.getRepository();
+    await repo.update(userId, { customerStripeId: customerId, subscriptionId });
   }
 }

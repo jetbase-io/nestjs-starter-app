@@ -11,14 +11,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
+import { SentryInterceptor } from '../../../common/interceptors/sentry.interceptor';
 import { AuthService } from '../../../modules/auth/auth.service';
-import { Public } from '../../../modules/auth/decorators/public.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
 import { SignInUserDto } from '../../../modules/users/dto/login-user.dto';
-import { GetCurrentUserId } from '../../../modules/auth/decorators/get-current-user-id.decorator';
+import { GetCurrentUserId } from '../../../common/decorators/get-current-user-id.decorator';
 import { GetCurrentUser } from '../../../modules/auth/decorators/get-current-user.decorator';
 import { RefreshTokenAuthGuard } from '../../../modules/auth/guards/refresh-token-auth.guard';
-import { RoleCheckInterceptor } from '../interceptors/role-check.interceptor';
+import { RoleCheckInterceptor } from '../../../common/interceptors/role-check.interceptor';
 import { MessageResponse } from 'src/common/responses/messageResponse';
 import { TokensDto } from 'src/common/dto/tokens.dto';
 import { SignOutBodyDto } from 'src/modules/auth/dto/signout-body.dtp';
@@ -53,6 +53,7 @@ export class AuthController {
   @Public()
   @UseGuards(RefreshTokenAuthGuard)
   @ApiResponse({ status: 200, type: TokensDto })
+  @ApiBearerAuth()
   @Post('/refresh')
   refreshAccessToken(
     @GetCurrentUserId() userId: string,

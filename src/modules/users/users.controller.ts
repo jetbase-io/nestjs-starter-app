@@ -9,9 +9,8 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import multer, { diskStorage } from 'multer';
+import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { IFile } from './file.interface';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
@@ -22,8 +21,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
-import { SentryInterceptor } from '../sentry/sentry.interceptor';
+import { GetCurrentUserId } from '../../common/decorators/get-current-user-id.decorator';
+import { SentryInterceptor } from '../../common/interceptors/sentry.interceptor';
 import {
   UploadUserAvatarDto,
   UploadUserAvatarResponseDto,
@@ -53,19 +52,16 @@ export const storage = {
   }),
 };
 
-//TODO
-//continue refactor admin user & user
-
 @ApiTags('Users')
 @UseInterceptors(SentryInterceptor)
 @Controller('users/')
+@ApiBearerAuth()
 export class UsersController {
   constructor(private userService: UsersService) {}
 
   @ApiOperation({ summary: 'Get user' })
   @ApiResponse({ status: 200, type: UserEntityDto })
   @Get('/:id')
-  @ApiBearerAuth()
   getOne(@Param() param: UuidParam): Promise<UserEntityDto> {
     return this.userService.getOne(param.id);
   }
@@ -73,7 +69,6 @@ export class UsersController {
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({ status: 200, type: UpdateUserDto })
   @Put()
-  @ApiBearerAuth()
   updateOne(
     @GetCurrentUserId() userId: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -86,7 +81,8 @@ export class UsersController {
   @Post('/avatar')
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadUserAvatarDto })
-  @ApiBearerAuth()
+  //TODO
+  //Add file validation
   @UseInterceptors(FileInterceptor('file', storage))
   async updateAvatar(
     @GetCurrentUserId() userId: string,

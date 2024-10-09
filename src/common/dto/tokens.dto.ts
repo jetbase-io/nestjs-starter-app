@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Tokens } from 'src/modules/auth/types/tokens.type';
+import { Tokens } from 'src/common/types/tokens.type';
 
 export class TokensDto implements Tokens {
   @ApiProperty()
@@ -8,7 +8,7 @@ export class TokensDto implements Tokens {
   @ApiProperty()
   refreshToken: string;
 
-  static call(accessToken: string, refreshToken: string): TokensDto {
+  static invoke(accessToken: string, refreshToken: string): TokensDto {
     const dto = new TokensDto();
 
     dto.accessToken = accessToken;

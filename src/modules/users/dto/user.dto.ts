@@ -1,17 +1,16 @@
-import { BaseEntityDto } from 'src/modules/base-entity.dto';
+import { BaseEntityDto } from 'src/common/base/classes/base-entity.dto';
 import { UserEntity } from '../models/users.entity';
-import { Role } from 'src/modules/roles/enums/role.enum';
+import { Role } from 'src/common/enums/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { PaginationResponseDto } from 'src/modules/admin/dto/pagination-response.dto';
 import { UpdateResult } from 'typeorm';
-import { UploadedFile } from '@nestjs/common';
 
 export class PaginatedUsersResponseDto extends PaginationResponseDto<UserEntityDto> {
-  static call(
+  static invoke(
     data: [UserEntity[], number],
   ): PaginationResponseDto<UserEntityDto> {
-    const userDtos = data[0].map((u) => UserEntityDto.call(u));
+    const userDtos = data[0].map((u) => UserEntityDto.invoke(u));
     const dto = PaginationResponseDto.generateResponse([userDtos, data[1]]);
 
     return dto;
@@ -39,8 +38,8 @@ export class UserEntityDto extends BaseEntityDto {
   @Exclude()
   password: string;
 
-  static call(entity: UserEntity): UserEntityDto {
-    const baseDto = BaseEntityDto.fromEntity(entity);
+  static invoke(entity: UserEntity): UserEntityDto {
+    const baseDto = BaseEntityDto.invoke(entity);
 
     const dto = new UserEntityDto();
     Object.assign(dto, baseDto);
@@ -71,7 +70,7 @@ export class UploadUserAvatarResponseDto {
   @ApiProperty()
   avatar: string;
 
-  static call(body: UpdateResult): UploadUserAvatarResponseDto {
+  static invoke(body: UpdateResult): UploadUserAvatarResponseDto {
     const dto = new UploadUserAvatarResponseDto();
 
     const { username, avatar } = body.raw[0];

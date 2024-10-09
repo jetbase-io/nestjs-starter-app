@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { FileUploadService } from './fileupload.service';
 import { UserEntity } from './models/users.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../roles/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';

@@ -24,7 +24,7 @@ import { PaginationResponseDto } from '../dto/pagination-response.dto';
 import { PostsService } from '../../../modules/posts/posts.service';
 import { CreatePostDto } from '../../../modules/posts/dto/create-post-dto';
 import { UpdatePostDto } from '../../../modules/posts/dto/update-post-dto';
-import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
+import { SentryInterceptor } from '../../../common/interceptors/sentry.interceptor';
 import { ApiOkResponsePaginated } from 'src/common/responses/successResponses';
 import { PostEntityDto } from 'src/modules/posts/dto/post-entity-dto';
 import { UuidListParam, UuidParam } from 'src/common/params/uuid.param';
@@ -48,12 +48,12 @@ export class PostsController {
     return this.postService.getAllPosts(query);
   }
 
-  @ApiOperation({ summary: 'Get post' })
+  @ApiOperation({ summary: 'Get post by id' })
   @ApiResponse({ type: PostEntityDto })
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/:id')
-  getOne(@Param() body: UuidParam): Promise<PostEntityDto> {
-    return this.postService.getPostById(body.id);
+  getOne(@Param() param: UuidParam): Promise<PostEntityDto> {
+    return this.postService.getPostById(param.id);
   }
 
   @ApiOperation({ summary: 'Create a post' })
@@ -69,23 +69,31 @@ export class PostsController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Put('/:id')
   updatePost(
-    @Param() body: UuidParam,
-    @Body() updatePostDto: UpdatePostDto,
+    @Param() param: UuidParam,
+    @Body() body: UpdatePostDto,
   ): Promise<UpdatePostDto> {
-    return this.postService.updatePostById(body.id, updatePostDto);
+    return this.postService.updatePostById(param.id, body);
   }
 
   @ApiOperation({ summary: 'Delete many posts' })
-  @ApiResponse({ status: 200, description: 'Returns success message' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns success message',
+    type: MessageResponse,
+  })
   @Delete('delete')
   deleteMany(@Body() body: UuidListParam): Promise<MessageResponse> {
     return this.postService.deleteManyPosts(body.ids);
   }
 
   @ApiOperation({ summary: 'Delete post' })
-  @ApiResponse({ status: 200, description: 'Returns success message' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns success message',
+    type: MessageResponse,
+  })
   @Delete('/:id')
-  deleteOne(@Param() body: UuidParam): Promise<MessageResponse> {
-    return this.postService.deletePostById(body.id);
+  deleteOne(@Param() param: UuidParam): Promise<MessageResponse> {
+    return this.postService.deletePostById(param.id);
   }
 }

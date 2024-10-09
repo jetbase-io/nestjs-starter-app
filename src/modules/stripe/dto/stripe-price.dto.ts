@@ -11,9 +11,7 @@ export class CustomUnitAmountDto {
   @ApiProperty()
   preset: number | null;
 
-  static fromEntity(
-    entity: Stripe.Price.CustomUnitAmount,
-  ): CustomUnitAmountDto {
+  static invoke(entity: Stripe.Price.CustomUnitAmount): CustomUnitAmountDto {
     const dto = new CustomUnitAmountDto();
 
     dto.maximum = entity?.maximum;
@@ -61,7 +59,7 @@ export class StripePriceResponseDto {
   @ApiProperty({ nullable: true })
   unit_amount_decimal: string | null;
 
-  static fromEntity(entity: Stripe.Price): StripePriceResponseDto {
+  static invoke(entity: Stripe.Price): StripePriceResponseDto {
     const dto = new StripePriceResponseDto();
 
     dto.id = entity.id;
@@ -73,7 +71,7 @@ export class StripePriceResponseDto {
     const entityUnit = entity.custom_unit_amount;
 
     if (entityUnit) {
-      const unit = CustomUnitAmountDto.fromEntity(entityUnit);
+      const unit = CustomUnitAmountDto.invoke(entityUnit);
       dto.custom_unit_amount = unit;
     } else {
       dto.custom_unit_amount = null;

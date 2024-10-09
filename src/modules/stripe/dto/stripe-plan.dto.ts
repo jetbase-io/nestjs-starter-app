@@ -133,7 +133,7 @@ export class StripePlanResponseDto {
   @ApiProperty()
   usage_type: string;
 
-  static fromEntity(entity: Stripe.Plan) {
+  static invoke(entity: Stripe.Plan) {
     const dto = new StripePlanResponseDto();
 
     dto.id = entity.id;
@@ -152,5 +152,13 @@ export class StripePlanResponseDto {
     dto.usage_type = entity.usage_type;
 
     return dto;
+  }
+}
+
+export class GetStripePlansResponseDto {
+  static invoke(
+    plans: Stripe.Response<Stripe.ApiList<Stripe.Plan>>,
+  ): StripePlanResponseDto[] {
+    return plans.data.reverse().map((item) => StripePlanResponseDto.invoke(item));
   }
 }

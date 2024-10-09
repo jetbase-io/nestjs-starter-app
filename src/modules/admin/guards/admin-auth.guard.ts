@@ -1,7 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { Role } from '../../roles/enums/role.enum';
+import { Role } from '../../../common/enums/role.enum';
 
 @Injectable()
 export class AdminAuthGuard extends AuthGuard('jwt-access') {

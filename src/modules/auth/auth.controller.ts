@@ -17,11 +17,11 @@ import {
 } from '@nestjs/swagger';
 import { SignInUserDto } from '../users/dto/login-user.dto';
 import { RefreshTokenAuthGuard } from './guards/refresh-token-auth.guard';
-import { GetCurrentUserId } from './decorators/get-current-user-id.decorator';
+import { GetCurrentUserId } from '../../common/decorators/get-current-user-id.decorator';
 import { GetCurrentUser } from './decorators/get-current-user.decorator';
-import { Public } from './decorators/public.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
-import { SentryInterceptor } from '../sentry/sentry.interceptor';
+import { SentryInterceptor } from '../../common/interceptors/sentry.interceptor';
 import { Request } from 'express';
 import { UpdateUserConfirmationDto } from '../users/dto/update-user-confirmed-at.dto';
 import { MessageResponse } from 'src/common/responses/messageResponse';
@@ -37,7 +37,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign Up' })
   @ApiResponse({
     status: 200,
-    description: 'Returns tokens',
+    description: 'Returns message',
     type: MessageResponse,
   })
   @Public()
@@ -90,7 +90,7 @@ export class AuthController {
   fullSignOut(
     @GetCurrentUserId() userId: string,
     @GetCurrentUser('accessToken') accessToken: string,
-  ) {
+  ): Promise<void> {
     return this.authService.fullSignOut(userId, accessToken);
   }
 

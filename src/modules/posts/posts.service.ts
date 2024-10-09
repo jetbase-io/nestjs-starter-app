@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getSort } from '../../utils/helpers/get-sort';
 import { getRepository, Repository } from 'typeorm';
@@ -7,7 +7,11 @@ import { PaginationResponseDto } from '../admin/dto/pagination-response.dto';
 import { CreatePostDto } from './dto/create-post-dto';
 import { UpdatePostDto } from './dto/update-post-dto';
 import { PostEntity } from './models/posts.entity';
-import { PostEntityDto } from './dto/post-entity-dto';
+import {
+  PaginatedPostsResponseDto,
+  PostEntityDto,
+} from './dto/post-entity-dto';
+import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @Injectable()
 export class PostsService {
@@ -23,7 +27,7 @@ export class PostsService {
     post.published_at = createPostDto.pubslished_at;
     const result = await this.postRepository.save(post);
 
-    return PostEntityDto.fromEntity(result);
+    return PostEntityDto.invoke(result);
   }
 
   async getAllPosts(
@@ -37,32 +41,29 @@ export class PostsService {
       .orderBy(sort, query.order)
       .getManyAndCount();
 
-    return {
-      items: data[0].map((item) => PostEntityDto.fromEntity(item)),
-      count: data[1],
-    };
+    return PaginatedPostsResponseDto.invoke(data);
   }
 
   async getPostById(id: string): Promise<PostEntityDto> {
     await this.isPostExist(id);
     const post = await this.postRepository.findOne({ id });
 
-    return PostEntityDto.fromEntity(post);
+    return PostEntityDto.invoke(post);
   }
 
-  async deletePostById(id: string): Promise<{ message: string }> {
+  async deletePostById(id: string): Promise<MessageResponse> {
     await this.isPostExist(id);
     await this.postRepository.delete(id);
-    return {
-      message: 'Post deleted successfully!',
-    };
+
+    const message = 'Post deleted successfully!';
+    return MessageResponse.invoke(message);
   }
 
-  async deleteManyPosts(ids: string[]): Promise<{ message: string }> {
+  async deleteManyPosts(ids: string[]): Promise<MessageResponse> {
     await this.postRepository.delete(ids);
-    return {
-      message: 'Posts deleted successfully!',
-    };
+
+    const message = 'Posts deleted successfully!';
+    return MessageResponse.invoke(message);
   }
 
   async updatePostById(

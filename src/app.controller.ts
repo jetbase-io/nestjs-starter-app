@@ -1,6 +1,6 @@
 import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
-import { SentryInterceptor } from './modules/sentry/sentry.interceptor';
+import { SentryInterceptor } from './common/interceptors/sentry.interceptor';
 
 @UseInterceptors(SentryInterceptor)
 @Controller()

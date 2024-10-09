@@ -11,7 +11,7 @@ export class BaseEntityDto {
   @ApiProperty({ type: Date })
   updated_at: Date;
 
-  static fromEntity(entity: BaseEntity): BaseEntityDto {
+  static invoke(entity: BaseEntity): BaseEntityDto {
     const dto = new BaseEntityDto();
     dto.id = entity.id;
     dto.created_at = entity.created_at;

@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as jwt from 'jsonwebtoken';
 import { getSecrets } from 'src/utils/helpers/getSecrets';
-import { Role } from 'src/modules/roles/enums/role.enum';
+import { Role } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class RoleCheckInterceptor implements NestInterceptor {
