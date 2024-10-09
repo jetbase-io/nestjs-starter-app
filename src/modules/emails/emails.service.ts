@@ -13,7 +13,6 @@ export class EmailService {
       await SendGrid.send(email);
     } else if (process.env.NODE_ENV === 'production')
       throw new Error('process.env.SENDGRID_API_KEY is undefined!');
-    // tslint:disable-next-line:no-console
     else console.warn('process.env.SENDGRID_API_KEY is undefined!');
   }
 

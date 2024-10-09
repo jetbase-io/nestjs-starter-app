@@ -49,6 +49,7 @@ export class AuthController {
     return this.authService.signOut(userId, accessToken, body.refreshToken);
   }
 
+  //TODO
   //better to use GET method
   @Public()
   @UseGuards(RefreshTokenAuthGuard)
