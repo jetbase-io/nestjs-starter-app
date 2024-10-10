@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '../../users/models/users.entity';
-import { BaseEntity } from '../../base.entity';
+import { BaseEntity } from '../../../common/base/classes/base.entity';
 
 @Entity('expired_access_tokens')
 export class ExpiredAccessTokenEntity extends BaseEntity {

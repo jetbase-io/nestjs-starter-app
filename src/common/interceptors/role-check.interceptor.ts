@@ -9,18 +9,14 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as jwt from 'jsonwebtoken';
 import { getSecrets } from 'src/utils/helpers/getSecrets';
-import { Role } from 'src/modules/roles/enums/role.enum';
+import { Role } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class RoleCheckInterceptor implements NestInterceptor {
   intercept(_: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((tokens) => {
-        const { secretForAccessToken } = getSecrets(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          Role.ADMIN,
-        );
+        const { secretForAccessToken } = getSecrets(Role.ADMIN);
 
         this.verifyToken(tokens.accessToken, secretForAccessToken);
 

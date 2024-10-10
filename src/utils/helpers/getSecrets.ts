@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Role } from '../../modules/roles/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 
 type Done = (err: Error | null, secretOrKey?: string) => void;
 export const enum SecretTypes {

@@ -1,5 +1,5 @@
 import { CreateUserByRoleDto } from 'src/modules/users/dto/create-user-by-role.dto';
-import { Role } from '../../../roles/enums/role.enum';
+import { Role } from '../../../../common/enums/role.enum';
 
 export const users: CreateUserByRoleDto[] = [
   {

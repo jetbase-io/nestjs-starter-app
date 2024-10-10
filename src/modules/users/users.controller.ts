@@ -11,22 +11,39 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { IFile } from './file.interface';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from './models/users.entity';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetCurrentUserId } from '../auth/decorators/get-current-user-id.decorator';
-import { SentryInterceptor } from '../sentry/sentry.interceptor';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { GetCurrentUserId } from '../../common/decorators/get-current-user-id.decorator';
+import { SentryInterceptor } from '../../common/interceptors/sentry.interceptor';
+import {
+  UploadUserAvatarDto,
+  UploadUserAvatarResponseDto,
+  UserEntityDto,
+} from './dto/user.dto';
+import { UuidParam } from 'src/common/params/uuid.param';
 
 const uploadDir = './uploads/temp';
 
 export const storage = {
+  dest: uploadDir,
   storage: diskStorage({
     destination: (req, file, cb) => {
-      cb(null, uploadDir);
+      cb(
+        // new Error('directory not exists'),
+        null,
+        uploadDir,
+      );
     },
     filename: (req, file, cb) => {
+      console.log('filename', file);
       const filename: string = uuidv4();
       const arr = file.originalname.split('.');
       const extension: string = arr[arr.length - 1];
@@ -38,14 +55,15 @@ export const storage = {
 @ApiTags('Users')
 @UseInterceptors(SentryInterceptor)
 @Controller('users/')
+@ApiBearerAuth()
 export class UsersController {
   constructor(private userService: UsersService) {}
 
   @ApiOperation({ summary: 'Get user' })
-  @ApiResponse({ status: 200, type: UserEntity })
+  @ApiResponse({ status: 200, type: UserEntityDto })
   @Get('/:id')
-  getOne(@Param('id') id: string): Promise<UserEntity> {
-    return this.userService.getOne(id);
+  getOne(@Param() param: UuidParam): Promise<UserEntityDto> {
+    return this.userService.getOne(param.id);
   }
 
   @ApiOperation({ summary: 'Update user' })
@@ -59,13 +77,17 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Update user profile picture' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: UploadUserAvatarResponseDto })
   @Post('/avatar')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UploadUserAvatarDto })
+  //TODO
+  //Add file validation
   @UseInterceptors(FileInterceptor('file', storage))
   async updateAvatar(
     @GetCurrentUserId() userId: string,
-    @UploadedFile() file: IFile,
-  ): Promise<any> {
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UploadUserAvatarResponseDto> {
     return this.userService.saveWithoutOptimization(userId, file);
   }
 }

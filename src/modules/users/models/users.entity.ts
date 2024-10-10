@@ -1,10 +1,10 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import { Role } from '../../roles/enums/role.enum';
+import { Role } from '../../../common/enums/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { RefreshTokenEntity } from '../../auth/models/refreshTokens.entity';
 import { Exclude } from 'class-transformer';
 import { ExpiredAccessTokenEntity } from '../../auth/models/expiredAccessTokens.entity';
-import { BaseEntity } from '../../base.entity';
+import { BaseEntity } from '../../../common/base/classes/base.entity';
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
@@ -37,7 +37,7 @@ export class UserEntity extends BaseEntity {
     enum: Role,
     default: Role.USER,
   })
-  roles: Role[];
+  roles: Role;
 
   @Column({ nullable: true })
   avatar: string;

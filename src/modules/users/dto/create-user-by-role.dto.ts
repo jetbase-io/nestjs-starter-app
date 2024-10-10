@@ -10,7 +10,7 @@ import {
 import { UsernameUnique } from '../validator/user-unique.validator';
 import { UserEntity } from '../models/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../roles/enums/role.enum';
+import { Role } from '../../../common/enums/role.enum';
 
 export class CreateUserByRoleDto {
   @IsNotEmpty()

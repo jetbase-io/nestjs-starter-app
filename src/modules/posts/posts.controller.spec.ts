@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaginationParams } from '../admin/dto/pagination-params.dto';
+import {
+  OrderDirection,
+  PaginationParams,
+} from '../admin/dto/pagination-params.dto';
 import { CreatePostDto } from './dto/create-post-dto';
 import { UpdatePostDto } from './dto/update-post-dto';
 import { PostEntity } from './models/posts.entity';
@@ -108,16 +111,18 @@ describe('PostsController', () => {
 
   it('should get all posts', () => {
     const data = controller.getPosts({
-      page: '0',
-      limit: '100',
+      page: 0,
+      limit: 50,
       sort: 'id',
-      order: 'ASC',
+      order: OrderDirection.ASC,
     });
     expect(data).toEqual(Promise.resolve(postList));
   });
 
   it('should get post by id', () => {
-    const data = controller.getPostById('92663221-01ca-4e31-9619-317c531ec3f9');
+    const data = controller.getPostById({
+      id: '92663221-01ca-4e31-9619-317c531ec3f9',
+    });
     expect(data).toEqual(
       Promise.resolve({
         title: expect.any(String),
@@ -132,9 +137,9 @@ describe('PostsController', () => {
   });
 
   it('should delete post by id', () => {
-    const data = controller.deletePostById(
-      '92663221-01ca-4e31-9619-317c531ec3f9',
-    );
+    const data = controller.deletePostById({
+      id: '92663221-01ca-4e31-9619-317c531ec3f9',
+    });
     expect(data).toEqual(
       Promise.resolve({
         message: 'Post deleted successfully!',
@@ -143,10 +148,12 @@ describe('PostsController', () => {
   });
 
   it('should delete many posts by ids', () => {
-    const data = controller.deleteMany([
-      '92663221-01ca-4e31-9619-317c531ec3f9',
-      '8125b51b-ca84-4864-86ca-eec6ad4395ca',
-    ]);
+    const data = controller.deleteMany({
+      ids: [
+        '92663221-01ca-4e31-9619-317c531ec3f9',
+        '8125b51b-ca84-4864-86ca-eec6ad4395ca',
+      ],
+    });
     expect(data).toEqual(
       Promise.resolve({
         message: 'Post deleted successfully!',
@@ -156,7 +163,7 @@ describe('PostsController', () => {
 
   it('should update post by id', () => {
     const data = controller.updatePostById(
-      '92663221-01ca-4e31-9619-317c531ec3f9',
+      { id: '92663221-01ca-4e31-9619-317c531ec3f9' },
       {
         title: 'New title',
         description: 'New description',

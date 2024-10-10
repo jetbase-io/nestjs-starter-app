@@ -8,17 +8,25 @@ import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
 import { randomUUID } from 'crypto';
-import { Role } from '../roles/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import { ForbiddenException } from '@nestjs/common';
 import { EmailService } from '../emails/emails.service';
 
 import * as dotenv from 'dotenv';
+import { UsersRepository } from '../users/users.repository';
 dotenv.config();
 
 describe('AuthService', () => {
   let service: AuthService;
   let refreshTokenRepository;
   let expiredAccessTokenRepository;
+
+  const userRepository = {
+    getOneById: jest.fn(),
+    getOneByName: jest.fn(),
+    save: jest.fn(),
+    createUser: jest.fn(),
+  };
 
   const fakeUserService = {
     getOne: jest.fn(),
@@ -32,6 +40,7 @@ describe('AuthService', () => {
     sendContactForm: async () => {
       return;
     },
+    sendConfirmationLink: jest.fn(),
   };
 
   const mockUserId = randomUUID();
@@ -51,6 +60,10 @@ describe('AuthService', () => {
         {
           provide: getRepositoryToken(RefreshTokenEntity),
           useFactory: repositoryMockFactory,
+        },
+        {
+          provide: UsersRepository,
+          useValue: userRepository,
         },
         {
           provide: JwtService,
@@ -93,10 +106,13 @@ describe('AuthService', () => {
       },
     );
 
-    const message = await service.signUp({
-      username: mockUsername,
-      password: mockPassword,
-    } as CreateUserDto);
+    const message = await service.signUp(
+      {
+        username: mockUsername,
+        password: mockPassword,
+      } as CreateUserDto,
+      '',
+    );
 
     expect(message).toEqual({
       message: 'Successfully signed up! We sent confirmation email',
@@ -118,10 +134,13 @@ describe('AuthService', () => {
       },
     );
 
-    const message = await service.signUp({
-      username: mockUsername,
-      password: mockPassword,
-    } as CreateUserDto);
+    const message = await service.signUp(
+      {
+        username: mockUsername,
+        password: mockPassword,
+      } as CreateUserDto,
+      '',
+    );
 
     expect(message).toEqual({
       message: 'Successfully signed up! We sent confirmation email',
@@ -145,6 +164,19 @@ describe('AuthService', () => {
       async (password, user) => {
         expect(password).toBe(mockPassword);
         return !!user;
+      },
+    );
+
+    userRepository.getOneByName.mockImplementationOnce(
+      async (username: string) => {
+        expect(username).toBe(mockUsername);
+        return {
+          id: mockUserId,
+          roles: Role.USER,
+          username: mockUsername,
+          password: mockPassword,
+          confirmedAt: new Date(),
+        };
       },
     );
 
@@ -228,6 +260,17 @@ describe('AuthService', () => {
       id: mockUserId,
       token: mockRefreshToken,
     }));
+
+    userRepository.getOneById.mockImplementationOnce(async (id: string) => {
+      expect(id).toBe(mockUserId);
+      return {
+        id: mockUserId,
+        roles: Role.USER,
+        username: mockUsername,
+        password: mockPassword,
+        confirmedAt: new Date(),
+      };
+    });
 
     const tokens = await service.refreshAccessToken(
       mockUserId,

@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { EmailService } from '../emails/emails.service';
+import { UsersRepository } from '../users/users.repository';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -18,6 +19,13 @@ describe('AuthController', () => {
     sendContactForm: async () => {
       return;
     },
+  };
+
+  const userRepository = {
+    getOneById: jest.fn(),
+    getOneByName: jest.fn(),
+    save: jest.fn(),
+    createUser: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -32,8 +40,8 @@ describe('AuthController', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: getRepositoryToken(UserEntity),
-          useFactory: repositoryMockFactory,
+          provide: UsersRepository,
+          useValue: userRepository,
         },
         JwtService,
         UsersService,

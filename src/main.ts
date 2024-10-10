@@ -31,6 +31,7 @@ async function start() {
     .setDescription(NEST_CONFIGS.DESCRIPTION)
     .setVersion(NEST_CONFIGS.VERSION)
     .addTag(NEST_CONFIGS.TAG)
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(API_DEFAULT_PREFIX + SWAGGER_PREFIX, app, document);

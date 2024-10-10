@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @ApiProperty({ example: 'Dr. House', description: 'Title' })
@@ -15,6 +16,13 @@ export class CreatePostDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ example: '', description: 'Time for post to be published at' })
+  @IsOptional()
+  // @IsDateString()
+  @Transform(({ value }) => new Date(value))
+  @ApiProperty({
+    description: 'Time for post to be published at',
+    type: Date,
+    nullable: true,
+  })
   pubslished_at?: Date | null;
 }

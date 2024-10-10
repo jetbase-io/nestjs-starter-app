@@ -9,7 +9,6 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserEntity } from '../users/models/users.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Tokens } from './types/tokens.type';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,6 +18,10 @@ import { SignInUserDto } from '../users/dto/login-user.dto';
 import { EmailService } from '../emails/emails.service';
 import { v4 as uuidv4 } from 'uuid';
 import { getSecrets } from '../../utils/helpers/getSecrets';
+import { TokensDto } from '../../common/dto/tokens.dto';
+import { UserEntityDto } from '../users/dto/user.dto';
+import { UsersRepository } from '../users/users.repository';
+import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @Injectable()
 export class AuthService {
@@ -28,18 +31,19 @@ export class AuthService {
     @InjectRepository(ExpiredAccessTokenEntity)
     private readonly expiredAccessTokenRepository: Repository<ExpiredAccessTokenEntity>,
     private readonly emailService: EmailService,
+    private readonly userRepository: UsersRepository,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async signIn(userDto: SignInUserDto): Promise<Tokens> {
+  async signIn(userDto: SignInUserDto): Promise<TokensDto> {
     const user = await this.validateUser(userDto.username, userDto.password);
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
     return tokens;
   }
 
-  async sendEmail(to: string): Promise<any> {
+  async sendEmail(to: string): Promise<void> {
     const emailContent = 'This is a welcome message! Thank You for signing up!';
     const emailDescription = 'Welcome message';
     await this.emailService.sendGeneralEmail(
@@ -53,12 +57,15 @@ export class AuthService {
     to: string,
     url: string,
     confirmationToken: string,
-  ): Promise<any> {
+  ): Promise<void> {
     const CONFIRM_URL = `${url}/confirmation/?confirmation_token=${confirmationToken}`;
     await this.emailService.sendConfirmationLink(to, CONFIRM_URL);
   }
 
-  async signUp(createUserDto: CreateUserDto, url: string) {
+  async signUp(
+    createUserDto: CreateUserDto,
+    url: string,
+  ): Promise<MessageResponse> {
     await this.usersService.validateUsername(createUserDto.username);
     createUserDto.confirmationToken = uuidv4();
     await this.usersService.create({ ...createUserDto });
@@ -67,10 +74,11 @@ export class AuthService {
       url,
       createUserDto.confirmationToken,
     );
-    return { message: 'Successfully signed up! We sent confirmation email' };
+    const message = 'Successfully signed up! We sent confirmation email';
+    return MessageResponse.invoke(message);
   }
 
-  async confirmEmail(confirmationToken: string) {
+  async confirmEmail(confirmationToken: string): Promise<MessageResponse> {
     const user = await this.usersService.findByConfirmationToken(
       confirmationToken,
     );
@@ -80,23 +88,28 @@ export class AuthService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     user.confirmedAt = new Date(Date.now());
-    await this.usersService.saveUser(user);
-    return {
-      message:
-        'Your email address has been successfully confirmed! Now you can sign in!',
-    };
+    await this.userRepository.save(user);
+
+    const message =
+      'Your email address has been successfully confirmed! Now you can sign in!';
+    return MessageResponse.invoke(message);
   }
 
-  async signOut(userId: string, accessToken: string, refreshToken: string) {
+  async signOut(
+    userId: string,
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<MessageResponse> {
     await this.deleteRefreshToken(userId, refreshToken);
     await this.saveExpiredAccessToken(userId, accessToken);
-    return { message: 'Successfully logged out!' };
+    const message = 'Successfully logged out!';
+    return MessageResponse.invoke(message);
   }
 
   async resetPassword(
     userId: string,
     resetPassword: ResetPasswordDto,
-  ): Promise<{ message: string }> {
+  ): Promise<MessageResponse> {
     const user = await this.usersService.getOne(userId);
     const isMatch = await this.usersService.isPasswordValid(
       resetPassword.oldPassword,
@@ -117,26 +130,30 @@ export class AuthService {
 
     await this.usersService.updatePassword(userId, resetPassword.newPassword);
     await this.deleteAllRefreshTokens(userId);
-    return {
-      message: 'Password updated successfully!',
-    };
+
+    const message = 'Password updated successfully!';
+    return MessageResponse.invoke(message);
   }
 
-  async fullSignOut(userId: string, accessToken: string) {
+  async fullSignOut(userId: string, accessToken: string): Promise<void> {
     await this.deleteAllRefreshTokens(userId);
     await this.saveExpiredAccessToken(userId, accessToken);
   }
 
-  async refreshAccessToken(userId: string, refreshToken: string) {
+  async refreshAccessToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<TokensDto> {
     await this.deleteRefreshToken(userId, refreshToken);
-    const user = await this.usersService.getOne(userId);
+    const user = await this.userRepository.getOneById(userId);
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user, tokens.refreshToken);
+
     return tokens;
   }
 
   async validateUser(username: string, password: string) {
-    const user = await this.usersService.findByUsername(username);
+    const user = await this.userRepository.getOneByName(username);
     const message = 'Incorrect password or username';
 
     if (!user?.confirmedAt) {
@@ -152,7 +169,10 @@ export class AuthService {
     return user;
   }
 
-  async updateRefreshToken(user: UserEntity, refreshToken: string) {
+  async updateRefreshToken(
+    user: UserEntity,
+    refreshToken: string,
+  ): Promise<void> {
     // create new refresh token
     const refreshTokenDb = new RefreshTokenEntity();
     refreshTokenDb.token = refreshToken;
@@ -160,7 +180,10 @@ export class AuthService {
     await this.refreshTokenRepository.save(refreshTokenDb);
   }
 
-  async deleteRefreshToken(userId: string, refreshToken: string) {
+  async deleteRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<void> {
     const foundToken = await this.refreshTokenRepository.findOne({
       where: { user: { id: userId }, token: refreshToken },
     });
@@ -172,15 +195,18 @@ export class AuthService {
     }
   }
 
-  async deleteAllRefreshTokens(userId: string) {
+  async deleteAllRefreshTokens(userId: string): Promise<void> {
     const foundTokens = await this.refreshTokenRepository.find({
       where: { user: { id: userId } },
     });
     await this.refreshTokenRepository.remove(foundTokens);
   }
 
-  async saveExpiredAccessToken(userId: string, accessToken: string) {
-    const user = await this.usersService.getOne(userId);
+  async saveExpiredAccessToken(
+    userId: string,
+    accessToken: string,
+  ): Promise<void> {
+    const user = await this.userRepository.getOneById(userId);
     const createdExpiredToken = new ExpiredAccessTokenEntity();
     createdExpiredToken.user = user;
     createdExpiredToken.token = accessToken;
@@ -194,7 +220,7 @@ export class AuthService {
     return foundToken !== undefined;
   }
 
-  private async generateTokens(user: UserEntity): Promise<Tokens> {
+  private async generateTokens(user: UserEntityDto): Promise<TokensDto> {
     const payload = {
       id: user.id,
       username: user.username,
@@ -203,8 +229,6 @@ export class AuthService {
     };
 
     const { secretForAccessToken, secretForRefreshToken } = getSecrets(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       user.roles,
     );
 
@@ -219,9 +243,6 @@ export class AuthService {
       }),
     ]);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return TokensDto.invoke(accessToken, refreshToken);
   }
 }

@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './models/users.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { FileUploadService } from './fileupload.service';
+import { UsersRepository } from './users.repository';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { FileUploadService } from './fileupload.service';
     FileUploadService,
   ],
   controllers: [UsersController],
-  providers: [UsersService, FileUploadService],
-  exports: [UsersService],
+  providers: [UsersService, FileUploadService, UsersRepository],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}

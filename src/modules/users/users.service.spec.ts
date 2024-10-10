@@ -2,19 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { FileUploadService } from './fileupload.service';
 import { UserEntity } from './models/users.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../roles/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
+import { UsersRepository } from './users.repository';
 
 describe('UsersService', () => {
   let userService: UsersService;
   const userRepository = {
+    getOneById: jest.fn(),
+    getOneByName: jest.fn(),
     save: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    createUser: jest.fn(),
   };
   const fileUploadService = {
     upload: async () => {
@@ -46,7 +46,7 @@ describe('UsersService', () => {
   const mockUserEntity = Promise.resolve({
     id: mockUserId,
     username: mockUsername,
-    roles: [Role.USER],
+    roles: Role.USER,
   } as Partial<UserEntity>);
 
   beforeEach(async () => {
@@ -54,7 +54,7 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         {
-          provide: getRepositoryToken(UserEntity),
+          provide: UsersRepository,
           useValue: userRepository,
         },
         {
@@ -72,19 +72,19 @@ describe('UsersService', () => {
   });
 
   it('create new user with encoded password', async () => {
-    jest.spyOn(userRepository, 'save').mockResolvedValue(mockUserEntity);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValue(mockUserEntity);
     const user = await userService.create(mockUserDto);
     expect(user.password).not.toEqual(mockUserDto.password);
   });
 
   it('create new user with role', async () => {
-    jest.spyOn(userRepository, 'save').mockResolvedValue(mockUserEntity);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValue(mockUserEntity);
     const user = await userService.create(mockUserWithRoleDto);
     expect(user.roles.length).toBeGreaterThan(0);
   });
 
   it('return user with provided id', async () => {
-    jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUserEntity);
+    jest.spyOn(userRepository, 'getOneById').mockResolvedValue(mockUserEntity);
     const user = await userService.getOne(mockUserId);
     expect(user.id).toEqual(mockUserId);
   });

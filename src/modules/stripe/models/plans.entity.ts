@@ -1,6 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseEntity } from '../../base.entity';
+import { BaseEntity } from '../../../common/base/classes/base.entity';
 
 @Entity('plans')
 export class PlanEntity extends BaseEntity {

@@ -11,72 +11,89 @@ import {
   UseInterceptors,
   Put,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { PaginationParams } from '../dto/pagination-params.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
 import { PostsService } from '../../../modules/posts/posts.service';
-import { PostEntity } from '../../../modules/posts/models/posts.entity';
 import { CreatePostDto } from '../../../modules/posts/dto/create-post-dto';
 import { UpdatePostDto } from '../../../modules/posts/dto/update-post-dto';
-import { SentryInterceptor } from '../../../modules/sentry/sentry.interceptor';
+import { SentryInterceptor } from '../../../common/interceptors/sentry.interceptor';
+import { ApiOkResponsePaginated } from 'src/common/responses/successResponses';
+import { PostEntityDto } from 'src/modules/posts/dto/post-entity-dto';
+import { UuidListParam, UuidParam } from 'src/common/params/uuid.param';
+import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @ApiTags('Posts')
 @UseInterceptors(SentryInterceptor)
 @Controller('posts')
 @UseGuards(AdminAuthGuard)
+@ApiBearerAuth()
 export class PostsController {
   constructor(private postService: PostsService) {}
 
   @ApiOperation({ summary: 'Get posts' })
-  @ApiResponse({ status: 200, type: PostEntity })
   @UseInterceptors(ClassSerializerInterceptor)
-  @Get('')
+  @Get()
+  @ApiOkResponsePaginated(PostEntityDto)
   getPosts(
     @Query() query: PaginationParams,
-  ): Promise<PaginationResponseDto<PostEntity>> {
+  ): Promise<PaginationResponseDto<PostEntityDto>> {
     return this.postService.getAllPosts(query);
   }
 
-  @ApiOperation({ summary: 'Get post' })
-  @ApiResponse({ status: 200, type: PostEntity })
+  @ApiOperation({ summary: 'Get post by id' })
+  @ApiResponse({ type: PostEntityDto })
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/:id')
-  getOne(@Param('id') id: string): Promise<PostEntity> {
-    return this.postService.getPostById(id);
+  getOne(@Param() param: UuidParam): Promise<PostEntityDto> {
+    return this.postService.getPostById(param.id);
   }
 
   @ApiOperation({ summary: 'Create a post' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ type: PostEntityDto })
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  createPost(@Body() createPostDto: CreatePostDto): Promise<PostEntity> {
+  createPost(@Body() createPostDto: CreatePostDto): Promise<PostEntityDto> {
     return this.postService.createPost(createPostDto);
   }
 
   @ApiOperation({ summary: 'Update a post' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: UpdatePostDto })
   @UseInterceptors(ClassSerializerInterceptor)
   @Put('/:id')
   updatePost(
-    @Param('id') id: string,
-    @Body() updatePostDto: UpdatePostDto,
+    @Param() param: UuidParam,
+    @Body() body: UpdatePostDto,
   ): Promise<UpdatePostDto> {
-    return this.postService.updatePostById(id, updatePostDto);
+    return this.postService.updatePostById(param.id, body);
   }
 
   @ApiOperation({ summary: 'Delete many posts' })
-  @ApiResponse({ status: 200, description: 'Returns success message' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns success message',
+    type: MessageResponse,
+  })
   @Delete('delete')
-  deleteMany(@Body() { ids }: any): Promise<{ message: string }> {
-    return this.postService.deleteManyPosts(ids);
+  deleteMany(@Body() body: UuidListParam): Promise<MessageResponse> {
+    return this.postService.deleteManyPosts(body.ids);
   }
 
   @ApiOperation({ summary: 'Delete post' })
-  @ApiResponse({ status: 200, description: 'Returns success message' })
-  @Delete(':id')
-  deleteOne(@Param('id') id: string): Promise<{ message: string }> {
-    return this.postService.deletePostById(id);
+  @ApiResponse({
+    status: 200,
+    description: 'Returns success message',
+    type: MessageResponse,
+  })
+  @Delete('/:id')
+  deleteOne(@Param() param: UuidParam): Promise<MessageResponse> {
+    return this.postService.deletePostById(param.id);
   }
 }
