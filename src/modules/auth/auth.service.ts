@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getSecrets } from '../../utils/helpers/getSecrets';
 import { TokensDto } from '../../common/dto/tokens.dto';
 import { UserEntityDto } from '../users/dto/user.dto';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/repository/users.repository';
 import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @Injectable()

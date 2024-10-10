@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { EmailService } from '../emails/emails.service';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/repository/users.repository';
 
 describe('AuthController', () => {
   let controller: AuthController;

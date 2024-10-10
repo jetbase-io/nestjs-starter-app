@@ -6,7 +6,7 @@ import { UsersService } from '../users/users.service';
 import { FileUploadService } from '../users/fileupload.service';
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/repository/users.repository';
 
 describe('StripeController', () => {
   let controller: StripeController;

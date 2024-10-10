@@ -13,7 +13,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { EmailService } from '../emails/emails.service';
 
 import * as dotenv from 'dotenv';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/repository/users.repository';
 dotenv.config();
 
 describe('AuthService', () => {

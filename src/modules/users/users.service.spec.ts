@@ -6,7 +6,7 @@ import { Role } from '../../common/enums/role.enum';
 import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
-import { UsersRepository } from './users.repository';
+import { UsersRepository } from './repository/users.repository';
 
 describe('UsersService', () => {
   let userService: UsersService;

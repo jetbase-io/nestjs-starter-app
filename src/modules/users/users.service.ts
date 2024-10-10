@@ -13,7 +13,7 @@ import {
   UploadUserAvatarResponseDto,
   UserEntityDto,
 } from './dto/user.dto';
-import { UsersRepository } from './users.repository';
+import { UsersRepository } from './repository/users.repository';
 import { MessageResponse } from 'src/common/responses/messageResponse';
 
 @Injectable()
@@ -30,7 +30,7 @@ export class UsersService {
 
     const userRole = Role.USER;
 
-    const createdUser = await this.userRepository.createUser(
+    const createdUser = await this.userRepository.createUserOld(
       createUserDto,
       userRole,
       hashedPassword,
@@ -48,7 +48,7 @@ export class UsersService {
 
     const userRole = createUserDto.role;
 
-    const createdUser = await this.userRepository.createUser(
+    const createdUser = await this.userRepository.createUserOld(
       createUserDto,
       userRole,
       hashedPassword,

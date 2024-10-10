@@ -5,7 +5,7 @@ import { UserEntity } from '../users/models/users.entity';
 import { UsersService } from '../users/users.service';
 import { FileUploadService } from '../users/fileupload.service';
 import { StripeService } from './stripe.service';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/repository/users.repository';
 
 describe('StripeService', () => {
   let service: StripeService;

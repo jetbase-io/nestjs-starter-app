@@ -21,7 +21,7 @@ import {
   GetStripePaymentMethodsResponseDto,
   StripePaymentMethodResponseDto,
 } from './dto/stripe-payment-method.dto';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/repository/users.repository';
 
 @Injectable()
 export class StripeService {

@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsernameUnique } from '../users/validator/user-unique.validator';
 import { entities } from './db.provider';
 import { getConnectionOptions } from 'typeorm';
+import { BaseToken } from 'src/common/enums/diTokens';
+import { DbContext } from './DbContext';
 
 @Module({
   imports: [
@@ -12,6 +14,18 @@ import { getConnectionOptions } from 'typeorm';
     }),
     TypeOrmModule.forFeature(entities),
   ],
-  providers: [UsernameUnique],
+  providers: [
+    UsernameUnique,
+    {
+      provide: BaseToken.DB_CONTEXT,
+      useClass: DbContext,
+    },
+  ],
+  exports: [
+    {
+      provide: BaseToken.DB_CONTEXT,
+      useClass: DbContext,
+    },
+  ],
 })
 export class DbModule {}

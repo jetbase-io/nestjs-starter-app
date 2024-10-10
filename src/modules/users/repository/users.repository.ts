@@ -1,24 +1,25 @@
 import { AbstractRepository } from 'src/common/base/classes/base.repository';
-import { UserEntity } from './models/users.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { Role } from '../../common/enums/role.enum';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { OrderDirection } from '../admin/dto/pagination-params.dto';
+import { UserEntity } from '../models/users.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { Role } from '../../../common/enums/role.enum';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { OrderDirection } from '../../admin/dto/pagination-params.dto';
 import { UpdateResult } from 'typeorm';
+import { IUserRepository } from './user-repository.type';
+import { UsersMapper } from '../models/users.mapper';
+import { UserModel } from '../models/users.model';
 
-export class UsersRepository extends AbstractRepository<UserEntity> {
-  constructor() {
-    super(UserEntity);
-  }
-
+export class UsersRepository
+  extends AbstractRepository<UserEntity>
+  implements IUserRepository
+{
   async createUser(
     createUserDto: CreateUserDto,
     role: Role,
     hashedPassword: string,
     confirmedAt?: Date,
-  ): Promise<UserEntity> {
-    const repo = this.getRepository();
-    const newUserBbid = repo.create({
+  ): Promise<UserModel> {
+    const newUserBbid = this.repository.create({
       username: createUserDto.username,
       password: hashedPassword,
       email: createUserDto.email,
@@ -26,7 +27,26 @@ export class UsersRepository extends AbstractRepository<UserEntity> {
       confirmationToken: createUserDto.confirmationToken,
       confirmedAt: confirmedAt,
     });
-    return await repo.save(newUserBbid);
+    const user = await this.repository.save(newUserBbid);
+
+    return UsersMapper.toDto(user);
+  }
+
+  async createUserOld(
+    createUserDto: CreateUserDto,
+    role: Role,
+    hashedPassword: string,
+    confirmedAt?: Date,
+  ): Promise<UserEntity> {
+    const newUserBbid = this.repository.create({
+      username: createUserDto.username,
+      password: hashedPassword,
+      email: createUserDto.email,
+      roles: role,
+      confirmationToken: createUserDto.confirmationToken,
+      confirmedAt: confirmedAt,
+    });
+    return await this.repository.save(newUserBbid);
   }
 
   async getMany(
@@ -35,9 +55,7 @@ export class UsersRepository extends AbstractRepository<UserEntity> {
     sort: string,
     order: OrderDirection,
   ): Promise<[UserEntity[], number]> {
-    const repo = this.getRepository();
-
-    const data = await repo
+    const data = await this.repository
       .createQueryBuilder('users')
       .take(take)
       .skip(skip)
@@ -48,17 +66,13 @@ export class UsersRepository extends AbstractRepository<UserEntity> {
   }
 
   async getOneById(id: string): Promise<UserEntity> {
-    const repo = this.getRepository();
-
-    const user = await repo.findOne({ id });
+    const user = await this.repository.findOne({ id });
 
     return user;
   }
 
   async getOneByName(username: string): Promise<UserEntity> {
-    const repo = this.getRepository();
-
-    return await repo.findOne({
+    return await this.repository.findOne({
       where: { username: username },
     });
   }
@@ -66,24 +80,20 @@ export class UsersRepository extends AbstractRepository<UserEntity> {
   async getOneByConfirmationToken(
     confirmationToken: string,
   ): Promise<UserEntity> {
-    const repo = this.getRepository();
-
-    return await repo.findOne({
+    return await this.repository.findOne({
       where: { confirmationToken },
     });
   }
 
   async updateById(id: string, update: UpdateUserDto): Promise<void> {
-    const repo = this.getRepository();
-    await repo.update(id, update);
+    await this.repository.update(id, update);
   }
 
   async updateUserAvatarById(
     id: string,
     avatarLocation: string,
   ): Promise<UpdateResult> {
-    const repo = this.getRepository();
-    const result = await repo
+    const result = await this.repository
       .createQueryBuilder()
       .update({
         avatar: avatarLocation,
@@ -101,18 +111,15 @@ export class UsersRepository extends AbstractRepository<UserEntity> {
     userId: string,
     hashedNewPassword: string,
   ): Promise<void> {
-    const repo = this.getRepository();
-    await repo.update(userId, { password: hashedNewPassword });
+    await this.repository.update(userId, { password: hashedNewPassword });
   }
 
   async deleteMany(ids: string[]): Promise<void> {
-    const repo = this.getRepository();
-    await repo.delete(ids);
+    await this.repository.delete(ids);
   }
 
   async deleteOne(id: string): Promise<void> {
-    const repo = this.getRepository();
-    await repo.delete(id);
+    await this.repository.delete(id);
   }
 
   async updateUserStripeInfo(
@@ -120,7 +127,9 @@ export class UsersRepository extends AbstractRepository<UserEntity> {
     customerId: string,
     subscriptionId: string,
   ) {
-    const repo = this.getRepository();
-    await repo.update(userId, { customerStripeId: customerId, subscriptionId });
+    await this.repository.update(userId, {
+      customerStripeId: customerId,
+      subscriptionId,
+    });
   }
 }

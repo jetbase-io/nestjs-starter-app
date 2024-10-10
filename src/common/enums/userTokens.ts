@@ -1,0 +1,4 @@
+export enum UserTokens {
+  CREATE_USER = 'CREATE_USER',
+  CREATE_USER_BY_ROLE = 'CREATE_USER_BY_ROLE',
+}
