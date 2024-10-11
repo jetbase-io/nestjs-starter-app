@@ -13,6 +13,7 @@ import {
   NEST_CONFIGS,
   HTTPS_PATTERN,
 } from './configs/constants';
+import { AppHttpExceptionFilter } from './common/base/exceptions/exception-filter';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ async function start() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.setGlobalPrefix(API_DEFAULT_PREFIX);
+  app.useGlobalFilters(new AppHttpExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle(NEST_CONFIGS.TITLE)

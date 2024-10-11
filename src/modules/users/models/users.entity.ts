@@ -6,6 +6,10 @@ import { Exclude } from 'class-transformer';
 import { ExpiredAccessTokenEntity } from '../../auth/models/expiredAccessTokens.entity';
 import { BaseEntity } from '../../../common/base/classes/base.entity';
 
+export type SaveableUserEntity = Omit<
+  UserEntity,
+  'expiredAccessTokens' | 'refreshTokens'
+>;
 @Entity('users')
 export class UserEntity extends BaseEntity {
   @ApiProperty({ example: 'username', description: 'Unique username' })

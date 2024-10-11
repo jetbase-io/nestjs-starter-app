@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
-import { FileUploadService } from './fileupload.service';
+import { FileUploadService } from './services/fileupload.service';
 import { UserEntity } from './models/users.entity';
 import { Role } from '../../common/enums/role.enum';
 import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
-import { UsersRepository } from './users.repository';
+import { UsersRepositoryBC } from './repository/users.repository.backwardCompability';
 
 describe('UsersService', () => {
   let userService: UsersService;
@@ -54,7 +54,7 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         {
-          provide: UsersRepository,
+          provide: UsersRepositoryBC,
           useValue: userRepository,
         },
         {

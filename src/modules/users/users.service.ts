@@ -6,20 +6,20 @@ import { CreateUserByRoleDto } from './dto/create-user-by-role.dto';
 import { Role } from '../../common/enums/role.enum';
 import { PaginationParams } from '../admin/dto/pagination-params.dto';
 import { getSort } from '../../utils/helpers/get-sort';
-import { FileUploadService } from './fileupload.service';
+import { FileUploadService } from './services/fileupload.service';
 import { readFileSync } from 'fs';
 import {
   PaginatedUsersResponseDto,
   UploadUserAvatarResponseDto,
   UserEntityDto,
 } from './dto/user.dto';
-import { UsersRepository } from './users.repository';
 import { MessageResponse } from 'src/common/responses/messageResponse';
+import { UsersRepositoryBC } from './repository/users.repository.backwardCompability';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly userRepository: UsersRepository,
+    private readonly userRepository: UsersRepositoryBC,
     private readonly fileUploadService: FileUploadService,
   ) {}
 

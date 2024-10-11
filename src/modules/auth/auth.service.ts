@@ -20,8 +20,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { getSecrets } from '../../utils/helpers/getSecrets';
 import { TokensDto } from '../../common/dto/tokens.dto';
 import { UserEntityDto } from '../users/dto/user.dto';
-import { UsersRepository } from '../users/users.repository';
 import { MessageResponse } from 'src/common/responses/messageResponse';
+import { UsersRepositoryBC } from '../users/repository/users.repository.backwardCompability';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +31,7 @@ export class AuthService {
     @InjectRepository(ExpiredAccessTokenEntity)
     private readonly expiredAccessTokenRepository: Repository<ExpiredAccessTokenEntity>,
     private readonly emailService: EmailService,
-    private readonly userRepository: UsersRepository,
+    private readonly userRepository: UsersRepositoryBC,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}

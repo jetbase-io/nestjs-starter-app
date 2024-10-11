@@ -13,7 +13,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { EmailService } from '../emails/emails.service';
 
 import * as dotenv from 'dotenv';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepositoryBC } from '../users/repository/users.repository.backwardCompability';
 dotenv.config();
 
 describe('AuthService', () => {
@@ -62,7 +62,7 @@ describe('AuthService', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersRepository,
+          provide: UsersRepositoryBC,
           useValue: userRepository,
         },
         {
