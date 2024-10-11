@@ -21,7 +21,7 @@ import {
   GetStripePaymentMethodsResponseDto,
   StripePaymentMethodResponseDto,
 } from './dto/stripe-payment-method.dto';
-import { UsersRepository } from '../users/repository/users.repository';
+import { UsersRepositoryBC } from '../users/repository/users.repository.backwardCompability';
 
 @Injectable()
 export class StripeService {
@@ -29,7 +29,7 @@ export class StripeService {
 
   constructor(
     private readonly usersService: UsersService,
-    private readonly usersRepository: UsersRepository,
+    private readonly usersRepository: UsersRepositoryBC,
   ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2020-08-27',

@@ -2,7 +2,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
-import { UserEntity } from '../users/models/users.entity';
 import { UsersService } from '../users/users.service';
 import { FileUploadService } from '../users/fileupload.service';
 import { AuthController } from './auth.controller';
@@ -10,7 +9,7 @@ import { AuthService } from './auth.service';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';
 import { RefreshTokenEntity } from './models/refreshTokens.entity';
 import { EmailService } from '../emails/emails.service';
-import { UsersRepository } from '../users/repository/users.repository';
+import { UsersRepositoryBC } from '../users/repository/users.repository.backwardCompability';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -40,7 +39,7 @@ describe('AuthController', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersRepository,
+          provide: UsersRepositoryBC,
           useValue: userRepository,
         },
         JwtService,

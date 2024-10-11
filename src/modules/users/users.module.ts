@@ -11,6 +11,7 @@ import { BcryptService } from './services/bcrypt.service';
 import { UserTokens } from 'src/common/enums/userTokens';
 import { CreateUserUseCase } from './useCases/create-user.use-case';
 import { CreateUserByRoleUseCase } from './useCases/create-user-by-role.use-case';
+import { UsersRepositoryBC } from './repository/users.repository.backwardCompability';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CreateUserByRoleUseCase } from './useCases/create-user-by-role.use-case
     UsersService,
     FileUploadService,
     UsersRepository,
+    UsersRepositoryBC,
     {
       provide: ServiceToken.BCRYPT_SERVICE,
       useClass: BcryptService,
@@ -36,6 +38,6 @@ import { CreateUserByRoleUseCase } from './useCases/create-user-by-role.use-case
       useClass: CreateUserByRoleUseCase,
     },
   ],
-  exports: [UsersService, UsersRepository],
+  exports: [UsersService, UsersRepository, UsersRepositoryBC],
 })
 export class UsersModule {}

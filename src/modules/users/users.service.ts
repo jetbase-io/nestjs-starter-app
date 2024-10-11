@@ -13,13 +13,13 @@ import {
   UploadUserAvatarResponseDto,
   UserEntityDto,
 } from './dto/user.dto';
-import { UsersRepository } from './repository/users.repository';
 import { MessageResponse } from 'src/common/responses/messageResponse';
+import { UsersRepositoryBC } from './repository/users.repository.backwardCompability';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly userRepository: UsersRepository,
+    private readonly userRepository: UsersRepositoryBC,
     private readonly fileUploadService: FileUploadService,
   ) {}
 
@@ -30,7 +30,7 @@ export class UsersService {
 
     const userRole = Role.USER;
 
-    const createdUser = await this.userRepository.createUserOld(
+    const createdUser = await this.userRepository.createUser(
       createUserDto,
       userRole,
       hashedPassword,
@@ -48,7 +48,7 @@ export class UsersService {
 
     const userRole = createUserDto.role;
 
-    const createdUser = await this.userRepository.createUserOld(
+    const createdUser = await this.userRepository.createUser(
       createUserDto,
       userRole,
       hashedPassword,
