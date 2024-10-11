@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users/users.service';
-import { FileUploadService } from '../users/fileupload.service';
+import { FileUploadService } from '../users/services/fileupload.service';
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
 import { UsersRepositoryBC } from '../users/repository/users.repository.backwardCompability';

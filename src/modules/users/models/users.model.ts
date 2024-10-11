@@ -67,4 +67,8 @@ export class UserModel {
   public changeName(name: string): void {
     this._username = name;
   }
+
+  public changeAvatar(url: string): void {
+    this._avatar = url;
+  }
 }

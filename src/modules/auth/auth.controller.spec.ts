@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { repositoryMockFactory } from 'src/utils/helpers/mock-repository';
 import { UsersService } from '../users/users.service';
-import { FileUploadService } from '../users/fileupload.service';
+import { FileUploadService } from '../users/services/fileupload.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ExpiredAccessTokenEntity } from './models/expiredAccessTokens.entity';

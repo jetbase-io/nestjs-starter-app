@@ -4,7 +4,6 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { Role } from '../../../common/enums/role.enum';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { OrderDirection } from '../../admin/dto/pagination-params.dto';
-import { UpdateResult } from 'typeorm';
 import { IUserRepository } from './user-repository.type';
 import { UsersMapper } from '../models/users.mapper';
 import { UserModel } from '../models/users.model';
@@ -13,6 +12,14 @@ export class UsersRepository
   extends AbstractRepository<UserEntity>
   implements IUserRepository
 {
+  async save(data: UserModel): Promise<UserModel> {
+    const userEntity = UsersMapper.toEntity(data);
+
+    const createdUser = await this.repository.save(userEntity);
+
+    return UsersMapper.toDto(createdUser);
+  }
+
   async createUser(
     createUserDto: CreateUserDto,
     role: Role,
@@ -32,23 +39,6 @@ export class UsersRepository
     return UsersMapper.toDto(user);
   }
 
-  async createUserOld(
-    createUserDto: CreateUserDto,
-    role: Role,
-    hashedPassword: string,
-    confirmedAt?: Date,
-  ): Promise<UserEntity> {
-    const newUserBbid = this.repository.create({
-      username: createUserDto.username,
-      password: hashedPassword,
-      email: createUserDto.email,
-      roles: role,
-      confirmationToken: createUserDto.confirmationToken,
-      confirmedAt: confirmedAt,
-    });
-    return await this.repository.save(newUserBbid);
-  }
-
   async getMany(
     skip: number,
     take: number,
@@ -65,10 +55,10 @@ export class UsersRepository
     return data;
   }
 
-  async getOneById(id: string): Promise<UserEntity> {
+  async getOneById(id: string): Promise<UserModel> {
     const user = await this.repository.findOne({ id });
 
-    return user;
+    return UsersMapper.toDto(user);
   }
 
   async getOneByName(username: string): Promise<UserEntity> {
@@ -87,24 +77,6 @@ export class UsersRepository
 
   async updateById(id: string, update: UpdateUserDto): Promise<void> {
     await this.repository.update(id, update);
-  }
-
-  async updateUserAvatarById(
-    id: string,
-    avatarLocation: string,
-  ): Promise<UpdateResult> {
-    const result = await this.repository
-      .createQueryBuilder()
-      .update({
-        avatar: avatarLocation,
-      })
-      .where({
-        id,
-      })
-      .returning(['username', 'avatar'])
-      .execute();
-
-    return result;
   }
 
   async updatePassword(

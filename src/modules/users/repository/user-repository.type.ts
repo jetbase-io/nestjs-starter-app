@@ -11,17 +11,17 @@ export interface IUserRepository {
     hashedPassword: string,
     confirmedAt?: Date,
   ): Promise<UserModel>;
+  getOneById(id: string): Promise<UserModel>;
+  save(data: UserModel): Promise<UserModel>;
   getMany(
     skip: number,
     take: number,
     sort: string,
     order: OrderDirection,
   ): Promise<any>;
-  getOneById(id: string): Promise<any>;
   getOneByName(username: string): Promise<any>;
   getOneByConfirmationToken(confirmationToken: string): Promise<any>;
   updateById(id: string, update: UpdateUserDto): Promise<any>;
-  updateUserAvatarById(id: string, avatarLocation: string): Promise<any>;
   updatePassword(userId: string, hashedNewPassword: string): Promise<any>;
   deleteMany(ids: string[]): Promise<any>;
   deleteOne(id: string): Promise<any>;

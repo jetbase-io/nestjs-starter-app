@@ -5,7 +5,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ServiceToken } from 'src/common/enums/diTokens';
 import { IBcryptService } from 'src/common/types/bcrypt.type';
 import { UserModel } from '../models/users.model';
-
+//TODO
+//Should be removed
+//Logic used for auth/signup
 export interface ICreateUserUseCase {
   execute(inputData: CreateUserDto): Promise<UserModel>;
 }

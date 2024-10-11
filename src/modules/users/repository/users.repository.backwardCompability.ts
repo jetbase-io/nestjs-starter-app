@@ -4,9 +4,25 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { Role } from '../../../common/enums/role.enum';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { OrderDirection } from '../../admin/dto/pagination-params.dto';
-import { UpdateResult } from 'typeorm';
+import {
+  Connection,
+  DeepPartial,
+  getRepository,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
+import { InjectConnection } from '@nestjs/typeorm';
 
-export class UsersRepositoryBC extends AbstractRepository<UserEntity> {
+export class UsersRepositoryBC {
+  protected repository: Repository<UserEntity>;
+
+  constructor(
+    @InjectConnection()
+    protected readonly connection: Connection,
+  ) {
+    this.repository = connection.getRepository(UserEntity);
+  }
+
   async createUser(
     createUserDto: CreateUserDto,
     role: Role,
@@ -22,6 +38,10 @@ export class UsersRepositoryBC extends AbstractRepository<UserEntity> {
       confirmedAt: confirmedAt,
     });
     return await this.repository.save(newUserBbid);
+  }
+
+  async save(data: DeepPartial<UserEntity>): Promise<UserEntity> {
+    return await this.repository.save(data, { reload: true });
   }
 
   async getMany(
@@ -106,5 +126,9 @@ export class UsersRepositoryBC extends AbstractRepository<UserEntity> {
       customerStripeId: customerId,
       subscriptionId,
     });
+  }
+
+  getRepository() {
+    return getRepository(UserEntity);
   }
 }

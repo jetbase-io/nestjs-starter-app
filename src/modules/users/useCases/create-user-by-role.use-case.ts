@@ -4,7 +4,9 @@ import { ServiceToken } from 'src/common/enums/diTokens';
 import { IBcryptService } from 'src/common/types/bcrypt.type';
 import { UserModel } from '../models/users.model';
 import { CreateUserByRoleDto } from '../dto/create-user-by-role.dto';
-
+//TODO
+//Should be removed
+//Logic used for seed data
 export interface ICreateUserByRoleUseCase {
   execute(inputData: CreateUserByRoleDto): Promise<UserModel>;
 }

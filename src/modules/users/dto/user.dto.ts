@@ -1,10 +1,11 @@
 import { BaseEntityDto } from 'src/common/base/classes/base-entity.dto';
-import { UserEntity } from '../models/users.entity';
+import { SaveableUserEntity, UserEntity } from '../models/users.entity';
 import { Role } from 'src/common/enums/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { PaginationResponseDto } from 'src/modules/admin/dto/pagination-response.dto';
 import { UpdateResult } from 'typeorm';
+import { UserModel } from '../models/users.model';
 
 export class PaginatedUsersResponseDto extends PaginationResponseDto<UserEntityDto> {
   static invoke(
@@ -52,7 +53,6 @@ export class UserEntityDto extends BaseEntityDto {
     dto.avatar = entity.avatar;
     dto.confirmationToken = entity.confirmationToken;
     dto.confirmedAt = entity.confirmedAt;
-    dto.password = entity.password;
 
     return dto;
   }

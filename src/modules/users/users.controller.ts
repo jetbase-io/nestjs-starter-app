@@ -7,11 +7,11 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
+  Inject,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBearerAuth,
@@ -23,12 +23,16 @@ import {
 } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../../common/decorators/get-current-user-id.decorator';
 import { SentryInterceptor } from '../../common/interceptors/sentry.interceptor';
-import {
-  UploadUserAvatarDto,
-  UploadUserAvatarResponseDto,
-  UserEntityDto,
-} from './dto/user.dto';
+import { UploadUserAvatarDto, UserEntityDto } from './dto/user.dto';
 import { UuidParam } from 'src/common/params/uuid.param';
+import {
+  UserServiceTokens,
+  UserUseCaseTokens,
+} from 'src/common/enums/userTokens';
+import { IGetUserByIdUseCase } from './useCases/get-user-by-id.use-case';
+import { IUserPresenter } from './models/users.presenter';
+import { IUpdateUserNameUseCase } from './useCases/update-user-name.use-case';
+import { IUpdateUserAvatarUseCase } from './useCases/update-user-avatar.use-case';
 
 const uploadDir = './uploads/temp';
 
@@ -57,27 +61,43 @@ export const storage = {
 @Controller('users/')
 @ApiBearerAuth()
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(
+    @Inject(UserUseCaseTokens.GET_USER_BY_ID)
+    private readonly _getUserByIdUseCase: IGetUserByIdUseCase,
+    @Inject(UserUseCaseTokens.UPDATE_USER_NAME)
+    private readonly _updateUserNameUseCase: IUpdateUserNameUseCase,
+    @Inject(UserUseCaseTokens.UPDATE_USER_AVATAR)
+    private readonly _updateUserAvatarUseCase: IUpdateUserAvatarUseCase,
+    @Inject(UserServiceTokens.USER_PRESENTER)
+    private readonly _userPresenter: IUserPresenter,
+  ) {}
 
   @ApiOperation({ summary: 'Get user' })
   @ApiResponse({ status: 200, type: UserEntityDto })
   @Get('/:id')
-  getOne(@Param() param: UuidParam): Promise<UserEntityDto> {
-    return this.userService.getOne(param.id);
+  async getOne(@Param() param: UuidParam): Promise<UserEntityDto> {
+    const userModel = await this._getUserByIdUseCase.execute(param.id);
+
+    return this._userPresenter.toResponseDto(userModel);
   }
 
   @ApiOperation({ summary: 'Update user' })
-  @ApiResponse({ status: 200, type: UpdateUserDto })
+  @ApiResponse({ status: 200, type: UserEntityDto })
   @Put()
-  updateOne(
+  async updateOne(
     @GetCurrentUserId() userId: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UpdateUserDto> {
-    return this.userService.updateOne(userId, updateUserDto);
+  ): Promise<UserEntityDto> {
+    const userModel = await this._updateUserNameUseCase.execute({
+      id: userId,
+      data: updateUserDto,
+    });
+
+    return this._userPresenter.toResponseDto(userModel);
   }
 
   @ApiOperation({ summary: 'Update user profile picture' })
-  @ApiResponse({ status: 200, type: UploadUserAvatarResponseDto })
+  @ApiResponse({ status: 200, type: UserEntityDto })
   @Post('/avatar')
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadUserAvatarDto })
@@ -87,7 +107,12 @@ export class UsersController {
   async updateAvatar(
     @GetCurrentUserId() userId: string,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<UploadUserAvatarResponseDto> {
-    return this.userService.saveWithoutOptimization(userId, file);
+  ): Promise<UserEntityDto> {
+    const userModel = await this._updateUserAvatarUseCase.execute({
+      id: userId,
+      data: file,
+    });
+
+    return this._userPresenter.toResponseDto(userModel);
   }
 }

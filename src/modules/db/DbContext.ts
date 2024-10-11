@@ -4,12 +4,12 @@ import {
   type EntityTarget,
   type ObjectLiteral,
   type EntityManager,
-  getRepository,
-  getManager,
+  Connection,
 } from 'typeorm';
 import { IUserRepository } from '../users/repository/user-repository.type';
 import { UserEntity } from '../users/models/users.entity';
 import { UsersRepository } from '../users/repository/users.repository';
+import { InjectConnection } from '@nestjs/typeorm';
 
 @Injectable()
 export class DbContext implements IDbContext {
@@ -17,7 +17,9 @@ export class DbContext implements IDbContext {
 
   private _manager: EntityManager;
 
-  constructor() {
+  constructor(@InjectConnection() private connection: Connection) {
+    this._manager = connection.manager;
+
     this.initRepositories();
   }
 
@@ -25,7 +27,7 @@ export class DbContext implements IDbContext {
     TEntity extends EntityTarget<ObjectLiteral>,
     TRepository,
   >(ctor: new (...args: any[]) => TRepository, entity: TEntity): TRepository {
-    return new ctor(getRepository(entity));
+    return new ctor(this._manager.getRepository(entity));
   }
 
   private initRepositories(): void {
@@ -37,7 +39,7 @@ export class DbContext implements IDbContext {
   }
 
   async startTransaction(): Promise<void> {
-    this._manager = getManager();
+    this._manager = this.connection.manager;
 
     this.initRepositories();
 

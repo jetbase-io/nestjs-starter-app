@@ -1,4 +1,11 @@
-export enum UserTokens {
+export enum UserUseCaseTokens {
   CREATE_USER = 'CREATE_USER',
   CREATE_USER_BY_ROLE = 'CREATE_USER_BY_ROLE',
+  GET_USER_BY_ID = 'GET_USER_BY_ID',
+  UPDATE_USER_NAME = 'UPDATE_USER_NAME',
+  UPDATE_USER_AVATAR = 'UPDATE_USER_AVATAR',
+}
+
+export enum UserServiceTokens {
+  USER_PRESENTER = 'USER_PRESENTER',
 }
